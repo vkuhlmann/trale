@@ -8,3 +8,7 @@ name = "Trale"
 [[lean_exe]]
 name = "trale"
 root = "Main"
+
+[[require]]
+name = "Qq"
+scope = "leanprover-community"

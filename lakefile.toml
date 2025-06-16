@@ -1,0 +1,10 @@
+name = "Trale"
+version = "0.1.0"
+defaultTargets = ["trale"]
+
+[[lean_lib]]
+name = "Trale"
+
+[[lean_exe]]
+name = "trale"
+root = "Main"

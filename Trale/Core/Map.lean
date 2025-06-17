@@ -171,6 +171,7 @@ instance : Coe (Map3 R) (Map2b R) where
 instance : Coe (Map4 R) (Map3 R) where
   coe m := m.toMap3
 
+
 #check DecidableLE MapType
 
 @[simp]

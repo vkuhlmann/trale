@@ -101,40 +101,40 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
               => (Param.R $base))
         | `right => q(
             fun (h1 : $covMapType1 >= MapType.Map1)
-            => (Param.right (Param.forget' (h1 := h1) (h2 := Param.map0bottom) $base))
+            => (Param.right (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
               )
         | `right_implies_R => q(
             fun (h1 : $covMapType1 ≥ MapType.Map2a) =>
-                  (Param.right_implies_R (Param.forget' (h1 := h1) (h2 := Param.map0bottom) $base))
+                  (Param.right_implies_R (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
               )
         | `R_implies_right => q(
             fun (h1 : $covMapType1 ≥ MapType.Map2b) =>
-                  (Param.R_implies_right (Param.forget' (h1 := h1) (h2 := Param.map0bottom) $base))
+                  (Param.R_implies_right (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
               )
 
         | `R_implies_rightK => q(
             fun (h1 : $covMapType1 ≥ MapType.Map4) =>
-                  (Param.R_implies_rightK (Param.forget' (h1 := h1) (h2 := Param.map0bottom) $base))
+                  (Param.R_implies_rightK (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
               )
 
         | `left => q(
             fun (h2 : $conMapType1 ≥ MapType.Map1)
-            => (Param.left (Param.forget' (h1 := Param.map0bottom) (h2 := h2) $base))
+            => (Param.left (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
               )
 
         | `left_implies_R => q(
             fun (h2 : $conMapType1 ≥ MapType.Map2a) =>
-                  (Param.left_implies_R (Param.forget' (h1 := Param.map0bottom) (h2 := h2) $base))
+                  (Param.left_implies_R (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
               )
 
         | `R_implies_left => q(
             fun (h2 : $conMapType1 ≥ MapType.Map2b) =>
-                  (Param.R_implies_left (Param.forget' (h1 := Param.map0bottom) (h2 := h2) $base))
+                  (Param.R_implies_left (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
               )
 
         | `R_implies_leftK => q(
             fun (h2 : $conMapType1 ≥ MapType.Map4) =>
-                  (Param.R_implies_leftK (Param.forget' (h1 := Param.map0bottom) (h2 := h2) $base))
+                  (Param.R_implies_leftK (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
               )
 
         | _ => none
@@ -290,7 +290,7 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
 
     if constNameResult.isSome then
       result := (<-Meta.unfold result constNameResult.get!).expr
-    result := (<-Meta.unfold result ``Param.forget').expr
+    result := (<-Meta.unfold result ``Param.forget).expr
     result := (<-Meta.unfold result ``coeMap).expr
 
     (result, _) <- Meta.dsimp result (<-Simp.mkContext)
@@ -443,7 +443,7 @@ macro "tr_extend" td:term:10 : tactic => `(tactic|
       Param.right, Param.left, Param.R, Param.right_implies_R,
       Param.R_implies_right, Param.R_implies_left, Param.left_implies_R,
       Param.R_implies_leftK, Param.R_implies_rightK,
-      Param.forget', coeMap, ]
+      Param.forget, coeMap, ]
   --  only $td
   --  <;> simp[`(Lean.Parser.Tactic.simpLemma|$td)]
   --  <;> simp[`(Lean.Parser.Tactic.simpLemma|$td)]
@@ -470,7 +470,7 @@ elab "tr_extend_multiple" " [" td:term,*,? "]" : tactic =>
                 Param.right, Param.left, Param.R, Param.right_implies_R,
                 Param.R_implies_right, Param.R_implies_left, Param.left_implies_R,
                 Param.R_implies_leftK, Param.R_implies_rightK,
-                Param.forget', coeMap, ]
+                Param.forget, coeMap, ]
             )
           )
         -- let mut result : TSyntax `tactic := `(tactic| tr_fill_from $x)
@@ -566,7 +566,7 @@ def par_ext_2' : Param2a0 String Nat := let aa := 3; by
 
 -- theorem forgetRight {Cov : MapType} {R} {covariant : MapType.interp Cov R}
 --   [CoeT (Cov.interp R) (Map1 R)]
---  : (Param.forget' _ _
+--  : (Param.forget _ _
 --           { R := R, covariant := covariant, contravariant := _ }).right = (covariant : Map1 R).map := by
 
 --   sorry
@@ -589,7 +589,7 @@ def par_ext_2 : Param2a0 String Nat := by
     -- unfold par_ext_1
 
     -- rw [Param.R]
-    -- simp only [Param.forget', coeMap]
+    -- simp only [Param.forget, coeMap]
 
 
 

@@ -7,6 +7,8 @@ import Trale.Utils.Extend
 import Trale.Theories.Sigma
 import Qq open Qq Lean
 
+namespace Param_exists
+
 open Param_sigma
 
 variable {α : Sort u} {α' : Sort u} {β : α -> Prop} {β' : α' -> Prop}

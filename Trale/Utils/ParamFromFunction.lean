@@ -1,4 +1,23 @@
 import Trale.Core.Param
+import Trale.Utils.Constructor
+import Trale.Utils.ParamIdent
+
+def Param_id : Param44 α α := Param44_ident
+
+def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
+  rw [h]
+  exact Param_id
+
+def Param_from_map
+  (f : α -> α')
+: Param40 α α' := by
+  tr_constructor
+
+  exact (f . = .) -- R
+  exact f         -- right
+  simp
+  simp
+  simp
 
 namespace SplitSurj
 def toParam

@@ -5,7 +5,6 @@ import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Core.Related
 import Trale.Utils.Extend
-import Trale.Utils.Simp
 import Qq open Qq Lean
 
 universe u v x w w1 w2 w3
@@ -120,30 +119,30 @@ instance [inst : Related α β] : Related (Option α) (Option β) where
     match cov with
     | .Map0 =>
       apply Map0_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide
 
     | .Map1 =>
       apply Map1_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide
 
     | .Map2a =>
       apply Map2a_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide
 
     | .Map2b =>
       apply Map2b_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide
 
     | .Map3 =>
       apply Map3_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide
 
     | .Map4 =>
       apply Map4_option
-      apply p.forget' (h2 := _)
+      apply p.forget (h2 := _)
       cases contra <;> decide

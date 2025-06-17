@@ -79,7 +79,7 @@ abbrev Param44  :=  Param.{w} α β .Map4 .Map4
 
 #check (_ : Param11 ?a ?b).covariant
 
--- ASK The last expression has type `MapType.Map1.interp p.R`. Can we apply a simplification automatically
+-- FIXME The last expression has type `MapType.Map1.interp p.R`. Can we apply a simplification automatically
 --     such that it becomes `Map1 p.R` instead?
 #check
   let p : Param11 ?a ?b := ?p
@@ -107,7 +107,7 @@ instance
 namespace Param
 
 @[simp]
-def forget
+def forget'
   (Rp : Param.{w} α β X Y)
   [Coe (X.interp Rp.R) (X'.interp Rp.R)]
   [Coe (Y.interp (flipRel Rp.R)) (Y'.interp (flipRel Rp.R))]
@@ -121,7 +121,7 @@ theorem map4top {X : MapType} : X ≤ MapType.Map4 := by
   cases X <;> decide
 
 @[simp]
-def forget'
+def forget
   {X Y X' Y': MapType}
 
   (h1 : X' ≤ X := by decide)

@@ -11,7 +11,7 @@ universe w u v
 
 variable (α: Sort u) (β : Sort v)
 
-structure Param (α : Sort u) (β : Sort v)
+class Param (α : Sort u) (β : Sort v)
     (mapCov : MapType)
     (mapContra : MapType)
   : Sort ((max u v w) + 1) where
@@ -20,6 +20,9 @@ structure Param (α : Sort u) (β : Sort v)
   covariant : mapCov.interp R
   contravariant : mapContra.interp (flipRel R)
 
+
+
+#check Param.R
 
 -- ## Param abbreviations
 --
@@ -78,6 +81,8 @@ abbrev Param44  :=  Param.{w} α β .Map4 .Map4
 
 
 #check (_ : Param11 ?a ?b).covariant
+
+#check (_ : Param11 ?a ?b).R
 
 -- FIXME The last expression has type `MapType.Map1.interp p.R`. Can we apply a simplification automatically
 --     such that it becomes `Map1 p.R` instead?

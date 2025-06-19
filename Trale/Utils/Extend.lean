@@ -98,43 +98,43 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
       match . with
         | `R => q(
               fun (_ : $covMapType1 >= MapType.Map0)
-              => (Param.R $base))
+              => (($base).R))
         | `right => q(
             fun (h1 : $covMapType1 >= MapType.Map1)
-            => (Param.right (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
+            => ((Param.forget (h1 := h1) (h2 := Param.map0bottom) $base).right)
               )
         | `right_implies_R => q(
             fun (h1 : $covMapType1 ≥ MapType.Map2a) =>
-                  (Param.right_implies_R (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
+                  ((Param.forget (h1 := h1) (h2 := Param.map0bottom) $base).right_implies_R)
               )
         | `R_implies_right => q(
             fun (h1 : $covMapType1 ≥ MapType.Map2b) =>
-                  (Param.R_implies_right (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
+                  ((Param.forget (h1 := h1) (h2 := Param.map0bottom) $base).R_implies_right)
               )
 
         | `R_implies_rightK => q(
             fun (h1 : $covMapType1 ≥ MapType.Map4) =>
-                  (Param.R_implies_rightK (Param.forget (h1 := h1) (h2 := Param.map0bottom) $base))
+                  ((Param.forget (h1 := h1) (h2 := Param.map0bottom) $base).R_implies_rightK)
               )
 
         | `left => q(
             fun (h2 : $conMapType1 ≥ MapType.Map1)
-            => (Param.left (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
+            => ((Param.forget (h1 := Param.map0bottom) (h2 := h2) $base).left )
               )
 
         | `left_implies_R => q(
             fun (h2 : $conMapType1 ≥ MapType.Map2a) =>
-                  (Param.left_implies_R (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
+                  ((Param.forget (h1 := Param.map0bottom) (h2 := h2) $base).left_implies_R)
               )
 
         | `R_implies_left => q(
             fun (h2 : $conMapType1 ≥ MapType.Map2b) =>
-                  (Param.R_implies_left (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
+                  ((Param.forget (h1 := Param.map0bottom) (h2 := h2) $base).R_implies_left)
               )
 
         | `R_implies_leftK => q(
             fun (h2 : $conMapType1 ≥ MapType.Map4) =>
-                  (Param.R_implies_leftK (Param.forget (h1 := Param.map0bottom) (h2 := h2) $base))
+                  ((Param.forget (h1 := Param.map0bottom) (h2 := h2) $base).R_implies_leftK)
               )
 
         | _ => none

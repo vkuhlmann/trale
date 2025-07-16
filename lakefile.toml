@@ -1,7 +1,7 @@
 name = "Trale"
 version = "0.1.0"
-defaultTargets = ["trale"]
-lintDriver = "batteries/runLinter"
+defaultTargets = ["Trale"]
+# lintDriver = "batteries/runLinter"
 testDriver = "TraleTest"
 
 [[lean_lib]]
@@ -10,10 +10,6 @@ name = "Trale"
 [[lean_lib]]
 name = "TraleTest"
 globs = ["TraleTest.+"]
-
-[[lean_exe]]
-name = "trale"
-root = "Main"
 
 [[require]]
 name = "Qq"

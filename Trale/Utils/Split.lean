@@ -8,10 +8,19 @@ import Trale.Theories.Arrow
 import Trale.Theories.Option
 import Trale.Theories.Sigma
 import Trale.Theories.Exists
+import Trale.Utils.ParamFromFunction
 import Qq open Qq Lean
 
 macro "tr_by" a:term:10 : tactic => `(tactic|
   apply fun x => Param.right x $a
+)
+
+macro "tr_from_map" : tactic => `(tactic|
+  refine (Param_from_map ?_).forget
+)
+
+macro "tr_ident" : tactic => `(tactic|
+  (refine (Param44_ident'' ?_).forget; try first |dsimp |decide)
 )
 
 macro "tr_split_forall" : tactic => `(tactic|

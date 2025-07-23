@@ -76,6 +76,9 @@ def _root_.Param44_ident'
   := by
     constructor
 
+    case normativeDirection =>
+      exact .this
+
     case R =>
       exact ident_R
 
@@ -104,3 +107,17 @@ def _root_.Param44_ident
 
     exact id
     repeat simp
+
+
+@[simp]
+def _root_.Param44_ident''
+  (h : α = β) : Param44 α β
+  := by
+    subst h
+    exact Param44_ident
+
+@[simp]
+instance : Param α α con cov
+  := Param44_ident.forget
+      (h1 := Param.map4top)
+      (h2 := Param.map4top)

@@ -11,11 +11,26 @@ universe w u v
 
 variable (α: Sort u) (β : Sort v)
 
+structure NormativeDirection where
+  this_dir : Bool
+  other_dir : Bool
+
+namespace NormativeDirection
+def both : NormativeDirection := ⟨true, true⟩
+def this : NormativeDirection := ⟨true, false⟩
+def other : NormativeDirection := ⟨false, true⟩
+def none : NormativeDirection := ⟨false, false⟩
+
+def opposite : NormativeDirection → NormativeDirection
+  := (match . with | ⟨a, b⟩ => ⟨b, a⟩)
+end NormativeDirection
+
+
 -- FIXME Being a 'class' sometimes hurts readability, especially when
 -- constructing new params based on previous ones. However, if manipulation of
 -- Params can be done by this library, such that the user (almost) never needs
 -- to do it, this issue is more limited.
-structure Param (α : Sort u) (β : Sort v)
+class Param (α : Sort u) (β : Sort v)
     (mapCov : MapType)
     (mapContra : MapType)
   : Sort ((max u v w) + 1) where
@@ -23,7 +38,7 @@ structure Param (α : Sort u) (β : Sort v)
   R : α → β -> Sort w
   covariant : mapCov.interp R
   contravariant : mapContra.interp (flipRel R)
-
+  normativeDirection : NormativeDirection := .this
 
 
 #check Param.R
@@ -110,7 +125,7 @@ instance
   (Param.{w} α β X' Y')
    where
    coe :=
-   (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant : Param.{w} α β X' Y')
+   (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant Rp.normativeDirection : Param.{w} α β X' Y')
 
 
 namespace Param
@@ -144,11 +159,12 @@ def forget
     case R => exact Rp.R
     case covariant => exact coeMap Rp.covariant h1
     case contravariant => exact coeMap Rp.contravariant h2
+    case normativeDirection => exact Rp.normativeDirection.opposite
 
 
 @[simp]
 abbrev flip (p : Param α β m1 m2) : Param β α m2 m1 :=
-  { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant }
+  { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant, normativeDirection := p.normativeDirection.opposite }
 
 @[simp]
 abbrev right (p : Param10 α β) : α -> β :=
@@ -197,3 +213,74 @@ abbrev R_implies_leftK (p : Param04 α β)
   := p.contravariant.R_in_mapK
 
 end Param
+
+-- @[simp]
+-- abbrev right [p : Param10 α β] : α -> β :=
+--   p.covariant.map
+
+namespace tr
+
+@[simp]
+abbrev R [p : Param00 α β] := p.R
+
+
+@[simp]
+abbrev map [p : Param10 α β] : α -> β :=
+  p.covariant.map
+
+-- @[simp]
+-- abbrev R_implies_left [p : Param02b α β]
+--   : forall (a : α) (b : β), p.R a b -> p.left b = a := by
+--     let h := p.contravariant.R_in_map
+--     simp
+--     simp [flipRel] at h
+--     intros a b h'
+--     let h2 := h b a
+--     exact h2 h'
+
+@[simp]
+abbrev R_implies_map [p : Param2b0 α β]
+  : forall (a : α) (b : β), (aR : p.R a b) -> p.right a = b := p.covariant.R_in_map
+
+@[simp]
+abbrev map_implies_R [p : Param2a0 α β]
+  : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
+
+@[simp]
+abbrev R_implies.mapK [p : Param40 α β]
+  := p.covariant.R_in_mapK
+
+end tr
+
+
+-- instance [p : Param α β cov con] [c :Coe (Param α β cov con) (Param α β cov2 con2)]
+--   : Param α β cov2 con2 := c.coe p
+
+-- instance : Param42a.{0} String Nat := sorry
+
+-- instance [p : Param40 α β] : Param10 α β := p
+-- instance [p : Param α β cov con] [h : cov ≥ .Map1]
+--   : Param10 α β := p.forget
+-- instance [p : Param α β cov con] (h : cov ≥ .Map1 := by decide)
+--   : Param10 α β := p.forget
+
+-- instance [p : Param α β .Map4 con] : Param α β .Map1 con := p
+-- instance [p : Param α β cov .Map2a] : Param α β cov .Map0 := p
+-- instance : Param10.{0} String Nat := sorry
+-- def abc : Nat := right "hoi"
+
+instance [p : Param α β cov con] : Param β α con cov := p.flip
+
+@[simp] instance [p : Param α β .Map4 con] : Param α β .Map3 con := p
+@[simp] instance [p : Param α β .Map3 con] : Param α β .Map2a con := p
+@[simp] instance [p : Param α β .Map3 con] : Param α β .Map2b con := p
+@[simp] instance [p : Param α β .Map2a con] : Param α β .Map1 con := p
+@[simp] instance [p : Param α β .Map2b con] : Param α β .Map1 con := p
+@[simp] instance [p : Param α β .Map1 con] : Param α β .Map0 con := p
+
+@[simp] instance [p : Param α β cov .Map4] : Param α β cov .Map3 := p
+@[simp] instance [p : Param α β cov .Map3] : Param α β cov .Map2a := p
+@[simp] instance [p : Param α β cov .Map3] : Param α β cov .Map2b := p
+@[simp] instance [p : Param α β cov .Map2a] : Param α β cov .Map1 := p
+@[simp] instance [p : Param α β cov .Map2b] : Param α β cov .Map1 := p
+@[simp] instance [p : Param α β cov .Map1] : Param α β cov .Map0 := p

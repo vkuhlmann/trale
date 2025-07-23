@@ -16,12 +16,12 @@ instance : Related α α where
 
   param := Param44_ident
 
-instance [p : Param00 α β] : Related α β where
-  mapCov := .Map0
-  mapCon := .Map0
-  param := p
+-- instance [p : Param00 α β] : Related α β where
+--   mapCov := .Map0
+--   mapCon := .Map0
+--   param := p
 
-instance [p : Param44 α β] : Related α β where
-  mapCov := .Map4
-  mapCon := .Map4
-  param := p
+-- instance [p : Param44 α β] : Related α β where
+--   mapCov := .Map4
+--   mapCon := .Map4
+--   param := p

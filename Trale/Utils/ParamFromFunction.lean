@@ -48,3 +48,28 @@ def toParam
       )
      } }
 end SplitSurj
+
+
+namespace SplitInj
+def toParam
+  {sect : α → β} {retract : β → α}
+  (sectK : forall a, retract (sect a) = a)
+  : Param42b α β := by
+  tr_constructor
+
+  -- R
+  · exact (sect . = .)
+
+  -- 4
+  · exact sect
+  repeat simp only [imp_self, implies_true]
+
+  -- 2b
+  · exact retract
+  · dsimp
+    intro x x' xR
+    subst xR
+    exact sectK _
+
+
+end SplitInj

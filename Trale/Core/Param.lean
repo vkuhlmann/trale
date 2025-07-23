@@ -11,7 +11,11 @@ universe w u v
 
 variable (α: Sort u) (β : Sort v)
 
-class Param (α : Sort u) (β : Sort v)
+-- FIXME Being a 'class' sometimes hurts readability, especially when
+-- constructing new params based on previous ones. However, if manipulation of
+-- Params can be done by this library, such that the user (almost) never needs
+-- to do it, this issue is more limited.
+structure Param (α : Sort u) (β : Sort v)
     (mapCov : MapType)
     (mapContra : MapType)
   : Sort ((max u v w) + 1) where

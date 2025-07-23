@@ -40,23 +40,26 @@ def forallApplication
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 
+  -- We use these Params
+  let _ := paramNNR
+  let _ := param_summable_seq
+
   -- Part 1: split the foralls
   show
     Param10
     (∀ (f g : seq_xnnR), Σ (f + g) = Σ f + Σ g)
     (∀ (u v : summable), Σ (u + v) = Σ u + Σ v)
 
-  let p1 : Param04 seq_xnnR summable := param_summable_seq.flip
 
   tr_split
   case p1 =>
-    exact p1.forget
+    infer_instance
 
   intro a a' R
 
   tr_split
   case p1 =>
-    exact p1.forget
+    infer_instance
 
   intro b b' bR
 
@@ -82,16 +85,16 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   case p1 =>
     show Param10 xnnR nnR
-    exact paramNNR.flip.forget
+    infer_instance
 
   case aR =>
-    show paramNNR.right A2 = A1; dsimp
+    show tr.map A2 = A1; dsimp
     show .fin (Σ a' + Σ b') = Σ a + Σ b
 
     -- If you change this to a 'let', the `subst` won't work because it will see
     -- it as a hypothesis instead of an equality.
-    have aF : seq_extend a' = a := p1.forget.R_implies_left a a' R
-    have bF : seq_extend b' = b := p1.forget.R_implies_left b b' bR
+    have aF : seq_extend a' = a := tr.R_implies_map a' a R
+    have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
     subst aF bF
 
@@ -105,10 +108,10 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   show Param10 ((_ = .) c) ((_ = .) c')
 
-  have cF := paramNNR.R_implies_right c' c cR
+  have cF := tr.R_implies_map c' c cR
   dsimp at cF
 
-  have cF2 := paramNNR.R_implies_left c' c cR
+  have cF2 := tr.R_implies_map c' c cR
   dsimp at cF2
 
 
@@ -126,15 +129,15 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   case p1 =>
     show Param10 xnnR nnR
-    exact paramNNR.flip.forget
+    infer_instance
 
   case aR =>
     show .fin B2 = B1
 
     -- If you change this to a 'let', the `subst` won't work because it will see
     -- it as a hypothesis instead of an equality.
-    have aF : seq_extend a' = a := p1.forget.R_implies_left a a' R
-    have bF : seq_extend b' = b := p1.forget.R_implies_left b b' bR
+    have aF : seq_extend a' = a := tr.R_implies_map a' a R
+    have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
     subst aF bF
     unfold B1 B2
@@ -150,10 +153,10 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   show Param10 (G1 d) (G2 d')
 
-  have dF := paramNNR.R_implies_right d' d dR
+  have dF := tr.R_implies_map d' d dR
   dsimp at dF
 
-  have dF2 := paramNNR.R_implies_left d' d dR
+  have dF2 := tr.R_implies_map d' d dR
   dsimp at dF2
 
   show Param10 (d = c) (d' = c')
@@ -182,7 +185,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   case p1 =>
     show Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
-    exact eqParam.forget
+    infer_instance
 
   case aR =>
     dsimp [Param_from_map]
@@ -199,7 +202,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   show Param10 (H1 e) (H2 e')
 
-  let eF := eqParam.R_implies_right e e' eR
+  let eF := tr.R_implies_map e e' eR
   dsimp at eF
 
 
@@ -210,7 +213,6 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   show e d c = e' d' c'
 
   rw [← eF]
-  dsimp [eqParam, Param_from_map]
   show e d c = e (xnnR.fin d') (xnnR.fin c')
 
   subst dF cF

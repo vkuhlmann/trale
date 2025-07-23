@@ -110,7 +110,7 @@ lemma repr5K : mod5 (repr5 a') = a' := by
 --     case _ h4 =>
 --       exact h2.symm
 
-
+@[simp]
 def ModParam : Param42a Nat Zmod5 := by
   tr_constructor
 

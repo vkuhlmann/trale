@@ -60,7 +60,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
       /-
           ⊢ Param04 ℕ ℕ
       -/
-      exact Param44_ident.forget
+      infer_instance
 
     case p2 =>
       intro a a' aR
@@ -72,7 +72,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
       -/
 
       rw [aR]
-      exact ParamModFin
+      infer_instance
 
   case p2 =>
     intro f f' fR
@@ -95,7 +95,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
     suffices F1 A = F1 B by
       rw [this]
-      exact Param44_ident.forget
+      infer_instance
 
     congr
     funext a

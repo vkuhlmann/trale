@@ -98,12 +98,13 @@ def Map4_option
       have h3 := p1.R_implies_rightK a a' aR
       rw [←h3]
 
-      let h := p1.R_implies_right a a' aR
+      have h := p1.R_implies_right a a' aR
       simp at h
 
       subst h
 
-      sorry
+      dsimp only [id_eq]
+      congr
 
 
 instance [inst : Related α β] : Related (Option α) (Option β) where

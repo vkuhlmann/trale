@@ -1,6 +1,7 @@
 import Mathlib
 import Trale.Core.Param
 import Trale.Utils.Constructor
+import Trale.Utils.Split
 -- import Mathlib.Data.Finset.Sum
 
 structure Modulo (n : Nat) where
@@ -61,8 +62,7 @@ lemma smallerThanMod : ∀ m n, n % (m+1) < (m + 1) := by
       exact smallerThanModCore _ _
 
 
-
-def ParamModFin : Param2a0 (Modulo (n + 1)) (Fin (n + 1)) := by
+instance ParamModFin : Param2a0 (Modulo (n + 1)) (Fin (n + 1)) := by
   tr_constructor
 
   case R =>

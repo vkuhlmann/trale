@@ -8,6 +8,7 @@ def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
   rw [h]
   exact Param_id
 
+@[simp]
 def Param_from_map
   (f : α -> α')
 : Param40 α α' := by

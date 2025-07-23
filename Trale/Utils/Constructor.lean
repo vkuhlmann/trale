@@ -73,6 +73,10 @@ elab "tr_constructor'" : tactic =>
     for subgoal in subgoals do
       -- let name := subgoal.name
       let name <- subgoal.getTag
+      if name == `normativeDirection then
+        subgoal.assign q(NormativeDirection.this)
+        continue
+
       IO.println s!"[tr_constructor] processing subgoal: {name}"
       -- let name <- MetavarContext.findUserName? subgoal
 
@@ -130,6 +134,9 @@ macro "tr_constructor" : tactic =>
 
 example : Param40 String Nat := by
   constructor
+
+  case normativeDirection =>
+    exact NormativeDirection.this
 
   case R =>
     intro s n

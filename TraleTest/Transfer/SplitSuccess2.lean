@@ -6,7 +6,45 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 
+import Trale.Theories.Forall
+
 import TraleTest.Utils.Lemmas.Modulo
+
+def forallApplication
+  {α α' : Sort _}
+  {β : α -> Sort _}
+  {β' : α' -> Sort _}
+  (p1 : Param10 α α')
+  (a : α)
+  (a' : α')
+  (aR : p1.R a a')
+  (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
+  :
+  Param10 (β a) (β' a') :=
+    by
+    tr_constructor
+
+    case R =>
+      exact (p2 a a' aR).R
+
+    case right =>
+      exact (p2 a a' aR).right
+
+
+instance ParamModFin2 : Param40 (Modulo (n + 1)) (Fin (n + 1)) := by
+  tr_from_map
+
+  intro a
+  constructor
+
+  case val =>
+    exact a.repr
+
+  case isLt =>
+    simp [Modulo.repr]
+
+    exact smallerThanMod _ _
+
 
 theorem P1 : ∀ f : (a : Nat) → Fin (a+1),
              ∑ b ∈ {1, 2, 3}, (f b).val ≤ 6
@@ -76,7 +114,8 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
   case p2 =>
     intro f f' fR
-    tr_simp_R at fR
+    -- unfold inferInstance at fR
+    -- tr_simp_R at fR
 
     /-
       f  : (a : ℕ) → Fin    (a + 1)
@@ -93,22 +132,71 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
     let B : ℕ → ℕ := fun a => (f' a).repr
     show Param10 (F1 A) (F1 B)
 
-    suffices F1 A = F1 B by
-      rw [this]
+    apply forallApplication
+
+    case p1 =>
       infer_instance
 
-    congr
-    funext a
-    specialize fR a a rfl
-    exact fR.symm
+    case aR =>
+      /- If you don't know the type yet, you get to see
+         `Param.R MapType.Map1 MapType.Map0 A B', where hovering over Param.R
+         shows
+         ```
+         @Param.R
+          (ℕ → ℕ) (ℕ → ℕ)
+          MapType.Map1 MapType.Map0
+          inferInstance A B : Prop
+         ```
 
+         You then recursively unfold the definition which is blocking. This
+         could be
+         ```
+         simp [inferInstance, instParamMap1OfMap2b, instParamMap2bOfMap3,
+               instParamMap3OfMap4, ...]
+         ```
+
+         I've now added simp to the instParamMap1OfMap2b etc which helps
+         somewhat. Still, we should search for a more elegant option.
+      -/
+      simp [inferInstance]
+
+      show A = B
+      subst A B
+      funext x
+
+      show ↑(f x) = (f' x).repr
+
+      -- We need some corresponde between f and f', but we have
+      -- `fR : Param2a0 .Map2a .Map0 f' f`
+
+      unfold inferInstance at fR
+      unfold ParamModFin at fR
+      -- unfold Param_forall.Map2a_forall at fR
+
+      dsimp at fR
+      specialize fR x x rfl
+      dsimp at fR
+
+      /-
+
+      fR : (f' x).repr = ↑(f x)
+
+      -/
+
+      exact fR.symm
+
+    intro a a' aR
+
+    show Param10 (F1 a) (F1 a')
+
+    have aF := tr.R_implies_map a a' aR
+    simp at aF
 
     /-
-      f : (a : ℕ) → Fin (a + 1)
-      f' : (a : ℕ) → Modulo (a + 1)
-      fR : ∀ (a : ℕ), ParamModFin.R (f' a) (f a)
-      F1 : (ℕ → ℕ) → Prop := fun x => ∑ a ∈ {1, 2, 3}, x a ≤ 6
-      A : ℕ → ℕ := fun a => ↑(f a)
-      B : ℕ → ℕ := fun a => (f' a).repr
-      ⊢ Param10 (F1 A) (F1 B)
+
+    aF : a = a'
+
     -/
+
+    subst aF
+    tr_ident

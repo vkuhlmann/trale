@@ -161,6 +161,8 @@ theorem id_exists_mod5_3
 
   tr_by id_exists_nat
 
+  let _ := ModParam
+
   /-
       ⊢ Param10 (∃ f, ∀ (x : ℕ), f x = x) (∃ f, ∀ (x : Zmod5), f x = x)
   -/
@@ -179,7 +181,7 @@ theorem id_exists_mod5_3
 
     case R =>
       intro f f'
-      exact ∀ n n' (nR : ModParam.R n n'), n < 5 → ModParam.R (f n) (f' n')
+      exact ∀ (n : Nat) (n' : Zmod5) (nR : tr.R n n'), n < 5 → tr.R (f n) (f' n')
 
     case right =>
       intro f a'
@@ -202,13 +204,13 @@ theorem id_exists_mod5_3
 
     tr_split
     case p1 =>
-      exact ModParam.forget
+      infer_instance
 
     case p2 =>
       intro a a' aR
       show Param10 (f a = a) (f' a' = a')
 
-      apply (Param_from_map _).forget
+      tr_from_map
       intro P
 
       tr_simp_R at aR
@@ -228,8 +230,7 @@ theorem id_exists_mod5_3
 
       show a < 5
 
-
-
+      sorry
       sorry
 
 
@@ -238,6 +239,8 @@ theorem id_exists_mod5_4
   : ∃ (f : Zmod5 -> Zmod5), ∀ (x : Zmod5), f x = x := by
 
   tr_by id_exists_nat
+
+  let _ := ModParam
 
   /-
       ⊢ Param10 (∃ f, ∀ (x : ℕ), f x = x) (∃ f, ∀ (x : Zmod5), f x = x)
@@ -273,19 +276,19 @@ theorem id_exists_mod5_4
     which we can't.
     -/
 
-    refine (Param_from_map ?_).forget
+    tr_from_map
 
     intro f
-    exact fun a' => ModParam.right (f (ModParam.left a'))
+    exact (tr.map <| f <| ModParam.left .)
 
   case p2 =>
     -- Note we're not splitting the forall!
 
     intro f f' fR
-    simp [Param_from_map, ModParam] at fR
+    simp at fR
     replace fR := congr_fun fR
 
-    apply (Param_from_map _).forget
+    tr_from_map
     intro h
 
     /-

@@ -1,14 +1,20 @@
 name = "Trale"
 version = "0.1.0"
-defaultTargets = ["trale"]
+defaultTargets = ["Trale"]
+# lintDriver = "batteries/runLinter"
+testDriver = "TraleTest"
 
 [[lean_lib]]
 name = "Trale"
 
-[[lean_exe]]
-name = "trale"
-root = "Main"
+[[lean_lib]]
+name = "TraleTest"
+globs = ["TraleTest.+"]
 
 [[require]]
 name = "Qq"
+scope = "leanprover-community"
+
+[[require]]
+name = "mathlib"
 scope = "leanprover-community"

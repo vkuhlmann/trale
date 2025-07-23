@@ -13,9 +13,9 @@ import Qq open Qq Lean
 -- 2 seconds
 
 
-set_option trace.profiler true
-set_option trace.profiler.threshold 10
-set_option trace.profiler.output.pp true
+-- set_option trace.profiler true
+-- set_option trace.profiler.threshold 10
+-- set_option trace.profiler.output.pp true
 
 namespace Param_arrow
 

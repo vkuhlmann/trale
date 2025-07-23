@@ -7,9 +7,6 @@ class Related (α : Type _) (β : Type _) where
 
   param : Param α β mapCov mapCon
 
-#check Related.mapCov
-#check @Related.mapCov
-
 instance : Related α α where
   mapCov := .Map4
   mapCon := .Map4

@@ -9,10 +9,6 @@ import Trale.Utils.Constructor
 
 open Lean Qq Elab Command Tactic Term Expr Meta PrettyPrinter
 
--- set_option trace.profiler true
--- set_option trace.profiler.threshold 0
-
-#check isDefEq
 
 def recoverMapTypeFromExpr (expr : Q(MapType)) : MetaM (Option MapType) := do
   if (← isExprDefEq expr q(MapType.Map4)) then
@@ -35,31 +31,6 @@ def recoverMapTypeFromExpr (expr : Q(MapType)) : MetaM (Option MapType) := do
 
   return none
 
-#check inferInstance
-
-def mmm : Inhabited String := by infer_instance
-
-#print mmm
--- #check String.instInhabited
-
-def mnnn : ((4 ≥ 3) → (4 ≥ 2) : Sort 0) := by simp
-
--- def mnnn : ((4 ≥ 3) → (4 ≥ 2) : Sort 0) := by
---   intro a
---   reflect a
-
-inductive TrOption (α : Sort _) : Sort _
-  | none : TrOption α
-  | some (val : α) : TrOption α
-
-#check Option
-
-#check whnf
-#check Meta.reduce
-
-#check LocalDecl
-
-#check @GE.ge.{0} MapType instLEMapType _ MapType.Map0
 
 def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name -> Option Expr) := do
   let levelU <- mkFreshLevelMVar
@@ -81,7 +52,6 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
   -- Did not solve the issue, but helps perhaps
   let levelU : Level ← instantiateLevelMVars levelU
   let levelV : Level ← instantiateLevelMVars levelV
-  let levelW : Level ← instantiateLevelMVars levelW
 
   let fromType : Q(Sort $levelU) <- instantiateMVars fromType
   let toType : Q(Sort $levelV) ← instantiateMVars toType
@@ -92,7 +62,7 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
   let base : Q(Param $fromType $toType $covMapType1 $conMapType1
                 : Type (max levelU levelV levelW)) <- instantiateMVars base
 
-  trace[trace] s!"[tr_fill_from] Looking for yield expression..."
+  trace[debug] s!"[tr_fill_from] Looking for yield expression..."
 
   let result : Name -> Option Expr := (
       match . with
@@ -149,9 +119,9 @@ def getHeadConst (e : Expr) : Option Name :=
 
 def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name := []) : TacticM Unit :=
   withMainContext do
-    trace[trace] s!"[tr_fill_from] Init..."
+    trace[debug] s!"[tr_fill_from] Init..."
     let goal ← Lean.Elab.Tactic.getMainGoal
-    let goalType ← Lean.Elab.Tactic.getMainTarget
+    -- let goalType ← Lean.Elab.Tactic.getMainTarget
 
     let result := mapper (← goal.getTag)
 
@@ -219,7 +189,7 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
       -- throwTacticEx `tr_extend goal
       --   (s!"donor condition is not decidable for {<- goal.getTag}: {donorCondition}")
       --
-      IO.println s!"[tr_extend] donor condition not met for {<- goal.getTag}: {donorCondition}"
+      trace[debug] s!"[tr_extend] donor condition not met for {<- goal.getTag}: {donorCondition}"
       return
 
 
@@ -269,7 +239,7 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
 
 
     for constName in unfoldNames do
-      IO.println s!"[tr_fill_from] constName: {constName}"
+      trace[debug] s!"[tr_fill_from] constName: {constName}"
       -- try
       let val := (<- Meta.unfold result constName)
       result := val.expr
@@ -284,7 +254,7 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
     result <- instantiateMVars result
 
     let constNameResult := getHeadConst result
-    IO.println s!"[tr_fill_from] constNameResult: {constNameResult}"
+    trace[debug] s!"[tr_fill_from] constNameResult: {constNameResult}"
 
     -- Meta.unfoldTarget
 
@@ -301,12 +271,6 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
     return
 
 
-elab "abccccc" : term <= t => do
-  sorry
-
-#check isMVarApp
-#check tryPostponeIfHasMVars
-
 def List.whereSome (a : List (Option α)) : List α :=
   a.filterMap id
 
@@ -322,12 +286,12 @@ def do_tr_fill_from (base : Expr) (baseType : Expr) : TacticM Unit := do
 --     do_tr_fill_from' (fun name => q($mapper $name))
 
 
-elab "tr_prefixed_fill" : tactic =>
-  Lean.Elab.Tactic.withMainContext do
-    let targetLevel <- mkFreshLevelMVar
-    let target : Q(Sort targetLevel) ← Lean.Elab.Tactic.getMainTarget
+-- elab "tr_prefixed_fill" : tactic =>
+--   Lean.Elab.Tactic.withMainContext do
+--     let targetLevel <- mkFreshLevelMVar
+--     let target : Q(Sort targetLevel) ← Lean.Elab.Tactic.getMainTarget
 
-    let newTarget : Q((h : Prop) -> h -> $target) ← mkFreshExprMVar q((h : Prop) -> h -> $target) (userName := `prefixedTarget)
+--     let newTarget : Q((h : Prop) -> h -> $target) ← mkFreshExprMVar q((h : Prop) -> h -> $target) (userName := `prefixedTarget)
 
 
 
@@ -349,8 +313,8 @@ elab "tr_fill_from" td:term : tactic =>
 
 elab "tr_fill_from_hypothesis_using_delab" name:ident : tactic =>
   Lean.Elab.Tactic.withMainContext do
-    let goal ← Lean.Elab.Tactic.getMainGoal
-    let goalType ← Lean.Elab.Tactic.getMainTarget
+    -- let goal ← Lean.Elab.Tactic.getMainGoal
+    -- let goalType ← Lean.Elab.Tactic.getMainTarget
 
     let hypo : LocalDecl ← getLocalDeclFromUserName name.getId
     let val : Expr := hypo.value
@@ -484,163 +448,3 @@ elab "tr_extend_multiple" " [" td:term,*,? "]" : tactic =>
 
     let result : TSyntax `tactic ← unfoldList els.toList
     replaceMainGoal (<- evalTacticAt result (← getMainGoal))
-
-
-#check Lean.Parser.Tactic.simpLemma
-#print Lean.Parser.Tactic.simpLemma
-#check ParserDescr
-
-
-
-def par_ext_1 : Param10 String Nat := by
-  tr_constructor
-
-  case R =>
-    intro s n
-    exact s.length = n
-
-  case right =>
-    intro s
-    exact s.length
-
-  -- repeat simp
-
-
-def par_ext : Param40 String Nat := by
-  -- tr_extend (by
-  --   tr_constructor
-
-  --   case R =>
-  --     intro s n
-  --     exact s.length = n
-
-  --   case right =>
-  --     intro s
-  --     exact s.length
-
-  --   : Param10 String Nat)
-
-  tr_constructor
-
-  case R =>
-    intro s n
-    exact s.length = n
-
-  case right =>
-    intro s
-    exact s.length
-
-  repeat simp
-
-
-def par_ext_2' : Param2a0 String Nat := let aa := 3; by
-  tr_add_param_base param_base := par_ext_1;
-  tr_extend' par_ext_1
-
-  /-
-  type mismatch
-    par_ext_1
-  has type
-    Param10 String Nat : Type 1
-  but is expected to have type
-    Param String Int ?covMapTypeBase ?conMapTypeBase : Type (max 1 ?u.3492)
-  -/
-
-  -- case R =>
-  --   intro s n
-  --   exact s.length = n
-
-  case right_implies_R =>
-    simp only []
-
-    simp
-
-
-#eval show MetaM Unit from do
-  let env ← getEnv
-  let decl := env.find? ``par_ext_2'
-
-  IO.println s!"[par_ext_2'] decl: {decl.map (fun d => d.value?)}"
-
--- #eval par_ext_2'.covariant.map
-
--- theorem forgetRight {Cov : MapType} {R} {covariant : MapType.interp Cov R}
---   [CoeT (Cov.interp R) (Map1 R)]
---  : (Param.forget _ _
---           { R := R, covariant := covariant, contravariant := _ }).right = (covariant : Map1 R).map := by
-
---   sorry
-
-
-def par_ext_2 : Param2a0 String Nat := by
-  tr_extend par_ext_1
-
-  case right_implies_R =>
-    --   ⊢ ∀ (a : String), a.length = a.length
-    simp
-
-    -- intro s
-    -- rfl
-    -- dsimp only [Param.right]
-
-    -- intro s
-
-    -- trivial
-    -- unfold par_ext_1
-
-    -- rw [Param.R]
-    -- simp only [Param.forget, coeMap]
-
-
-
-    -- simp
-
-
-    -- simp only [par_ext_1]
-    -- simp
-
-
-def par_ext_3 : Param40 String Nat := by
-  tr_extend par_ext_2
-
-  simp
-  simp
-
-  -- case right_implies_R =>
-  --   intro s
-
-  --   unfold par_ext_1
-
-  --   -- simp [par_ext_2]
-  --   simp [par_ext_1]
-
-  -- case R_implies_right =>
-  --   intro s s' sR
-  --   simp [par_ext_2, par_ext_1] at *
-  --   exact sR
-
-def par_option (p1 : Param2a0 α β) : Param2a0 (Option α) (Option β) := by
-  tr_constructor
-
-  case R =>
-    intro a a'
-    match a, a' with
-    | none, none => exact Unit
-    | some a, some a' => exact p1.R a a'
-    | _, _ => exact Unit
-
-  case right =>
-    sorry
-
-  case right_implies_R =>
-    intro a a'
-    sorry
-
-def par_option2 (p1 : Param30 α β) : Param30 (Option α) (Option β) := by
-  tr_extend (par_option p1)
-
-
-  sorry
-
-
-variable {α : Sort u} {α' : Sort u} {β : α -> Prop} {β' : α' -> Prop}

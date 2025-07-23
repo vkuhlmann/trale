@@ -41,8 +41,6 @@ class Param (α : Sort u) (β : Sort v)
   normativeDirection : NormativeDirection := .this
 
 
-#check Param.R
-
 -- ## Param abbreviations
 --
 -- We're enumerating all the abbreviations manually.

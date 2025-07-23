@@ -111,7 +111,6 @@ instance : @Trans MapType MapType MapType LE.le LE.le LE.le where
   trans := mapTypeTrans
 
 
-#print Decidable
 
   -- decidableLe a b : Decidable (a ≤ b) := by
   --   unfold LE.le
@@ -131,8 +130,6 @@ instance : @Trans MapType MapType MapType LE.le LE.le LE.le where
   (_root_.Map2b R)
   (_root_.Map3 R)
   (_root_.Map4 R)
-
-#print MapType.interp
 
 
   -- MapType.casesOn (motive := fun _ => Type _) mapType
@@ -172,8 +169,6 @@ instance : Coe (Map4 R) (Map3 R) where
   coe m := m.toMap3
 
 
-#check DecidableLE MapType
-
 @[simp]
 def coeMap {m1 m2 : MapType} {R : α -> β -> Sort w}
   (m : m1.interp R) (h : m2 ≤ m1) : m2.interp R := by
@@ -200,9 +195,6 @@ def coeMap {m1 m2 : MapType} {R : α -> β -> Sort w}
   | .Map1, .Map1 => exact (m : Map1 R)
   | .Map0, .Map0 => constructor
 
-
-
-#check Decidable.decide
 
 @[simp]
 def coeMap' {m1 m2 : MapType} {R : α -> β -> Sort w}

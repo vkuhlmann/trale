@@ -214,7 +214,7 @@ theorem id_exists_mod5_3
       intro P
 
       tr_simp_R at aR
-      simp [ModParam] at *
+      simp only at *
 
       /-
       f : ℕ → ℕ

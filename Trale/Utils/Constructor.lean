@@ -6,6 +6,8 @@ import Trale.Core.Param
 import Qq open Qq Lean
 open Lean Elab Command Tactic Term Expr Meta
 
+set_option trace.debug true
+
 elab "tr_constructor'" : tactic =>
   Lean.Elab.Tactic.withMainContext do
     let goal ← Lean.Elab.Tactic.getMainGoal
@@ -32,10 +34,10 @@ elab "tr_constructor'" : tactic =>
     let covMapType : Q(MapType) ← instantiateMVars covMapType
     let conMapType : Q(MapType) ← instantiateMVars conMapType
 
-    dbg_trace s!"[tr_constructor] fromType: {fromType}"
-    dbg_trace s!"[tr_constructor] toType: {toType}"
-    dbg_trace s!"[tr_constructor] covMap: {covMapType}"
-    dbg_trace s!"[tr_constructor] conMap: {conMapType}"
+    trace[debug] s!"[tr_constructor] fromType: {fromType}"
+    trace[debug] s!"[tr_constructor] toType: {toType}"
+    trace[debug] s!"[tr_constructor] covMap: {covMapType}"
+    trace[debug] s!"[tr_constructor] conMap: {conMapType}"
 
     -- let holeR : Q($fromType → $toType -> Sort $levelW)
     --     ← mkFreshExprMVar q($fromType → $toType -> Sort $levelW) .syntheticOpaque (userName := `Param.R)
@@ -77,22 +79,22 @@ elab "tr_constructor'" : tactic =>
         subgoal.assign q(NormativeDirection.this)
         continue
 
-      IO.println s!"[tr_constructor] processing subgoal: {name}"
+      trace[debug] s!"[tr_constructor] processing subgoal: {name}"
       -- let name <- MetavarContext.findUserName? subgoal
 
       let root := name.getRoot
       if !name.isStr then
-        IO.println s!"[tr_constructor] subgoal name is not a string: {name}"
+        trace[debug] s!"[tr_constructor] subgoal name is not a string: {name}"
         continue
 
       let suffix := name.getString!
 
       let query := (root.str suffix)
-      IO.println s!"[tr_constructor] query: {query}"
+      trace[debug] s!"[tr_constructor] query: {query}"
 
       let translated := translationMap.find? query
 
-      IO.println s!"[tr_constructor] translated: {translated}"
+      trace[debug] s!"[tr_constructor] translated: {translated}"
 
       let finalTag := match translated with
         | .none => name
@@ -113,7 +115,7 @@ elab "tr_constructor'" : tactic =>
       -- newGoals := newGoals.insert translated.get! subgoal
       newGoals := newGoals.insert finalTag subgoal
 
-    IO.println s!"[tr_constructor] newGoals length: {newGoals.toList.length}"
+    trace[debug] s!"[tr_constructor] newGoals length: {newGoals.toList.length}"
 
 
     let mut newGoalsOrdered : List MVarId := []
@@ -130,61 +132,3 @@ elab "tr_constructor'" : tactic =>
 macro "tr_constructor" : tactic =>
   -- `(tactic| tr_constructor' <;> try simp)
   `(tactic| tr_constructor')
-
-
-example : Param40 String Nat := by
-  constructor
-
-  case normativeDirection =>
-    exact NormativeDirection.this
-
-  case R =>
-    intro s n
-    exact s.length = n
-
-
-  case covariant =>
-    exact {
-      map := by sorry
-      map_in_R := by sorry
-      R_in_map := by sorry
-      R_in_mapK := by sorry
-    }
-
-  case contravariant =>
-    exact { }
-
-
-example : Param40 String Nat := by
-  constructor <;>
-    try constructor <;>
-    try constructor <;>
-    try constructor <;>
-    try constructor <;>
-    try constructor
-
-  simp at *
-
-
-  case R =>
-    intro s n
-    exact s.length = n
-
-  /-
-  case covariant.R_in_mapK
-  ⊢ ∀ (a : String) (b : Nat) (r : a.length = b), ⋯ = r
-
-  case covariant.toMap3.R_in_map
-  ⊢ ∀ (a : String) (b : Nat),
-    a.length = b →
-      { map := ?covariant.toMap3.toMap2a.toMap1.map, map_in_R := ?covariant.toMap3.toMap2a.map_in_R }.map a = b
-
-  case covariant.toMap3.toMap2a.map_in_R
-  ⊢ ∀ (a : String) (b : Nat), { map := ?covariant.toMap3.toMap2a.toMap1.map }.map a = b → a.length = b
-
-  case covariant.toMap3.toMap2a.toMap1.map
-  ⊢ String → Nat
-
-  -/
-
-  repeat sorry

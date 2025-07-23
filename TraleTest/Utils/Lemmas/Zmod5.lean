@@ -135,8 +135,8 @@ def ModParam : Param42a Nat Zmod5 := by
   case left_implies_R =>
     intro a b h
 
-    simp
-    simp [mod5, repr5]
+    simp [mod5]
+
     congr
     rw [← h]
 

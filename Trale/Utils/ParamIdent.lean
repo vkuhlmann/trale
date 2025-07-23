@@ -25,7 +25,6 @@ def symm_eq : (a = b) = (b = a) := by
     intro h
     rw [Eq.symm h]
 
-#print symm_eq
 
 -- @[simp]
 -- def _root_.Map4_ident : @Map4 α α ident_R := by

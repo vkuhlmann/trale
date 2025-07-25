@@ -21,6 +21,10 @@ initialize Lean.registerTraceClass `tr.utils
 -- #eval show IO Unit from do
 --   Lean.registerTraceClass `tr_split_application
 
+-- #check Type 8 -> Type 9
+
+#check Lean.Expr.lam
+
 def forallApplication
   {α α' : Sort _}
   {β : α -> Sort _}
@@ -79,7 +83,7 @@ elab "tr_split_application" : tactic =>
       let matcher : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType $conMapType)
 
       if !(← isExprDefEq matcher goalType) then
-        throwTacticEx `tr_constructor goal ("goal should be of type Param")
+        throwTacticEx `tr_split_application goal ("goal should be of type Param")
 
       let fromType : Q(Sort $levelU) ← instantiateMVars fromType
       let toType : Q(Sort $levelV) ← instantiateMVars toType
@@ -129,8 +133,212 @@ elab "tr_split_application" : tactic =>
               (toType, .none, toArgs),
             )
 
-      let result ← findFirstNonFvars (fromType, []) (toType, [])
-      trace[tr.utils] s!"Got result {result}"
+      let ((body1, target1, args1), (body2, target2, args2))
+        ← findFirstNonFvars (fromType, []) (toType, [])
+
+      if target1.isNone || target2.isNone then
+        throwTacticEx `tr_split_application goal "Can't split application: not an application, or no non-fvar arguments"
+
+      let target1 := target1.get!
+      let target2 := target2.get!
+
+      let targetFVar1 ← mkFreshFVarId
+      let targetFVar2 ← mkFreshFVarId
+
+      let lambda1pre := mkAppN body1 ⟨(.fvar targetFVar1)::args1⟩
+
+      trace[tr.utils] s!"lambda1pre: {repr lambda1pre}"
+      let lambda1pre <- instantiateMVars lambda1pre
+
+      trace[tr.utils] s!"lambda1pre: {repr lambda1pre}"
+
+      let lambda1 ← mkLambdaFVars #[.fvar targetFVar1]
+        <| lambda1pre
+
+        /-
+        Lean.Expr.lam
+        Lean.Name.anonymous
+        (Lean.Expr.const `_inhabitedExprDummy [])
+        (Lean.Expr.app
+
+        -/
+
+      trace[tr.utils] s!"lambda1 (a): {repr lambda1}"
+      let lambda1 ← instantiateMVars lambda1
+      trace[tr.utils] s!"lambda1 (b): {repr lambda1}"
+
+
+      let lambda2 ← instantiateMVars <| (← mkLambdaFVars #[.fvar targetFVar2]
+        <| mkAppN body2 ⟨(.fvar targetFVar2)::args2⟩)
+
+      let result1 : Q(Sort $levelU) := .app lambda1 target1
+      let result2 : Q(Sort $levelV) := .app lambda2 target2
+
+      -- trace[tr.utils] s!"Got result {result}"
+      let resultType : Q(Type (max levelU levelV levelW))
+        := q(Param $result1 $result2 $covMapType $conMapType)
+
+      -- evalTactic (← `(tactic| show $resultType))
+
+      if !(← isDefEq goalType resultType) then
+        throwTacticEx `tr_split_application goal "Failed to replace goal with new one"
+
+      let lambda1 : Expr ← instantiateMVars lambda1
+      let lambda2 : Expr ← instantiateMVars lambda2
+
+      trace[tr.utils] s!"lambda1: {repr lambda1}"
+      trace[tr.utils] s!"lambda2: {repr lambda2}"
+      trace[tr.utils] s!"target1: {repr target1}"
+      trace[tr.utils] s!"target2: {repr target2}"
+
+      /-
+      The following does not work, because following it with apply or refine undoes
+      our works, eta reducing to the original goal:
+      ```
+      let newGoal ← goal.replaceTargetDefEq resultType
+      replaceMainGoal [newGoal]
+      ```
+      -/
+
+      -- let α : Q(Sort $levelU) ← mkFreshExprMVar (.some q(Sort)) (userName := `α)
+      -- let α' : Q(Sort $levelV) ← mkFreshExprMVar (.some q(Sort)) (userName := `α')
+
+      -- let α ← inferType target1
+      -- let α' ← inferType target2
+
+      let levelX1 ← mkFreshLevelMVar
+      let levelX2 ← mkFreshLevelMVar
+      let levelY1 ← mkFreshLevelMVar
+      let levelY2 ← mkFreshLevelMVar
+      let levelZ ← mkFreshLevelMVar
+      -- let levelAA1 ← mkFreshLevelMVar
+      -- let levelAA2 ← mkFreshLevelMVar
+
+      let α : Q(Sort $levelX1) ← mkFreshExprMVar .none (userName := `α)
+      let α' : Q(Sort $levelX2) ← mkFreshExprMVar .none (userName := `α')
+
+      if !(← isExprDefEq α (←inferType target1)) then
+        throwTacticEx `tr_split_application goal "Failed to match type of target1 with α"
+
+      if !(← isExprDefEq α' (←inferType target2)) then
+        throwTacticEx `tr_split_application goal "Failed to match type of target2 with α"
+
+      let a : Q($α) := target1
+      let a' : Q($α') := target2
+
+      let βType := q($α → Sort $levelY1)
+      let βType' := q($α' → Sort $levelY2)
+
+      -- if !(← isExprDefEq βType (←inferType lambda1)) then
+      --   throwTacticEx `tr_split_application goal "Failed to match type of lambda1 with type of β"
+      -- if !(← isExprDefEq βType' (←inferType lambda2)) then
+      --   throwTacticEx `tr_split_application goal "Failed to match type of lambda2 with type of β'"
+
+      -- let β : Q($α → Sort $levelY1) := lambda1
+      -- let β' : Q($α' → Sort $levelY2) := lambda2
+
+      -- /-
+      -- stuck at solving universe constraint
+      --   max
+      --   (max (max (max (max levelX1 levelX2) (levelY1+1)) (levelY2+1)) ?u.20766)
+      --   (?u.20772+1) =?= max (max levelU levelV) (levelW+1)
+      -- while trying to unify
+      --   Sort
+      --     (max (max (max (max (max levelX1 levelX2) ?u.20766) (levelY2 + 1)) (levelY1 + 1))
+      --         (?u.20772 +
+      --             1)) : Type (max (max (max (max (max levelX1 levelX2) ?u.20766) (levelY2 + 1)) (levelY1 + 1)) (?u.20772 + 1))
+      -- with
+      --   Sort (max levelU levelV (levelW + 1)) : Type (max levelU levelV (levelW + 1))
+      -- -/
+
+      -- -- This does not work
+      -- -- let p1Type : Q(Type (max levelX1 levelX2)) := q(Param10 $α $α')
+      -- -- let p1 : Q($p1Type) ← mkFreshExprMVar (.some p1Type) (userName := `p1)
+
+      -- -- Cryptic errors like "unknown constant '_inhabitedExprDummy'"
+
+      -- -- This will be a goal
+      -- let p1 : Q(Param10 $α $α' : Type (max levelX1 levelX2 levelZ)) ←
+      --   mkFreshExprMVar (.some q((Param10 $α $α' : Type (max levelX1 levelX2 levelZ)))) (userName := `p1)
+
+      -- -- This will be inferred
+      -- let a : Q($α) ← mkFreshExprMVar (.some q($α)) (userName := `a)
+      -- let a' : Q($α') ← mkFreshExprMVar (.some q($α')) (userName := `a')
+
+      -- -- These will be goals
+      -- let aR : Q(($p1).R $a $a') ← mkFreshExprMVar (.some q(($p1).R $a $a')) (userName := `aR)
+      -- /-
+      -- Sometimes it's a hunt for loose universe levels, and trying various things
+      -- until something works.
+
+      -- stuck at solving universe constraint
+      --   max
+      --   (max (max (max levelX1 levelX2) (levelY1+1)) (levelY2+1))
+      --   (?u.20373+1) =?= max (max (max levelX1 levelX2) (levelY1+1)) (levelY2+1)
+      -- while trying to unify
+      --   Sort
+      --     (max (max (max (max levelX1 levelX2) (levelY2 + 1)) (levelY1 + 1))
+      --         (?u.20373 + 1)) : Type (max (max (max (max levelX1 levelX2) (levelY2 + 1)) (levelY1 + 1)) (?u.20373 + 1))
+      -- with
+      --   Sort (max levelX1 levelX2 (levelY2 + 1) (levelY1 + 1)) : Type (max levelX1 levelX2 (levelY2 + 1) (levelY1 + 1))
+
+      -- -/
+      -- /-
+      -- stuck at solving universe constraint
+      --   max
+      --   (max (max (max (max levelX1 levelX2) (levelY1+1)) (levelY2+1)) levelZ)
+      --   (?u.20294+1) =?= max (max (max (max levelX1 levelX2) (levelY1+1)) (levelY2+1)) levelZ
+      -- while trying to unify
+      --   Sort
+      --     (max (max (max (max (max levelX1 levelX2) levelZ) (levelY2 + 1)) (levelY1 + 1))
+      --         (?u.20294 +
+      --             1)) : Type (max (max (max (max (max levelX1 levelX2) levelZ) (levelY2 + 1)) (levelY1 + 1)) (?u.20294 + 1))
+      -- with
+      --   Sort
+      --     (max levelX1 levelX2 levelZ (levelY2 + 1)
+      --         (levelY1 + 1)) : Type (max levelX1 levelX2 levelZ (levelY2 + 1) (levelY1 + 1))
+      -- -/
+      -- -- let mytest
+      -- -- --  : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) ))
+      -- -- -- := q(Param10 ($β $a) ($β' $a') : Type (max (max levelX1 levelY1) (max levelX2 levelY2) levelZ))
+      -- -- := q(Param10 ($β $a) ($β' $a') : Type (max levelY1 levelY2 levelZ))
+
+      -- -- let p2Type
+      -- -- : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) ))
+      -- -- := q(∀ a a' (_ : ($p1).R a a'), (Param10 ($β a) ($β' a') : Type (max (max levelX1 levelY1) (max levelX2 levelY2) levelZ)))
+
+      -- let p2Type
+      -- : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
+      -- := q(∀ (a : $α) (a' : $α') (_ : ($p1).R a a'), (Param10 ($β a) ($β' a') : Type (max levelY1 levelY2 levelZ)))
+
+      -- let p2 : Q(∀ (a : $α) (a' : $α') (_ : ($p1).R a a'), (Param10 ($β a) ($β' a') : Type (max levelY1 levelY2 levelZ)))
+      --   ← mkFreshExprMVar (.some p2Type)
+      --   (userName := `p2)
+
+      -- -- (a : α)
+      -- -- (a' : α')
+      -- -- (aR : p1.R a a')
+      -- -- (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
+
+      -- /-
+      --   {α α' : Sort _}
+      --   {β : α -> Sort _}
+      --   {β' : α' -> Sort _}
+      --   (p1 : Param10 α α')
+      --   (a : α)
+      --   (a' : α')
+      --   (aR : p1.R a a')
+      --   (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
+      --   :
+      --   Param10 (β a) (β' a')
+      -- -/
+
+
+      -- -- let complete := q(forallApplication $p1 $a $a' $aR $p2)
+
+
+      -- let complete := q(4)
+
 
 
       -- match fromType, toType with

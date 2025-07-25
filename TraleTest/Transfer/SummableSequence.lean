@@ -80,7 +80,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   simp
   intro c c' cR
 
-  tr_split_application
+  -- tr_split_application
   /-
   (0) Both final arguments are fvars
   (1) Final arguments are not fvar
@@ -109,14 +109,14 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     )
   )
   -/
-  show Param10 ((_ = .) c) ((_ = .) c')
+
+  -- show Param10 ((_ = .) c) ((_ = .) c')
 
   have cF := tr.R_implies_map c' c cR
   dsimp at cF
 
   have cF2 := tr.R_implies_map c' c cR
   dsimp at cF2
-
 
   -- Part 3: Relate lhs:  *X*  =  X
   --                      ___
@@ -126,23 +126,20 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   let G2 := (@Eq nnR . c')
   let B2 := Σ (a' + b')
-
-  tr_inspect_expr G1
-  tr_inspect_expr B1
-  tr_inspect_expr G2
-  tr_inspect_expr B2
-
-  show Param10 (G1 B1) (G2 B2)
+  -- show Param10 (G1 B1) (G2 B2)
   tr_split_application
 
   apply forallApplication
+  -- refine' forallApplication ?_ ?_ ?_ ?_ ?_
 
   case p1 =>
     show Param10 xnnR nnR
     infer_instance
 
   case aR =>
-    show .fin B2 = B1
+
+    show .fin (Σ (a' + b')) = Σ (a + b)
+    -- show .fin B2 = B1
 
     -- If you change this to a 'let', the `subst` won't work because it will see
     -- it as a hypothesis instead of an equality.

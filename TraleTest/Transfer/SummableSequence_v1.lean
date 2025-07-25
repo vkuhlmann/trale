@@ -3,13 +3,39 @@ import Trale.Utils.Extend
 import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
-import Trale.Utils.Application
 
 import TraleTest.Utils.Lemmas.SummableSequence
 
-set_option trace.tr.utils true
-
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
+
+-- axiom functionRelationApplication
+--   (p1 : Param10 (A -> B) (A' -> B'))
+--   (p2 : Param10 A A')
+--   (p3 : Param10 B B')
+--   :
+--   ∀ f f' (_ : p1.R f f'),
+--   ∀ a a' (_ : p2.R a a'), p3.R (f a) (f' a')
+
+def forallApplication
+  {α α' : Sort _}
+  {β : α -> Sort _}
+  {β' : α' -> Sort _}
+  (p1 : Param10 α α')
+  (a : α)
+  (a' : α')
+  (aR : p1.R a a')
+  (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
+  :
+  Param10 (β a) (β' a') :=
+    by
+    tr_constructor
+
+    case R =>
+      exact (p2 a a' aR).R
+
+    case right =>
+      exact (p2 a a' aR).right
+
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
@@ -80,35 +106,6 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   simp
   intro c c' cR
 
-  tr_split_application
-  /-
-  (0) Both final arguments are fvars
-  (1) Final arguments are not fvar
-  Got result (
-    (
-      Eq.{1} xnnR,
-      (
-        (
-          some (SequenceSummation.sum.{0, 0} seq_xnnR xnnR
-          instSequenceSummationSeq_xnnRXnnR (HAdd.hAdd.{0, 0, 0} seq_xnnR seq_xnnR
-          seq_xnnR (instHAdd.{0} seq_xnnR instAddSeq_xnnR) _uniq.1344 _uniq.2306))
-        ),
-        [_uniq.4944]
-      )
-    ),
-    (
-      Eq.{1} nnR,
-      (
-        (
-          some (SequenceSummation.sum.{0, 0} summable nnR instSummationSummable
-          (HAdd.hAdd.{0, 0, 0} summable summable summable (instHAdd.{0} summable
-          instAddSummable) _uniq.1347 _uniq.2309))
-        ),
-        [_uniq.4947]
-      )
-    )
-  )
-  -/
   show Param10 ((_ = .) c) ((_ = .) c')
 
   have cF := tr.R_implies_map c' c cR
@@ -127,14 +124,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   let G2 := (@Eq nnR . c')
   let B2 := Σ (a' + b')
 
-  tr_inspect_expr G1
-  tr_inspect_expr B1
-  tr_inspect_expr G2
-  tr_inspect_expr B2
-
   show Param10 (G1 B1) (G2 B2)
-  tr_split_application
-
   apply forallApplication
 
   case p1 =>

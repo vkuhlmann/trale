@@ -46,23 +46,25 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 2: Relate rhs:  X  =  *X*
   --                            ___
   --
-  let F1 := (fun x => (Σ (a + b)) = x)
-  let A1 := (Σ a + Σ b)
+  -- let F1 := (fun x => (Σ (a + b)) = x)
+  -- let A1 := (Σ a + Σ b)
 
-  let F2 := (fun x => (Σ (a' + b')) = x)
-  let A2 := (Σ a' + Σ b')
+  -- let F2 := (fun x => (Σ (a' + b')) = x)
+  -- let A2 := (Σ a' + Σ b')
 
   -- show Param10 ((_ = .) _) ((_ = .) _)
-  show Param10 (F1 A1) (F2 A2)
+  -- show Param10 (F1 A1) (F2 A2)
 
-  apply forallApplication
+  tr_split_application
+
+  -- apply forallApplication
 
   case p1 =>
     show Param10 xnnR nnR
     infer_instance
 
   case aR =>
-    show tr.map A2 = A1; dsimp
+    -- show tr.map A2 = A1; dsimp
     show .fin (Σ a' + Σ b') = Σ a + Σ b
 
     -- If you change this to a 'let', the `subst` won't work because it will see
@@ -75,7 +77,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     repeat rw [summationHomeo]
     rw [add_xnnR_homeo]
 
-  subst F1 F2 A1 A2
+  -- subst F1 F2 A1 A2
 
   simp
   intro c c' cR
@@ -129,7 +131,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- show Param10 (G1 B1) (G2 B2)
   tr_split_application
 
-  apply forallApplication
+  -- apply forallApplication
   -- refine' forallApplication ?_ ?_ ?_ ?_ ?_
 
   case p1 =>
@@ -147,7 +149,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
     subst aF bF
-    unfold B1 B2
+    -- unfold B1 B2
 
     have h1 : seq_extend a'.seq + seq_extend b'.seq = seq_extend (a' + b').seq := by
       congr
@@ -189,6 +191,17 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   show Param10 (H1 C1) (H2 C2)
   apply forallApplication
+
+  /-
+  Currently, we can't use `tr_split_application` here yet, because the
+  implicit argument gets converted, and also we haven't implemented
+  transferring the function head itself:
+
+  ```plaintext
+  Would relate:    (@Eq.{1} xnnR d c) (@Eq.{1} nnR d' c')
+                            ----               ---
+  ```
+  -/
 
   case p1 =>
     show Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop)

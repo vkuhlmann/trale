@@ -162,12 +162,6 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   show Param10 (G1 d) (G2 d')
 
-  have dF := tr.R_implies_map d' d dR
-  dsimp at dF
-
-  have dF2 := tr.R_implies_map d' d dR
-  dsimp at dF2
-
   show Param10 (d = c) (d' = c')
 
 
@@ -180,14 +174,41 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   let H2 := fun (f : _ -> _ -> Sort _) => (f d' c')
   let C2 := @Eq nnR
 
+  -- tr_split_application
+
   -- This and variations do not work
   -- show Param10 ((. _ _) _ _) ((. _ _) _ _)
   -- show Param10 ((fun (f : _ -> _ -> Sort _) => f _ _) _) ((fun (f : _ -> _ -> Sort _) => f _ _) _)
 
-  let eqParam : Param40 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+    tr_split
+    case p1 => infer_instance
+
+    tr_split
+    case p1 => infer_instance
+
+    -- TODO: Make this work with infer_instance
+    exact propParam.forget
+
+
+    /-
+    Previous approach:
+
+    ```
+    -- Use Prop related to Prop by identity.
+    infer_instance
+    ```
+
+    Approach before that:
+    ```
     apply Param_from_map
     intro f x y
     exact f (.fin x) (.fin y)
+    ```
+    -/
+
+  -- Why can't we simplify the value of a hypothesis? (Only the type)
+  -- simp [inferInstance, eqParam, Param_arrow.Map4_arrow] at eqParam
 
   show Param10 (H1 C1) (H2 C2)
   apply forallApplication
@@ -203,37 +224,87 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   ```
   -/
 
+
   case p1 =>
-    show Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
+    show Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
     infer_instance
 
   case aR =>
-    dsimp [Param_from_map]
-    funext x y
+    dsimp [inferInstance, eqParam, Param_arrow.Map1_arrow]
 
-    show C1 (xnnR.fin x) (xnnR.fin y) = C2 x y
-
+    -- We need to use `propParam` instance for `Param Prop Prop`, not the
+    -- instance defined by equality.
+    unfold propParam
     unfold C1 C2
-    show (xnnR.fin x = xnnR.fin y) = (x = y)
-    simp
+
+    dsimp
+    intro x x' xR
+    intro y y' yR
+
+    show x = y → x' = y'
+
+    have xF := tr.R_implies_map x x' xR
+    have yF := tr.R_implies_map y y' yR
+
+    dsimp at xF yF
+    subst xF yF
+
+    show x = y → tr.map x = tr.map y
+    exact congrArg _
+
+    -- Previous approach:
+    -- -- Since we related Props by id, we have to prove the two Props are equal.
+    -- -- Ideally we would only want to proof the implication. This would be
+    -- -- addressed by implementing translation of the types in the propositions
+    -- -- using registed Param instances.
+    -- show C1 x y = C2 x' y'
+
+    -- unfold C1 C2
+    -- show (x = y) = (x' = y')
+
+    -- apply propext
+
+    -- constructor
+    -- · show (x = y → x' = y')
+    --   have xF := tr.R_implies_map x x' xR
+    --   have yF := tr.R_implies_map y y' yR
+
+    --   dsimp at xF yF
+    --   subst xF yF
+
+    --   intro h
+    --   congr
+
+    -- · show (x' = y' → x = y)
+    --   have xF := tr.R_implies_map x' x xR
+    --   have yF := tr.R_implies_map y' y yR
+
+    --   dsimp at xF yF
+    --   subst xF yF
+
+    --   intro h
+    --   congr
 
   simp
   intro e e' eR
 
   show Param10 (H1 e) (H2 e')
 
-  let eF := tr.R_implies_map e e' eR
-  dsimp at eF
+  -- let eF := tr.R_implies_map e e' eR
+  -- dsimp at eF
 
 
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  apply (Param_id' _).forget
-  show e d c = e' d' c'
+  dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam] at eR
 
-  rw [← eF]
-  show e d c = e (xnnR.fin d') (xnnR.fin c')
+  tr_from_map
+  show e d c → e' d' c'
 
-  subst dF cF
-  congr
+  exact eR d d' dR c c' cR
+
+  -- Previous approach
+  -- tr_ident
+  -- show e d c = e' d' c'
+  -- ...

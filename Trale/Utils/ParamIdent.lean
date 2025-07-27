@@ -115,8 +115,29 @@ def _root_.Param44_ident''
     subst h
     exact Param44_ident
 
+/-
+This is no longer necessary, since I implemented forgetful instances.
+
+<s>
+However, it's not just redudant, it's also problematic: When implementing a
+custom instance `ParamXY Prop Prop`, it would only get inferred for exactly
+`ParamXY Prop Prop` and not any `ParamZW Prop Prop`. It should be accessible
+from the Prop instance, but because then the chain is longer than this ident
+instance, it isn't used. Note that the ident instance would always be length 1
+with this definition, since it allows any cov/con. Switching to only defining
+the instance for `Param44` seems to solve the problem.
+</s>
+EDIT: Nope, problem still not solved.
+
+```
 @[simp]
 instance : Param α α con cov
   := Param44_ident.forget
       (h1 := Param.map4top)
       (h2 := Param.map4top)
+```
+-/
+
+@[simp]
+instance : Param α α .Map4 .Map4
+  := Param44_ident

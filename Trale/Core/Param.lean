@@ -245,7 +245,7 @@ abbrev map_implies_R [p : Param2a0 α β]
   : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
 
 @[simp]
-abbrev R_implies.mapK [p : Param40 α β]
+abbrev R_implies_mapK [p : Param40 α β]
   := p.covariant.R_in_mapK
 
 end tr

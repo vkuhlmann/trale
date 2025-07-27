@@ -29,7 +29,7 @@ def forallApplication
   {α α' : Sort _}
   {β : α -> Sort _}
   {β' : α' -> Sort _}
-  (p1 : Param10 α α')
+  (p1 : Param00 α α')
   (a : α)
   (a' : α')
   (aR : p1.R a a')
@@ -98,6 +98,7 @@ elab "tr_split_application" : tactic =>
       trace[tr.utils] s!"covMap: {covMapType}"
       trace[tr.utils] s!"conMap: {conMapType}"
 
+      let lctx ← getLCtx
 
       let rec findFirstNonFvars
         (fromType toType : (Expr × List Expr))
@@ -124,6 +125,36 @@ elab "tr_split_application" : tactic =>
               trace[tr.utils] s!"{pref}One of the final arguments is not an fvar"
             | _, _ =>
               trace[tr.utils] s!"{pref}Final arguments are not fvar"
+
+            -- trace[tr.utils] s!"{pref}a: {a}"
+            -- trace[tr.utils] s!"{pref}b: {b}"
+
+            -- let aDecl := LocalContext.findFVar? lctx a
+            -- let bDecl := LocalContext.findFVar? lctx b
+
+            -- trace[tr.utils] s!"{pref}aDecl: {aDecl.isSome}"
+            -- trace[tr.utils] s!"{pref}bDecl: {bDecl.isSome}"
+
+            let aType ← inferType a
+            let bType ← inferType b
+
+            -- match aDecl, bDecl with
+            -- | .some aDecl, .some bDecl =>
+            --   let aType := aDecl.type
+            --   let bType := bDecl.type
+
+            --   trace[tr.utils] s!"{pref}Type of a: {format aType}"
+            --   trace[tr.utils] s!"{pref}Type of b: {format bType}"
+
+
+            if Expr.isSort aType || Expr.isSort bType then
+              trace[tr.utils] s!"{pref}One or both types are Sort type. Skipping to next"
+              return (← findFirstNonFvars
+                (f, a :: fromArgs)
+                (g, b :: toArgs))
+
+            -- | _, _ => pure ()
+
 
             return (
               (f, .some a, fromArgs),

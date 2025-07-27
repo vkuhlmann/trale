@@ -152,3 +152,40 @@ def param_summable_NNR_seq : Param40 summable seq_nnR
 
 def param_summable_seq : Param40 summable seq_xnnR
   := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
+
+-- prop1 and prop2 are related if prop1 implies prop2.
+instance propParam : Param2a2a Prop Prop := by
+  tr_constructor
+
+  -- R
+  · intro x y
+    exact x → y
+
+  -- 2a
+  · exact id
+  · intro a a' aR
+    subst aR
+    simp
+
+  -- 2a
+  · exact id
+  · intro a a' aR
+    subst aR
+    simp
+
+/-
+TODO: Make a Prop relation which translates types it comes across. That would
+prevent needing to show equivalence of the propositions, where in some cases
+only an implication is needed or possible.
+
+```
+let eqParam2 : Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+  tr_split
+  case p1 => infer_instance
+
+  tr_split
+  case p1 => infer_instance
+
+  infer_instance
+```
+-/

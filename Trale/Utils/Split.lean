@@ -25,6 +25,7 @@ macro "tr_ident" : tactic => `(tactic|
 
 macro "tr_split_forall" : tactic => `(tactic|
   first
+  | apply Param_forall.Map0_forall; rotate_left 1
   | apply Param_forall.Map1_forall; rotate_left 1
   | apply Param_forall.Map2a_forall; rotate_left 1
   | apply Param_forall.Map2b_forall; rotate_left 1
@@ -34,6 +35,7 @@ macro "tr_split_forall" : tactic => `(tactic|
 
 macro "tr_split_arrow" : tactic => `(tactic|
   first
+  | apply Param_arrow.Map0_arrow; rotate_left 1
   | apply Param_arrow.Map1_arrow; rotate_left 1
   | apply Param_arrow.Map2a_arrow; rotate_left 1
   | apply Param_arrow.Map2b_arrow; rotate_left 1

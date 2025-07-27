@@ -139,5 +139,5 @@ instance : Param α α con cov
 -/
 
 @[simp]
-instance : Param α α .Map4 .Map4
+instance (priority := 40) : Param α α .Map4 .Map4
   := Param44_ident

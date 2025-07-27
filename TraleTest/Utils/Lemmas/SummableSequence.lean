@@ -154,7 +154,7 @@ def param_summable_seq : Param40 summable seq_xnnR
   := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
 
 -- prop1 and prop2 are related if prop1 implies prop2.
-instance propParam : Param2a2a Prop Prop := by
+instance (priority := high) propParam : Param2a2a Prop Prop := by
   tr_constructor
 
   -- R

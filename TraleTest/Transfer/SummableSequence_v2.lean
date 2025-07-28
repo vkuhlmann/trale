@@ -25,13 +25,13 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     (∀ (u v : summable), Σ (u + v) = Σ u + Σ v)
 
 
-  tr_split
+  tr_split'
   case p1 =>
     infer_instance
 
   intro a a' R
 
-  tr_split
+  tr_split'
   case p1 =>
     infer_instance
 
@@ -55,12 +55,12 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- show Param10 ((_ = .) _) ((_ = .) _)
   -- show Param10 (F1 A1) (F2 A2)
 
-  tr_split_application
+  tr_split_application'
 
   -- apply forallApplication
 
   case p1 =>
-    show Param10 xnnR nnR
+    show Param00 xnnR nnR
     infer_instance
 
   case aR =>
@@ -129,13 +129,17 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   let G2 := (@Eq nnR . c')
   let B2 := Σ (a' + b')
   -- show Param10 (G1 B1) (G2 B2)
-  tr_split_application
+  tr_split_application'
+
+  run_tac do
+    trace[tr.utils] "Hello"
+
 
   -- apply forallApplication
   -- refine' forallApplication ?_ ?_ ?_ ?_ ?_
 
   case p1 =>
-    show Param10 xnnR nnR
+    show Param00 xnnR nnR
     infer_instance
 
   case aR =>
@@ -181,10 +185,10 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- show Param10 ((fun (f : _ -> _ -> Sort _) => f _ _) _) ((fun (f : _ -> _ -> Sort _) => f _ _) _)
 
   let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    tr_split
+    tr_split'
     case p1 => infer_instance
 
-    tr_split
+    tr_split'
     case p1 => infer_instance
 
     -- TODO: Make this work with infer_instance

@@ -33,17 +33,41 @@ def forallApplication
   (a : α)
   (a' : α')
   (aR : p1.R a a')
-  (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
+  (p2 : ∀ a a' (_ : p1.R a a'), Param (β a) (β' a') cov con)
   :
-  Param10 (β a) (β' a') :=
-    by
-    tr_constructor
+  Param (β a) (β' a') cov con := (p2 a a' aR)
 
-    case R =>
-      exact (p2 a a' aR).R
+-- def forallApplication2a
+--   {α α' : Sort _}
+--   {β : α -> Sort _}
+--   {β' : α' -> Sort _}
+--   (p1 : Param00 α α')
+--   (a : α)
+--   (a' : α')
+--   (aR : p1.R a a')
+--   (p2 : ∀ a a' (_ : p1.R a a'), Param2a0 (β a) (β' a'))
+--   :
+--   Param2a0 (β a) (β' a') := by
+--     tr_extend forallApplication p1 a a' aR (p2 . . .)
 
-    case right =>
-      exact (p2 a a' aR).right
+--     exact (p2 a a' aR).right_implies_R
+
+-- def forallApplication2b
+--   {α α' : Sort _}
+--   {β : α -> Sort _}
+--   {β' : α' -> Sort _}
+--   (p1 : Param00 α α')
+--   (a : α)
+--   (a' : α')
+--   (aR : p1.R a a')
+--   (p2 : ∀ a a' (_ : p1.R a a'), Param2b0 (β a) (β' a'))
+--   :
+--   Param2b0 (β a) (β' a') := (p2 a a' aR)
+
+
+
+
+
 
 def a : Simp.DSimproc := sorry
 
@@ -63,7 +87,7 @@ elab "tr_inspect_expr" td:term : tactic =>
 
 #check Simp.SimprocsArray
 
-elab "tr_split_application" : tactic =>
+elab "tr_split_application'" : tactic =>
   -- TODO Is there a more elegant way to write the constant function?
   Lean.withTraceNode `tr.utils (fun _ => return "tr_split_application") do
     withMainContext do
@@ -167,14 +191,104 @@ elab "tr_split_application" : tactic =>
               (toType, .none, toArgs),
             )
 
-      let ((body1, target1, args1), (body2, target2, args2))
+      let rec sealLambda
+        (e : Expr) (count : Nat) (exampleValues : List Expr) : MetaM (Expr × List Expr) := do
+        trace[tr.utils] s!"Doing sealLambda for count {count}, (exampleValues.length: {exampleValues.length})"
+        if count > 0 then
+          throwError "Disabled sealLambda for testing"
+        match count, exampleValues with
+        | 0, _
+        | _, [] => return (e, exampleValues)
+        | n+1, a::as =>
+            let (body, remaining) ← sealLambda e n as
+            return (Expr.lam Name.anonymous (← inferType a) body BinderInfo.default, remaining)
+
+      let rec hoistFVarsToLambda'
+        (e1 e2 : Expr)
+        -- (lambdaDepth : Nat)
+        -- (isTrailing : Bool)
+        (needsSeal : Bool)
+
+        : MetaM ((Expr × List Expr) × (Expr × List Expr) × Nat) := do
+        match e1, e2 with
+        | .app f a, .app g b =>
+          trace[tr.utils] s!"[hoistFVarsToLambda'] f: {repr f}"
+          trace[tr.utils] s!"[hoistFVarsToLambda'] a: {repr a}"
+
+          match a, b with
+            | .fvar _, .fvar _ =>
+              let ((f, fVars), (g, gVars), sealDepth) ← hoistFVarsToLambda' f g needsSeal
+              return match needsSeal with
+              | true =>  (
+                  (.app f (.bvar sealDepth), a::fVars),
+                  (.app g (.bvar sealDepth), b::gVars),
+                  sealDepth + 1
+                )
+              | false => (
+                  (f, a::fVars),
+                  (g, b::gVars),
+                  0
+                )
+
+            | _, _ =>
+              let ((f, fVars), (g, gVars), sealDepth) ← hoistFVarsToLambda' f g true
+              let (fSealed, _) ← sealLambda (.app f a) sealDepth fVars
+              let (gSealed, _) ← sealLambda (.app g b) sealDepth gVars
+              return ((fSealed, fVars), (gSealed, gVars), 0)
+              -- match isTrailing with
+              -- | true => ((f, fVars), (g, gVars))
+              -- | false => ((.app f a, fVars), (.app g b, gVars))
+        | _, _ =>
+          return ((e1, []), (e2, []), 0)
+
+      -- Can't proof easily because it uses the MetaM now
+      -- have sealDepthIsZeroWhenNoSeal : ∀ e1 e2, (←hoistFVarsToLambda' e1 e2 false).3 == 0 := by
+
+      let hoistFVarsToLambda (e1 e2 : Expr) : MetaM ((Expr × Expr) × (Expr × Expr)) := do
+        let ((a1, a1Vars), (a2, a2Vars), _) ← hoistFVarsToLambda' e1 e2 false
+
+        -- let a1VarsTypes ← List.mapM inferType a1Vars
+        -- let a2VarsTypes ← List.mapM inferType a2Vars
+
+        -- let rec mkApplierFun (types : List Expr) : Expr :=
+
+        -- let applierFun1 := a1VarsTypes.foldr
+        --   (fun x y => Expr.lam .anonymous x y .default)
+        --   (.bvar 0)
+
+        trace[tr.utils] s!"[hoistFVarsToLambda] a1: {a1}"
+        trace[tr.utils] s!"[hoistFVarsToLambda] a1 repr: {repr a1}"
+        trace[tr.utils] s!"[hoistFVarsToLambda] a1Vars: {a1Vars}"
+
+        let applierFun1 := Expr.lam .anonymous (← inferType a1) (mkAppN (.bvar 0) ⟨a1Vars.reverse⟩) .default
+        -- let applierFun2 ← withLocalDeclD .anonymous (← inferType a2) (pure $ mkAppN . ⟨a2Vars⟩)
+        let applierFun2 := Expr.lam .anonymous (← inferType a2) (mkAppN (.bvar 0) ⟨a2Vars.reverse⟩) .default
+
+        trace[tr.utils] s!"[hoistFVarsToLambda] applierFun1 repr: {repr applierFun1}"
+        trace[tr.utils] s!"[hoistFVarsToLambda] applierFun1: {applierFun1}"
+
+
+        return ((applierFun1, a1), (applierFun2, a2))
+
+
+      let mut ((body1, target1, args1), (body2, target2, args2))
         ← findFirstNonFvars (fromType, []) (toType, [])
 
-      match target1, target2 with
+      let (a, a') ← match target1, target2 with
       | .none, _
       | _, .none =>
-        throwTacticEx `tr_split_application goal "Can't split application: not an application, or no non-fvar arguments"
-      | some a, some a' =>
+
+        let ((f1, a1), (f2, a2)) ← hoistFVarsToLambda fromType toType
+
+        body1 ← instantiateMVars f1
+        body2 ← instantiateMVars f2
+        args1 := []
+        args2 := []
+
+        pure (← instantiateMVars a1, ← instantiateMVars a2)
+
+        -- throwTacticEx `tr_split_application goal "Can't split application: not an application, or no non-fvar arguments"
+      | some a, some a' => pure (a, a')
 
 
       -- if target1.isNone || target2.isNone then
@@ -266,6 +380,8 @@ elab "tr_split_application" : tactic =>
       -- evalTactic (← `(tactic| show $resultType))
 
       if !(← isDefEq goalType resultType) then
+        throwTypeMismatchError none goalType resultType (mkStrLit "dummy")
+
         throwTacticEx `tr_split_application goal "Failed to replace goal with new one"
 
       -- let lambda1 : Expr ← instantiateMVars lambda1
@@ -342,8 +458,8 @@ elab "tr_split_application" : tactic =>
       --   Solved now.  Was using an fresh FVar without `withLocalDec`
 
       -- This will be a goal
-      let p1 : Q(Param10 $α $α' : Type (max levelX1 levelX2 levelZ)) ←
-        mkFreshExprMVar (.some q((Param10 $α $α' : Type (max levelX1 levelX2 levelZ)))) (userName := `p1)
+      let p1 : Q(Param00 $α $α' : Type (max levelX1 levelX2 levelZ)) ←
+        mkFreshExprMVar (.some q((Param00 $α $α' : Type (max levelX1 levelX2 levelZ)))) (userName := `p1)
 
       -- This will be inferred
       -- let a : Q($α) := target1
@@ -395,12 +511,12 @@ elab "tr_split_application" : tactic =>
         : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
         := q(
             ∀ (a : $α) (a' : $α') (aR : ($p1).R a a'),
-            (Param10 ($β a) ($β' a') : Type (max levelY1 levelY2 levelZ)))
+            (Param ($β a) ($β' a') $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
 
       trace[tr.utils] s!"p2Type: {repr p2Type}"
 
       let p2 : Q(∀ (a : $α) (a' : $α') (aR: ($p1).R a a'),
-        (Param10 ($β a) ($β' a') : Type (max levelY1 levelY2 levelZ)))
+        (Param ($β a) ($β' a')  $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
         ← mkFreshExprMVar (.some p2Type) (userName := `p2)
 
       trace[tr.utils] s!"p2: {repr p2}"
@@ -439,7 +555,8 @@ elab "tr_split_application" : tactic =>
 
       -- let complete := q(forallApplication $p1 $a $a' $aR $p2)
       -- let complete := q(@forallApplication _ _ $β $β' $p1 $a $a' $aR $p2)
-      let almostComplete := q(fun aR => @forallApplication _ _ $β $β' $p1 $a $a' aR $p2)
+      -- let almostComplete := q(fun aR => @forallApplication $covMapType $conMapType _ _ $β $β' $p1 $a $a' aR $p2)
+      let almostComplete := q(fun aR => @forallApplication $covMapType $conMapType _ _ $β $β' $p1 $a $a' aR $p2)
       let complete : Expr := .app almostComplete aR
 
       let completeResult : Simp.Result ← unfold complete ``forallApplication
@@ -504,6 +621,17 @@ elab "tr_split_application" : tactic =>
 
       -- getForallArity
 
-
-
-#check Lean.LMVarId
+macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
+macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
+  tactic| (
+    (tr_split_application' <;> try infer_instance); (
+      try (
+        (case' p2 => intro $a $a' $aR);rotate_left 1); tr_whnf
+        -- tr_simp_R at aR
+      )
+    )
+  )
+macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident "by" sub:tacticSeq : tactic => `(
+  tactic| (
+    (tr_split_application $a $a' $aR; case aR => $sub)
+  ))

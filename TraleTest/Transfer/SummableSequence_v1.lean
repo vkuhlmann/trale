@@ -51,13 +51,13 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     (∀ (u v : summable), Σ (u + v) = Σ u + Σ v)
 
 
-  tr_split
+  tr_split'
   case p1 =>
     infer_instance
 
   intro a a' R
 
-  tr_split
+  tr_split'
   case p1 =>
     infer_instance
 

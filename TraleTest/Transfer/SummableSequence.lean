@@ -15,43 +15,29 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 
   -- We use these Params
-  let _ := paramNNR
   let _ := param_summable_seq
 
+  -- TODO: Make this work with infer_instance
+  -- We need to use `propParam` instance for `Param Prop Prop`, not the
+  -- instance defined by equality.
+  let _ : Param00 Prop Prop := propParam.forget
+
+  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+    tr_split; tr_split
+
   -- Part 1: split the foralls
-  show
-    Param10
-    (∀ (f g : seq_xnnR), Σ (f + g) = Σ f + Σ g)
-    (∀ (u v : summable), Σ (u + v) = Σ u + Σ v)
-
-
-  tr_split
-  infer_instance
-  intro a a' R
-
-  tr_split
-  infer_instance
-
-  intro b b' bR
-
-  show Param10 (Σ (a + b) = Σ a + Σ b) (Σ (a' + b') = Σ a' + Σ b')
+  tr_intro a a' aR
+  tr_intro b b' bR
 
   -- Part 2: Relate rhs:  X  =  *X*
   --                            ___
   --
+  tr_split_application c c' cR by
+    unfold extend
 
-  tr_split_application
-
-  case p1 =>
-    show Param10 xnnR nnR
-    infer_instance
-
-  case aR =>
     show .fin (Σ a' + Σ b') = Σ a + Σ b
 
-    -- If you change this to a 'let', the `subst` won't work because it will see
-    -- it as a hypothesis instead of an equality.
-    have aF : seq_extend a' = a := tr.R_implies_map a' a R
+    have aF : seq_extend a' = a := tr.R_implies_map a' a aR
     have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
     subst aF bF
@@ -59,23 +45,15 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     repeat rw [summationHomeo]
     rw [add_xnnR_homeo]
 
-  intro c c' cR
-
   -- Part 3: Relate lhs:  *X*  =  X
   --                      ___
   --
-  tr_split_application
-
-  case p1 =>
-    show Param10 xnnR nnR
-    infer_instance
-
-  case aR =>
+  tr_split_application d d' dR by
     show .fin (Σ (a' + b')) = Σ (a + b)
 
     -- If you change this to a 'let', the `subst` won't work because it will see
     -- it as a hypothesis instead of an equality.
-    have aF : seq_extend a' = a := tr.R_implies_map a' a R
+    have aF : seq_extend a' = a := tr.R_implies_map a' a aR
     have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
     subst aF bF
@@ -86,73 +64,23 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     rw [h1]
     rw [summationHomeo]
 
-  intro d d' dR
-
   show Param10 (d = c) (d' = c')
 
   -- Part 4: Relate eq:  X  *=*  X
   --                        ___
   --
-  let H1 := fun (f : _ -> _ -> Sort _) => (f d c)
-  let C1 := @Eq xnnR
-
-  let H2 := fun (f : _ -> _ -> Sort _) => (f d' c')
-  let C2 := @Eq nnR
-
-  -- This and variations do not work
-  -- show Param10 ((. _ _) _ _) ((. _ _) _ _)
-  -- show Param10 ((fun (f : _ -> _ -> Sort _) => f _ _) _) ((fun (f : _ -> _ -> Sort _) => f _ _) _)
-
-  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    tr_split
-    case p1 => infer_instance
-
-    tr_split
-    case p1 => infer_instance
-
-    -- TODO: Make this work with infer_instance
-    -- We need to use `propParam` instance for `Param Prop Prop`, not the
-    -- instance defined by equality.
-    exact propParam.forget
-
-  show Param10 (H1 C1) (H2 C2)
-  apply forallApplication
-
-  /-
-  Currently, we can't use `tr_split_application` here yet, because the
-  implicit argument gets converted, and also we haven't implemented
-  transferring the function head itself:
-
-  ```plaintext
-  Would relate:    (@Eq.{1} xnnR d c) (@Eq.{1} nnR d' c')
-                            ----               ---
-  ```
-  -/
-
-
-  case p1 =>
-    show Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
-    infer_instance
-
-  case aR =>
+  tr_split_application e e' eR by
     dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam]
-    unfold C1 C2
 
     intro x x' xR
     intro y y' yR
 
     show x = y → x' = y'
 
-    have xF := tr.R_implies_map x x' xR
-    have yF := tr.R_implies_map y y' yR
+    rw [←tr.R_implies_map x x' xR]
+    rw [←tr.R_implies_map y y' yR]
 
-    dsimp at xF yF
-    subst xF yF
-
-    show x = y → tr.map x = tr.map y
     exact congrArg _
-
-  intro e e' eR
 
   -- Part 5: Use relations to make the relation trivial
   --

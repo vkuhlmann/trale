@@ -140,7 +140,7 @@ theorem summationHomeo (a : summable) : Σ seq_extend a.seq = .fin (Σ a) := by
     contradiction
 
 
-def paramNNR : Param42b nnR xnnR
+instance paramNNR : Param42b nnR xnnR
   := SplitInj.toParam truncate_extend
 
 def param_NNR_seq : Param40 seq_nnR seq_xnnR
@@ -150,7 +150,7 @@ def param_NNR_seq : Param40 seq_nnR seq_xnnR
 def param_summable_NNR_seq : Param40 summable seq_nnR
   := Param_from_map summable.seq
 
-def param_summable_seq : Param40 summable seq_xnnR
+instance param_summable_seq : Param40 summable seq_xnnR
   := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
 
 -- prop1 and prop2 are related if prop1 implies prop2.

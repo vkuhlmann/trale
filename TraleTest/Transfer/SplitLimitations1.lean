@@ -203,8 +203,6 @@ theorem id_exists_mod5_3
     simp at fR
 
     tr_split
-    case p1 =>
-      infer_instance
 
     case p2 =>
       intro a a' aR

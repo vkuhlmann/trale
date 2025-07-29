@@ -21,10 +21,6 @@ initialize Lean.registerTraceClass `tr.utils
 -- #eval show IO Unit from do
 --   Lean.registerTraceClass `tr_split_application
 
--- #check Type 8 -> Type 9
-
-#check Lean.Expr.lam
-
 def forallApplication
   {α α' : Sort _}
   {β : α -> Sort _}
@@ -37,40 +33,6 @@ def forallApplication
   :
   Param (β a) (β' a') cov con := (p2 a a' aR)
 
--- def forallApplication2a
---   {α α' : Sort _}
---   {β : α -> Sort _}
---   {β' : α' -> Sort _}
---   (p1 : Param00 α α')
---   (a : α)
---   (a' : α')
---   (aR : p1.R a a')
---   (p2 : ∀ a a' (_ : p1.R a a'), Param2a0 (β a) (β' a'))
---   :
---   Param2a0 (β a) (β' a') := by
---     tr_extend forallApplication p1 a a' aR (p2 . . .)
-
---     exact (p2 a a' aR).right_implies_R
-
--- def forallApplication2b
---   {α α' : Sort _}
---   {β : α -> Sort _}
---   {β' : α' -> Sort _}
---   (p1 : Param00 α α')
---   (a : α)
---   (a' : α')
---   (aR : p1.R a a')
---   (p2 : ∀ a a' (_ : p1.R a a'), Param2b0 (β a) (β' a'))
---   :
---   Param2b0 (β a) (β' a') := (p2 a a' aR)
-
-
-
-
-
-
-def a : Simp.DSimproc := sorry
-
 elab "tr_inspect_expr" td:term : tactic =>
   withMainContext do
     let expr ← Tactic.elabTerm td .none
@@ -78,7 +40,7 @@ elab "tr_inspect_expr" td:term : tactic =>
     trace[tr.utils] s!"Type as expression is\n  {repr expr}"
 
     match expr with
-    | .fvar fvarId =>
+    | .fvar _ =>
       --
       let ldecl ← getFVarLocalDecl expr
       trace[tr.utils] s!"Fvar value is\n  {repr ldecl.value}"
@@ -121,8 +83,6 @@ elab "tr_split_application'" : tactic =>
       trace[tr.utils] s!"toType: {toType}"
       trace[tr.utils] s!"covMap: {covMapType}"
       trace[tr.utils] s!"conMap: {conMapType}"
-
-      let lctx ← getLCtx
 
       let rec findFirstNonFvars
         (fromType toType : (Expr × List Expr))
@@ -387,13 +347,13 @@ elab "tr_split_application'" : tactic =>
       -- let lambda1 : Expr ← instantiateMVars lambda1
       -- let lambda2 : Expr ← instantiateMVars lambda2
 
-      trace[tr.utils] s!"α: {repr α}"
-      trace[tr.utils] s!"α': {repr α'}"
-      trace[tr.utils] s!"a: {repr a}"
-      trace[tr.utils] s!"lambda1: {repr β}"
-      trace[tr.utils] s!"lambda2: {repr β'}"
-      trace[tr.utils] s!"target1: {repr target1}"
-      trace[tr.utils] s!"target2: {repr target2}"
+      -- trace[tr.utils] s!"α: {repr α}"
+      -- trace[tr.utils] s!"α': {repr α'}"
+      -- trace[tr.utils] s!"a: {repr a}"
+      -- trace[tr.utils] s!"lambda1: {repr β}"
+      -- trace[tr.utils] s!"lambda2: {repr β'}"
+      -- trace[tr.utils] s!"target1: {repr target1}"
+      -- trace[tr.utils] s!"target2: {repr target2}"
 
       /-
       The following does not work, because following it with apply or refine undoes
@@ -510,22 +470,22 @@ elab "tr_split_application'" : tactic =>
       let p2Type
         : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
         := q(
-            ∀ (a : $α) (a' : $α') (aR : ($p1).R a a'),
+            ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
             (Param ($β a) ($β' a') $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
 
-      trace[tr.utils] s!"p2Type: {repr p2Type}"
+      -- trace[tr.utils] s!"p2Type: {repr p2Type}"
 
-      let p2 : Q(∀ (a : $α) (a' : $α') (aR: ($p1).R a a'),
+      let p2 : Q(∀ (a : $α) (a' : $α') (_: ($p1).R a a'),
         (Param ($β a) ($β' a')  $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
         ← mkFreshExprMVar (.some p2Type) (userName := `p2)
 
-      trace[tr.utils] s!"p2: {repr p2}"
+      -- trace[tr.utils] s!"p2: {repr p2}"
 
       let a : Q($α) := a
       let a' : Q($α') := a'
 
       let aRtype := q(($p1).R $a $a')
-      trace[tr.utils] s!"aRtype: {repr aRtype}"
+      -- trace[tr.utils] s!"aRtype: {repr aRtype}"
 
       -- These will be goals
       let aR

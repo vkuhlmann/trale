@@ -7,7 +7,7 @@ import Trale.Utils.Application
 
 import TraleTest.Utils.Lemmas.SummableSequence
 
-set_option trace.tr.utils true
+set_option trace.tr.utils false
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 

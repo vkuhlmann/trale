@@ -54,7 +54,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
         ⊢ Param02a ((a : ℕ) → Fin (a + 1)) ((a : ℕ) → Modulo (a + 1))
     -/
     tr_flip
-    tr_split
+    tr_split'
 
     case p1 =>
       /-

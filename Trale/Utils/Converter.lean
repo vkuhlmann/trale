@@ -152,7 +152,7 @@ partial def trale (e : Expr) : TacticM Expr := do
               let existingMatch : Option MVarId <- withMainContext do
                 let goals ← getGoals
                 for goal in goals do
-                  let goalType ← goal.getType''
+                  let goalType ← goal.getType'
                   if ← Meta.isExprDefEq goalType requiredType then
                     return goal
                 return .none
@@ -222,7 +222,7 @@ partial def trale (e : Expr) : TacticM Expr := do
 
         -- FIXME This is for testing only
         if doesMatch || true then
-          let goalType ← goal.getType''
+          let goalType ← goal.getType'
           if ← Meta.isExprDefEq goalType newType then
             -- IO.println s!"[trale] used orig to avoid repeating of: {n}"
             return Expr.mvar goal
@@ -288,7 +288,7 @@ partial def trale (e : Expr) : TacticM Expr := do
         -- if origType.sort then
         --   return e
         for goal in goals do
-          let goalType ← goal.getType''
+          let goalType ← goal.getType'
           if ← Meta.isExprDefEq goalType newType then
             return Expr.mvar goal
 
@@ -321,7 +321,10 @@ partial def trale (e : Expr) : TacticM Expr := do
       -- let newName := Name.mkStr Name.anonymous s!" Equivalent for {n} using {βName} instead of {αName} "
       -- let newName := Name.mkStr Name.anonymous s!"[{αName}→{βName}] {n}"
       -- let newName := Name.mkStr Name.anonymous s!"'{n}' [{βName.lastComponentAsString}/{αName}]"
-      let newName := Name.mkStr Name.anonymous s!"{n.lastComponentAsString}'"
+      let newName : Name := match n with
+      | .str _ b => .mkStr .anonymous b
+      | .num _ b => .mkStr .anonymous s!"num{b}"
+      | .anonymous => .anonymous
       -- let newName := Name.mkStr Name.anonymous s!"{n}'"
 
       IO.println s!"[trale] adding goal of type: {newType}"
@@ -411,10 +414,13 @@ elab "trale_add_transformed" " [" alphaName:ident " -> " betaName:ident "] " n:i
 
 
     if !(← αNameVar.isAssigned) then
-      αNameVar.assignIfDefeq <| Expr.const αName []
+      if !(← isDefEq (Expr.const αName []) (.mvar αNameVar)) then
+        trace[debug] s!"Failed to assign αNameVar"
 
     if !(← βNameVar.isAssigned) then
-      βNameVar.assignIfDefeq <| Expr.const βName []
+      if !(← isDefEq (.const βName []) (.mvar βNameVar)) then
+        trace[debug] s!"Failed to assign αNameVar"
+      -- βNameVar.assignIfDefeq <| Expr.const βName []
 
 
     let transformed ← Conversion.trale (αName := αName) (βName := βName) origVal

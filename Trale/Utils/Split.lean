@@ -82,16 +82,13 @@ syntax (name := tr_intro_syntax) "tr_intro" notFollowedBy("|") (ppSpace colGt te
 elab_rules : tactic
   -- | `(tactic| tr_intro) notFollowedBy("|") (ppSpace colGt term:max)* : tactic =>
   | `(tactic| tr_intro)                     =>  do
-        evalTactic (← `(tactic| tr_split))
-        evalTactic (← `(tactic| intro))
+        evalTactic (← `(tactic| tr_split; (case' p2 => intro)))
 
   | `(tactic| tr_intro $h:ident)            => do
-        evalTactic (← `(tactic| tr_split))
-        evalTactic (← `(tactic| intro $h:ident))
+        evalTactic (← `(tactic| tr_split; (case' p2 => intro $h:ident)))
 
   | `(tactic| tr_intro $h:term $hs:term*)   =>  do
-        evalTactic (← `(tactic| tr_split))
-        evalTactic (← `(tactic| intro $h:term $hs:term*))
+        evalTactic (← `(tactic| tr_split; (case' p2 => intro $h:term $hs:term*)))
 
   -- evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
 

@@ -4,6 +4,7 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
+import Trale.Utils.Converter
 
 import TraleTest.Utils.Lemmas.SummableSequence
 
@@ -38,6 +39,7 @@ def mytest2 (a b : nnR) : (a + b = b + a) := by
 
 open Qq Lean Elab Command Tactic Term Expr Meta in
 def mytest3 (a b : nnR) : (a + b = b + a) := by
+  revert a b
   run_tac
     let levelV ← mkFreshLevelMVar
     let fromType := q(nnR)
@@ -60,8 +62,108 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
     let myInstValue ← instantiateMVars myInstValue
     trace[tr.utils] s!"Found value: {myInstValue}"
 
+    let toType : Q(Sort levelV) ← instantiateMVars toType
+
+    let goal ← getMainGoal
+    let goalType ← getMainTarget
+
+    trace[tr.utils] s!"From type: {repr fromType}"
+    trace[tr.utils] s!"To type: {repr toType}"
+
+    let (fromName, toName) ← match fromType, toType with
+      | .const a aLevels, .const b bLevels => pure (a, b)
+      | _, _ =>
+        throwTacticEx `tr_right goal "Couldn't extract constant names from fromType and toType"
+
+    -- evalTactic (← `(tactic| trale_add_transformed [$fromType -> $toType] h1 := ))
+    let transformedType ← Converter.Conversion.trale (αName := fromName) (βName := toName) (← getMainTarget)
+    trace[tr.utils] s!"Transformed type: {transformedType}"
+
+    let levelX ← mkFreshLevelMVar
+
+    -- let levelW ← mkFreshLevelMVar
+
+    if !(← isDefEq (← inferType transformedType) q(Sort levelX)) then
+      throwTacticEx `tr_right goal "Failed to infer universe level of transformedType"
+
+    let levelY ← mkFreshLevelMVar
+    if !(← isDefEq (← inferType goalType) q(Sort levelY)) then
+      throwTacticEx `tr_right goal "Failed to infer universe level of goalType"
+
+    let transformedType : Q(Sort levelX) := transformedType
+
+    let newBase : Q($transformedType)
+      ← mkFreshExprMVar transformedType (userName := `base)
+
+    let mvarIdNew ← goal.define `base transformedType newBase
+    let (_, mvarIdNew) ← mvarIdNew.intro1P
+
+    -- let newGoals ← evalTacticAt (← `(tactic| tr_by `(ident| base); tr_sorry sorry)) mvarIdNew
+    trace[tr.utils] s!"Performing tr_by..."
+    -- let newGoals ← evalTacticAt (← `(tactic| tr_by `(ident| basee))) mvarIdNew
+    let baseIdent := mkIdent `base
+
+    let newGoals ← evalTacticAt (← `(tactic| tr_by $baseIdent)) mvarIdNew
+
+    /-
+    (cannot evaluate code because
+    '_tmp._lam_0._@.TraleTest.Transfer.SummableSequence._hyg.1926'
+    uses 'sorry' and/or contains errors)
+
+    unquoteExpr: transformedType✝ : Expr
+    -/
+    -- mvarIdNew.apply q(fun x => Param.right.{levelY, levelX, levelW} x $newBase)
+
+    trace[tr.utils] s!"MvarIdNew: {repr mvarIdNew}"
+
+    let paramType ← mkFreshExprMVar none
+
+    let newGoals ← mvarIdNew.apply (
+      .lam `x paramType (
+        mkAppN
+        (.const ``Param.right [levelX, levelY, .zero])
+        #[
+          transformedType,
+          goalType,
+          .bvar 0,
+          newBase
+        ]
+      ) .default)
+
+    -- let newGoals ← evalTacticAt (← `(apply fun x => Param.right x $a)) mvarIdNew
+
+    trace[tr.utils] s!"Performed tr_by."
+    -- let newGoals := [mvarIdNew]
+
+    -- goal.assign (.mvar mvarIdNew)
+    replaceMainGoal <| [newBase.mvarId!] ++ newGoals
+
+    -- goal.add
+
+    -- evalApply
+    -- let newMainGoal := apply fun x => Param.right x $a
+
+    -- replaceMainGoal [
+    --   newBase
+    -- ] ++ (evalTacticAt (← `(tactic| tr_by `(term|$newBase))) goal)
+
+
+  case instAddNnR =>
+    infer_instance
+
+  case base =>
+    show ∀ (a b : xnnR), a + b = b + a
+    intro a b
+
+    exact xnnR_comm a b
+
   sorry
 
+
+
+  -- tr_by base
+
+  -- tr_sorry sorry
 
 
 

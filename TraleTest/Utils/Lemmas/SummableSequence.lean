@@ -42,6 +42,25 @@ theorem add_xnnR_homeo
   unfold add_xnnR
   dsimp only
 
+theorem nnR_comm (a b : nnR) : a + b = b + a := by
+  unfold nnR at *
+  exact Nat.add_comm a b
+
+theorem xnnR_comm (a b : xnnR) : a + b = b + a := by
+  show add_xnnR a b = add_xnnR b a
+  unfold add_xnnR
+
+  match a, b with
+  | .fin a, .fin b =>
+    show (xnnR.fin a) + (.fin b) = (.fin b) + (.fin a)
+    repeat rw [←add_xnnR_homeo]
+    apply congrArg
+    exact nnR_comm a b
+
+  | .inf, .inf
+  | .fin a, .inf
+  | .inf, .fin b => dsimp
+
 
 def seq_nnR := Nat → nnR
 def seq_xnnR := Nat → xnnR

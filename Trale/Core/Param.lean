@@ -245,7 +245,7 @@ abbrev map_implies_R [p : Param2a0 α β]
   : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
 
 @[simp]
-abbrev R_implies.mapK [p : Param40 α β]
+abbrev R_implies_mapK [p : Param40 α β]
   := p.covariant.R_in_mapK
 
 end tr
@@ -267,18 +267,18 @@ end tr
 -- instance : Param10.{0} String Nat := sorry
 -- def abc : Nat := right "hoi"
 
-instance [p : Param α β cov con] : Param β α con cov := p.flip
+instance (priority := 80) [p : Param α β cov con] : Param β α con cov := p.flip
 
-@[simp] instance [p : Param α β .Map4 con] : Param α β .Map3 con := p
-@[simp] instance [p : Param α β .Map3 con] : Param α β .Map2a con := p
-@[simp] instance [p : Param α β .Map3 con] : Param α β .Map2b con := p
-@[simp] instance [p : Param α β .Map2a con] : Param α β .Map1 con := p
-@[simp] instance [p : Param α β .Map2b con] : Param α β .Map1 con := p
-@[simp] instance [p : Param α β .Map1 con] : Param α β .Map0 con := p
+@[simp] instance (priority := low) [p : Param α β .Map4 con] : Param α β .Map3 con := p
+@[simp] instance (priority := low) [p : Param α β .Map3 con] : Param α β .Map2a con := p
+@[simp] instance (priority := low) [p : Param α β .Map3 con] : Param α β .Map2b con := p
+@[simp] instance (priority := low) [p : Param α β .Map2a con] : Param α β .Map1 con := p
+@[simp] instance (priority := low) [p : Param α β .Map2b con] : Param α β .Map1 con := p
+@[simp] instance (priority := low) [p : Param α β .Map1 con] : Param α β .Map0 con := p
 
-@[simp] instance [p : Param α β cov .Map4] : Param α β cov .Map3 := p
-@[simp] instance [p : Param α β cov .Map3] : Param α β cov .Map2a := p
-@[simp] instance [p : Param α β cov .Map3] : Param α β cov .Map2b := p
-@[simp] instance [p : Param α β cov .Map2a] : Param α β cov .Map1 := p
-@[simp] instance [p : Param α β cov .Map2b] : Param α β cov .Map1 := p
-@[simp] instance [p : Param α β cov .Map1] : Param α β cov .Map0 := p
+@[simp] instance (priority := low) [p : Param α β cov .Map4] : Param α β cov .Map3 := p
+@[simp] instance (priority := low) [p : Param α β cov .Map3] : Param α β cov .Map2a := p
+@[simp] instance (priority := low) [p : Param α β cov .Map3] : Param α β cov .Map2b := p
+@[simp] instance (priority := low) [p : Param α β cov .Map2a] : Param α β cov .Map1 := p
+@[simp] instance (priority := low) [p : Param α β cov .Map2b] : Param α β cov .Map1 := p
+@[simp] instance (priority := low) [p : Param α β cov .Map1] : Param α β cov .Map0 := p

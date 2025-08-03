@@ -21,6 +21,9 @@ initialize Lean.registerTraceClass `tr.utils
 -- #eval show IO Unit from do
 --   Lean.registerTraceClass `tr_split_application
 
+-- elab "tr_sometest" : tactic =>
+--   withMainContext do
+
 def forallApplication
   {α α' : Sort _}
   {β : α -> Sort _}

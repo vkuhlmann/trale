@@ -142,6 +142,8 @@ theorem summationHomeo (a : summable) : Σ seq_extend a.seq = .fin (Σ a) := by
 
 instance paramNNR : Param42b nnR xnnR
   := SplitInj.toParam truncate_extend
+instance : TrTranslateRight nnR xnnR := by constructor
+instance : TrTranslateLeft nnR xnnR := by constructor
 
 def param_NNR_seq : Param40 seq_nnR seq_xnnR
   := Param_from_map seq_extend
@@ -152,6 +154,9 @@ def param_summable_NNR_seq : Param40 summable seq_nnR
 
 instance param_summable_seq : Param40 summable seq_xnnR
   := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
+instance : TrTranslateRight summable seq_xnnR := by constructor
+instance : TrTranslateLeft summable seq_xnnR := by constructor
+
 
 -- prop1 and prop2 are related if prop1 implies prop2.
 instance (priority := high) propParam : Param2a2a Prop Prop := by

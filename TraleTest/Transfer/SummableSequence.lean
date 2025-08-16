@@ -64,8 +64,11 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
 
     let toType : Q(Sort levelV) ← instantiateMVars toType
 
+    let levelX ← mkFreshLevelMVar
+    let levelY ← mkFreshLevelMVar
+
     let goal ← getMainGoal
-    let goalType ← getMainTarget
+    let goalType : Q(Sort levelY) ← getMainTarget
 
     trace[tr.utils] s!"From type: {repr fromType}"
     trace[tr.utils] s!"To type: {repr toType}"
@@ -76,34 +79,30 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
         throwTacticEx `tr_right goal "Couldn't extract constant names from fromType and toType"
 
     -- evalTactic (← `(tactic| trale_add_transformed [$fromType -> $toType] h1 := ))
-    let transformedType ← Converter.Conversion.trale (αName := fromName) (βName := toName) (← getMainTarget)
+    let transformedType : Q(Sort levelX) ← Converter.Conversion.trale (αName := fromName) (βName := toName) (← getMainTarget)
     trace[tr.utils] s!"Transformed type: {transformedType}"
 
-    let levelX ← mkFreshLevelMVar
 
     -- let levelW ← mkFreshLevelMVar
 
     if !(← isDefEq (← inferType transformedType) q(Sort levelX)) then
       throwTacticEx `tr_right goal "Failed to infer universe level of transformedType"
 
-    let levelY ← mkFreshLevelMVar
     if !(← isDefEq (← inferType goalType) q(Sort levelY)) then
       throwTacticEx `tr_right goal "Failed to infer universe level of goalType"
-
-    let transformedType : Q(Sort levelX) := transformedType
 
     let newBase : Q($transformedType)
       ← mkFreshExprMVar transformedType (userName := `base)
 
-    let mvarIdNew ← goal.define `base transformedType newBase
-    let (_, mvarIdNew) ← mvarIdNew.intro1P
+    -- let mvarIdNew ← goal.define `base transformedType newBase
+    -- let (_, mvarIdNew) ← mvarIdNew.intro1P
 
     -- let newGoals ← evalTacticAt (← `(tactic| tr_by `(ident| base); tr_sorry sorry)) mvarIdNew
     trace[tr.utils] s!"Performing tr_by..."
     -- let newGoals ← evalTacticAt (← `(tactic| tr_by `(ident| basee))) mvarIdNew
     let baseIdent := mkIdent `base
 
-    let newGoals ← evalTacticAt (← `(tactic| tr_by $baseIdent)) mvarIdNew
+    -- let newGoals ← evalTacticAt (← `(tactic| tr_by $baseIdent)) mvarIdNew
 
     /-
     (cannot evaluate code because
@@ -114,12 +113,29 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
     -/
     -- mvarIdNew.apply q(fun x => Param.right.{levelY, levelX, levelW} x $newBase)
 
-    trace[tr.utils] s!"MvarIdNew: {repr mvarIdNew}"
+    -- The `apply` function uses an elabForApply. This extra trickery makes it
+    -- perhaps more difficult to still perform an apply for an already existing
+    -- expression. We can't really and don't want to bring the expression back
+    -- to a syntax.
 
-    let paramType ← mkFreshExprMVar none
+    -- trace[tr.utils] s!"MvarIdNew: {repr mvarIdNew}"
+    trace[tr.utils] s!"Transformed type: {repr transformedType}"
+    trace[tr.utils] s!"Goal type: {repr goalType}"
 
-    let newGoals ← mvarIdNew.apply (
-      .lam `x paramType (
+    -- This gives universe metavariable error
+    -- let paramType ← mkFreshExprMVar none
+    -- let paramType ← mkFreshExprMVar none
+
+    -- This gives the unquote error (unquoteExpr: transformedType✝ : Expr)
+    let paramType := q(Param10.{0} $transformedType $goalType)
+
+    let paramType := mkAppN (.const ``Param10 [.zero, levelX, levelY]) #[
+      transformedType,
+      goalType,
+    ]
+
+    let newGoals ← goal.applyN (
+      .lam .anonymous paramType (
         mkAppN
         (.const ``Param.right [levelX, levelY, .zero])
         #[
@@ -128,11 +144,16 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
           .bvar 0,
           newBase
         ]
-      ) .default)
+      ) .default) 1
 
     -- let newGoals ← evalTacticAt (← `(apply fun x => Param.right x $a)) mvarIdNew
 
-    trace[tr.utils] s!"Performed tr_by."
+    trace[tr.utils] s!"New goals: {repr newGoals}"
+    trace[tr.utils] s!"Performed tr_by. newGoals length: {newGoals.length}"
+    -- newGoals length: 4
+
+
+
     -- let newGoals := [mvarIdNew]
 
     -- goal.assign (.mvar mvarIdNew)
@@ -157,13 +178,53 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
 
     exact xnnR_comm a b
 
-  sorry
+  tr_intro a a' aR
+  tr_intro b b' bR
 
+  tr_split_application c c' cR by
+    show extend (b' + a') = b + a
+    unfold extend
+    have h := tr.R_implies_map a' a aR
+    dsimp at h
+    subst h
 
+    have h := tr.R_implies_map b' b bR
+    dsimp at h
+    subst h
 
-  -- tr_by base
+    show xnnR.fin (b' + a') = tr.map b' + tr.map a'
+    congr
 
-  -- tr_sorry sorry
+    -- Or continue a bit more:
+    -- simp [instParam, paramNNR, truncate_extend, SplitInj.toParam]
+    -- show xnnR.fin (b' + a') = extend b' + extend a'
+    -- unfold extend
+    -- show xnnR.fin (b' + a') = .fin b' + .fin a'
+    -- congr
+
+  tr_split_application d d' dR by
+    show extend (a' + b') = a + b
+    have h := tr.R_implies_map a' a aR
+    dsimp at h
+    subst h
+
+    have h := tr.R_implies_map b' b bR
+    dsimp at h
+    subst h
+
+    congr
+
+  show Param10 (d = c) (d' = c')
+
+  simp [inferInstance, instParam, paramNNR, SplitInj.toParam] at aR bR cR dR
+  subst aR bR cR dR
+
+  tr_from_map
+  intro h
+
+  rw [←truncate_extend d', ←truncate_extend c']
+  congr
+
 
 
 

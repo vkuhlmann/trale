@@ -33,49 +33,62 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 2: Relate rhs:  X  =  *X*
   --                            ___
   --
-  tr_split_application' c c' cR by
-    show tr.R (Σ a + Σ b) (Σ a' + Σ b')
-    apply R_add_xnnR
+  tr_split_application c c' cR by
+    unfold extend
 
-    · show tr.R (Σ a') (Σ a)
-      exact R_sum_xnnR a' a aR
-    · show tr.R (Σ b') (Σ b)
-      exact R_sum_xnnR b' b bR
+    show .fin (Σ a' + Σ b') = Σ a + Σ b
+
+    have aF : seq_extend a' = a := tr.R_implies_map a' a aR
+    have bF : seq_extend b' = b := tr.R_implies_map b' b bR
+
+    subst aF bF
+
+    repeat rw [summationHomeo]
+    rw [add_xnnR_homeo]
 
   -- Part 3: Relate lhs:  *X*  =  X
   --                      ___
   --
-  tr_split_application' d d' dR by
-    show tr.R (Σ (a + b)) (Σ (a' + b'))
-    apply R_sum_xnnR
+  tr_split_application d d' dR by
+    show .fin (Σ (a' + b')) = Σ (a + b)
 
-    -- FIXME: Why is it the swapped order by default?
-    -- show tr.R (a + b) (a' + b')
-    show tr.R (a' + b') (a + b)
-    apply seq_nnR_add
+    -- If you change this to a 'let', the `subst` won't work because it will see
+    -- it as a hypothesis instead of an equality.
+    have aF : seq_extend a' = a := tr.R_implies_map a' a aR
+    have bF : seq_extend b' = b := tr.R_implies_map b' b bR
 
-    · exact aR
-    · exact bR
+    subst aF bF
 
-  show Param40 (d = c) (d' = c')
+    have h1 : seq_extend a'.seq + seq_extend b'.seq = seq_extend (a' + b').seq := by
+      congr
+
+    rw [h1]
+    rw [summationHomeo]
+
+  show Param10 (d = c) (d' = c')
+
   -- Part 4: Relate eq:  X  *=*  X
   --                        ___
   --
   tr_split_application e e' eR by
-    exact R_eq
+    dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam]
+
+    intro x x' xR
+    intro y y' yR
+
+    show x = y → x' = y'
+
+    rw [←tr.R_implies_map x x' xR]
+    rw [←tr.R_implies_map y y' yR]
+
+    exact congrArg _
 
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  dsimp
+  dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam] at eR
 
-  /-
-  By the Param rules of lambda abstraction and application, we can get the goal
-  relation as:
-  -/
-  have goalTypeR : Param.R _ _ (e d c) (e' d' c') := eR d d' dR c c' cR
-  /-
-  This is a relation for the 'propParam' Param. I.e. `Param Prop Prop`.
-  We use `instantiatePropR` to convert it to the Param between those types.
-  -/
-  exact instantiatePropR goalTypeR
+  tr_from_map
+  show e d c → e' d' c'
+
+  exact eR d d' dR c c' cR

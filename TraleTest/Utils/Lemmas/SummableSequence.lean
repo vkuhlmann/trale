@@ -3,6 +3,7 @@ import Trale.Utils.Extend
 import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
+import Trale.Theories.Sorts
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
@@ -11,7 +12,7 @@ import Trale.Utils.ParamIdent
 -- axiom zero_nnR : nnR
 -- axiom one_nnR : nnR
 
-def nnR := Nat
+def nnR := Nat deriving Repr
 
 instance : OfNat nnR n where
   ofNat := n
@@ -25,6 +26,7 @@ instance : Add nnR where
 inductive xnnR where
   | fin : nnR -> xnnR
   | inf : xnnR
+deriving Repr
 
 def add_xnnR (a b : xnnR) : xnnR :=
   match a, b with
@@ -176,3 +178,44 @@ instance param_summable_seq : Param40 summable seq_xnnR
 instance : TrTranslateRight summable seq_xnnR := by constructor
 instance : TrTranslateLeft summable seq_xnnR := by constructor
 -- For propParam, see Trale/Theories/Sorts.lean
+
+
+theorem R_sum_xnnR
+  (u : summable) (u' : seq_xnnR) (uR : tr.R u u')
+  : tr.R (Σ u) (Σ u') := by
+
+  simp [paramNNR, param_summable_seq, SplitInj.toParam] at ⊢ uR
+
+  unfold extend
+  subst uR
+  dsimp [param_NNR_seq, Param_from_map, seq_nnR, param_summable_NNR_seq]
+
+  exact (summationHomeo u).symm
+
+
+theorem R_add_xnnR
+  (a : nnR) (a' : xnnR) (aR : tr.R a a')
+  (b : nnR) (b' : xnnR) (bR : tr.R b b')
+  : tr.R (a + b) (a' + b') := by
+
+  tr_whnf
+  show extend (a + b) = a' + b'
+
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  exact add_xnnR_homeo a b
+
+
+theorem seq_nnR_add
+  (a : summable) (a' : seq_xnnR) (aR : tr.R a a')
+  (b : summable) (b' : seq_xnnR) (bR : tr.R b b')
+  : tr.R (a + b) (a' + b') := by
+
+  tr_whnf
+  simp
+
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  congr

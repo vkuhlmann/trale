@@ -11,6 +11,7 @@ import Trale.Theories.Option
 import Trale.Theories.Sigma
 import Trale.Theories.Exists
 import Trale.Utils.ParamFromFunction
+import Trale.Utils.Application
 import Qq open Qq Lean Meta Elab Tactic
 
 macro "tr_by" a:term:10 : tactic => `(tactic|
@@ -23,6 +24,14 @@ macro "tr_from_map" : tactic => `(tactic|
 
 macro "tr_ident" : tactic => `(tactic|
   (refine (Param44_ident'' ?_).forget; try first |dsimp |decide)
+)
+
+macro "tr_subst" ppSpace colGt a:ident a':ident aR:term:10 : tactic => `(tactic|
+  (
+    have aF := tr.R_implies_map $a $a' $aR;
+    simp at aF;
+    subst aF
+  )
 )
 
 macro "tr_split_forall" : tactic => `(tactic|
@@ -76,6 +85,19 @@ syntax (name := tr_intro_syntax_not_working) "tr_intro_not_working" notFollowedB
   evalIntro stx
 
 syntax (name := tr_intro_syntax) "tr_intro" notFollowedBy("|") (ppSpace colGt term:max)* : tactic
+
+
+macro "tr_step" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
+    tactic| (
+      first
+      | infer_instance
+      | (tr_intro $a $a' $aR)
+      | (tr_split_application $a $a' $aR)
+      | decide
+
+    )
+  )
+
 
 
 -- elab "tr_intro" notFollowedBy("|") (ppSpace colGt term:max)* : tactic =>

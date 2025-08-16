@@ -57,7 +57,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     · exact aR
     · exact bR
 
-  show Param40 (d = c) (d' = c')
+  show Param10 (d = c) (d' = c')
   -- Part 4: Relate eq:  X  *=*  X
   --                        ___
   --
@@ -66,8 +66,8 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   -- Part 5: Use relations to make the relation trivial
   --
-  show Param10 (e d c) (e' d' c')
   dsimp
+  show Param10 (e d c) (e' d' c')
 
   /-
   By the Param rules of lambda abstraction and application, we can get the goal
@@ -78,4 +78,4 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   This is a relation for the 'propParam' Param. I.e. `Param Prop Prop`.
   We use `instantiatePropR` to convert it to the Param between those types.
   -/
-  exact instantiatePropR goalTypeR
+  exact (instantiatePropR goalTypeR).forget

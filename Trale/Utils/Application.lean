@@ -585,6 +585,14 @@ elab "tr_split_application'" : tactic =>
       -- getForallArity
 
 macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
+macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
+  tactic| (
+    (tr_split_application'); (
+      try (
+        (case' p2 => intro $a $a' $aR);rotate_left 1); tr_whnf
+      )
+    )
+  )
 macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
   tactic| (
     (tr_split_application' <;> try infer_instance); (
@@ -594,7 +602,20 @@ macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic =>
       )
     )
   )
-macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident "by" sub:tacticSeq : tactic => `(
+
+
+-- After the 'by' it doesn't show the subgoal in the Goals list until you start
+-- typing... The syntax mirrors syntax of 'case', so how is it working for 'case'?
+-- Is there some magic missing in this implementation?
+macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident " by " sub:tacticSeq : tactic => `(
+  tactic| (
+    (tr_split_application $a $a' $aR; case aR => $sub)
+  ))
+macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident " by " sub:tacticSeq : tactic => `(
+  tactic| (
+    (tr_split_application' $a $a' $aR; case aR => $sub)
+  ))
+macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident " => " sub:tacticSeq : tactic => `(
   tactic| (
     (tr_split_application $a $a' $aR; case aR => $sub)
   ))

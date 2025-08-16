@@ -1,6 +1,5 @@
 import Trale.Core.Param
 import Trale.Utils.Extend
-import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Lean.Util
@@ -72,7 +71,7 @@ elab "tr_split_application'" : tactic =>
       let covMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `covMapType)
       let conMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `conMapType)
 
-      let matcher : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType $conMapType)
+      let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW} $fromType $toType $covMapType $conMapType)
 
       if !(← isExprDefEq matcher goalType) then
         throwTacticEx `tr_split_application goal ("goal should be of type Param")
@@ -338,7 +337,7 @@ elab "tr_split_application'" : tactic =>
 
       -- trace[tr.utils] s!"Got result {result}"
       let resultType : Q(Type (max levelU levelV levelW))
-        := q(Param $result1 $result2 $covMapType $conMapType)
+        := q(Param.{levelW} $result1 $result2 $covMapType $conMapType)
 
       -- evalTactic (← `(tactic| show $resultType))
 
@@ -421,8 +420,8 @@ elab "tr_split_application'" : tactic =>
       --   Solved now.  Was using an fresh FVar without `withLocalDec`
 
       -- This will be a goal
-      let p1 : Q(Param00 $α $α' : Type (max levelX1 levelX2 levelZ)) ←
-        mkFreshExprMVar (.some q((Param00 $α $α' : Type (max levelX1 levelX2 levelZ)))) (userName := `p1)
+      let p1 : Q(Param00.{levelZ} $α $α') ←
+        mkFreshExprMVar (.some q((Param00.{levelZ} $α $α'))) (userName := `p1)
 
       -- This will be inferred
       -- let a : Q($α) := target1
@@ -474,12 +473,12 @@ elab "tr_split_application'" : tactic =>
         : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
         := q(
             ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
-            (Param ($β a) ($β' a') $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
+            (Param.{levelZ} ($β a) ($β' a') $covMapType $conMapType))
 
       -- trace[tr.utils] s!"p2Type: {repr p2Type}"
 
       let p2 : Q(∀ (a : $α) (a' : $α') (_: ($p1).R a a'),
-        (Param ($β a) ($β' a')  $covMapType $conMapType : Type (max levelY1 levelY2 levelZ)))
+        (Param.{levelZ} ($β a) ($β' a')  $covMapType $conMapType))
         ← mkFreshExprMVar (.some p2Type) (userName := `p2)
 
       -- trace[tr.utils] s!"p2: {repr p2}"
@@ -526,7 +525,7 @@ elab "tr_split_application'" : tactic =>
       let complete := completeResult.expr
 
       -- The function `mkSimpContext`
-      let (complete, simpStats) ←
+      let (complete, _) ←
         dsimp complete
           (← Simp.mkContext)
           -- (simprocs := #[{}])
@@ -550,6 +549,14 @@ elab "tr_split_application'" : tactic =>
       trace[tr.utils] s!"Complete is {format complete}"
 
       /-
+      MVarId.assign recommends:
+      ```
+      Add mvarId := x to the metavariable assignment. This method does not check
+      whether mvarId is already assigned, nor it checks whether a cycle is being
+      introduced, or whether the expression has the right type. This is a
+      low-level API, and it is safer to use isDefEq (mkMVar mvarId) x.
+      ```
+
       While recommended by MVarId.assign, this throws, even though the above
       type check.
       ```

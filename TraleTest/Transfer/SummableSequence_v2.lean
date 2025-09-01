@@ -234,16 +234,9 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     infer_instance
 
   case aR =>
-    dsimp [inferInstance, eqParam, Param_arrow.Map1_arrow]
-
-    -- We need to use `propParam` instance for `Param Prop Prop`, not the
-    -- instance defined by equality.
-    unfold propParam
-    unfold C1 C2
-
-    dsimp
-    intro x x' xR
-    intro y y' yR
+    tr_whnf; intro x x' xR
+    tr_whnf; intro y y' yR
+    tr_whnf
 
     show x = y → x' = y'
 

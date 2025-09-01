@@ -31,11 +31,15 @@ exact p2
 tr_split_app
 
 [p1] ⊢ Param A A'
+
 [aR] ⊢ ?p1.R a a'
+
 [p2]   (a a' aR) -- values erased by generalisation
      ⊢ Param (B a) (B' a')
-[bR] ⊢ ?p2.R (b a) (b' a')
----  [instantiate] ⊢ ?p2.R (b a) (b' a') -> Param (b a) (b' a')
+
+[bR]   (a a' aR)
+     ⊢ ?p2.R (b a) (b' a')
+
 [instantiate] ⊢ ?p2.R x x' -> Param x x'
 
 Solve:
@@ -46,13 +50,14 @@ exact instantiate (bR a a' aR)
 For example:
 A : Type := nnR
 A' : Type := xnnR
-a := 4
-a' := .fin 4
+a : A := 4
+a' : A' := .fin 4
 
-B : Type := ∀ (_ :  nnR), Prop
-B': Type := ∀ (_ : xnnR), Prop
-b : B  := b  ↦ (b  = b)
-b': B' := b' ↦ (b' = b')
+let B : nnR → Type := fun (_ :  nnR) ↦ Prop
+let B': xnnR → Type := fun (_ : xnnR) ↦ Prop
+let b (a : nnR)  : B a  := (a  = a)
+let b (a' : nnR) : B a' := (a'  = a')
+
 
 ⊢ Param (4 = 4) (.fin 4 = .fin 4)
 ⊢ Param (b a) (b' a')
@@ -83,17 +88,11 @@ exact instantiate (bR a a' aR)
 
 -/
 
-#check nnR -> Type
-#check ∀ (a: nnR), (a = a)
-
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
-
-  -- We use these Params
-  let _ := param_summable_seq
 
   -- TODO: Make this work with infer_instance
   -- We need to use `propParam` instance for `Param Prop Prop`, not the
@@ -156,3 +155,30 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   We use `instantiatePropR` to convert it to the Param between those types.
   -/
   exact (instantiatePropR goalTypeR).forget
+
+
+-- Minimal
+theorem sum_nnR_add_minimal : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
+  tr_by sum_xnnR_add
+
+  let _ : Param00 Prop Prop := propParam.forget
+  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+    repeat tr_split
+
+  tr_intro _ _ aR
+  tr_intro _ _ bR
+  tr_split_application c c' cR by
+    apply R_add_xnnR
+    · exact R_sum_xnnR _ _ aR
+    · exact R_sum_xnnR _ _ bR
+
+  tr_split_application d d' dR by
+    apply R_sum_xnnR
+    apply seq_nnR_add
+    · exact aR
+    · exact bR
+
+  tr_split_application e e' eR by
+    exact R_eq
+
+  exact (instantiatePropR (eR d d' dR c c' cR)).forget

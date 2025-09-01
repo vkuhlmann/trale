@@ -3,6 +3,7 @@ import Trale.Utils.Extend
 import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
+import Trale.Theories.Sorts
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
@@ -11,7 +12,7 @@ import Trale.Utils.ParamIdent
 -- axiom zero_nnR : nnR
 -- axiom one_nnR : nnR
 
-def nnR := Nat
+def nnR := Nat deriving Repr
 
 instance : OfNat nnR n where
   ofNat := n
@@ -25,6 +26,7 @@ instance : Add nnR where
 inductive xnnR where
   | fin : nnR -> xnnR
   | inf : xnnR
+deriving Repr
 
 def add_xnnR (a b : xnnR) : xnnR :=
   match a, b with
@@ -41,6 +43,25 @@ theorem add_xnnR_homeo
 
   unfold add_xnnR
   dsimp only
+
+theorem nnR_comm (a b : nnR) : a + b = b + a := by
+  unfold nnR at *
+  exact Nat.add_comm a b
+
+theorem xnnR_comm (a b : xnnR) : a + b = b + a := by
+  show add_xnnR a b = add_xnnR b a
+  unfold add_xnnR
+
+  match a, b with
+  | .fin a, .fin b =>
+    show (xnnR.fin a) + (.fin b) = (.fin b) + (.fin a)
+    repeat rw [←add_xnnR_homeo]
+    apply congrArg
+    exact nnR_comm a b
+
+  | .inf, .inf
+  | .fin a, .inf
+  | .inf, .fin b => dsimp
 
 
 def seq_nnR := Nat → nnR
@@ -142,6 +163,8 @@ theorem summationHomeo (a : summable) : Σ seq_extend a.seq = .fin (Σ a) := by
 
 instance paramNNR : Param42b nnR xnnR
   := SplitInj.toParam truncate_extend
+instance : TrTranslateRight nnR xnnR := by constructor
+instance : TrTranslateLeft nnR xnnR := by constructor
 
 def param_NNR_seq : Param40 seq_nnR seq_xnnR
   := Param_from_map seq_extend
@@ -152,40 +175,47 @@ def param_summable_NNR_seq : Param40 summable seq_nnR
 
 instance param_summable_seq : Param40 summable seq_xnnR
   := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
+instance : TrTranslateRight summable seq_xnnR := by constructor
+instance : TrTranslateLeft summable seq_xnnR := by constructor
+-- For propParam, see Trale/Theories/Sorts.lean
 
--- prop1 and prop2 are related if prop1 implies prop2.
-instance (priority := high) propParam : Param2a2a Prop Prop := by
-  tr_constructor
 
-  -- R
-  · intro x y
-    exact x → y
+theorem R_sum_xnnR
+  (u : summable) (u' : seq_xnnR) (uR : tr.R u u')
+  : tr.R (Σ u) (Σ u') := by
 
-  -- 2a
-  · exact id
-  · intro a a' aR
-    subst aR
-    simp
+  simp [paramNNR, param_summable_seq, SplitInj.toParam] at ⊢ uR
 
-  -- 2a
-  · exact id
-  · intro a a' aR
-    subst aR
-    simp
+  unfold extend
+  subst uR
+  dsimp [param_NNR_seq, Param_from_map, seq_nnR, param_summable_NNR_seq]
 
-/-
-TODO: Make a Prop relation which translates types it comes across. That would
-prevent needing to show equivalence of the propositions, where in some cases
-only an implication is needed or possible.
+  exact (summationHomeo u).symm
 
-```
-let eqParam2 : Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-  tr_split
-  case p1 => infer_instance
 
-  tr_split
-  case p1 => infer_instance
+theorem R_add_xnnR
+  (a : nnR) (a' : xnnR) (aR : tr.R a a')
+  (b : nnR) (b' : xnnR) (bR : tr.R b b')
+  : tr.R (a + b) (a' + b') := by
 
-  infer_instance
-```
--/
+  tr_whnf
+  show extend (a + b) = a' + b'
+
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  exact add_xnnR_homeo a b
+
+
+theorem seq_nnR_add
+  (a : summable) (a' : seq_xnnR) (aR : tr.R a a')
+  (b : summable) (b' : seq_xnnR) (bR : tr.R b b')
+  : tr.R (a + b) (a' + b') := by
+
+  tr_whnf
+  simp
+
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  congr

@@ -25,6 +25,16 @@ def opposite : NormativeDirection → NormativeDirection
   := (match . with | ⟨a, b⟩ => ⟨b, a⟩)
 end NormativeDirection
 
+class TrTranslateRight (α : Sort u) (β : outParam (Sort v)) where
+  -- hypotheses : Array (((p : Prop), (proof : p)) : (p : Prop) ×' (_ : p))
+  -- hypotheses : Σ' (p : Prop), (_ : p)
+  -- or type like Simprocs? Do it by attributes?
+
+
+
+class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
+-- class TrTranslateRight (α : Sort u) : Sort (max 1 u)
+-- class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
 
 -- FIXME Being a 'class' sometimes hurts readability, especially when
 -- constructing new params based on previous ones. However, if manipulation of

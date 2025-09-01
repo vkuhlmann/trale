@@ -39,7 +39,7 @@ instance (priority := high) propParam : Param2a2a Prop Prop := by
     subst aR
     exact id
 
--- FIXME: How to use `tr.R a b`? It infers the Eq instance instead.
+-- FIXME: How to use `tr.R a b`? Currently that would infer the Eq instance instead.
 def instantiatePropR
   {a b : Prop}
   (r : propParam.R a b)

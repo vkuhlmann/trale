@@ -602,7 +602,7 @@ macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident : tactic =
   )
 macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
   tactic| (
-    (tr_split_application' <;> try infer_instance); (
+    (tr_split_application); (
       try (
         (case' p2 => intro $a $a' $aR);rotate_left 1); tr_whnf
         -- tr_simp_R at aR

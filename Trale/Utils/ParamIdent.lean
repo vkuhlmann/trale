@@ -99,11 +99,14 @@ def _root_.Param44_ident
   := by
     tr_constructor
 
+    -- R
     exact Eq
 
+    -- 4
     exact id
     repeat simp
 
+    -- 4
     exact id
     repeat simp
 
@@ -139,5 +142,5 @@ instance : Param α α con cov
 -/
 
 @[simp]
-instance (priority := 40) : Param α α .Map4 .Map4
+instance (priority := 40) : Param44 α α
   := Param44_ident

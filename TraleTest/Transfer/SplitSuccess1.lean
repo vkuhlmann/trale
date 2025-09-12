@@ -76,6 +76,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
   case p2 =>
     intro f f' fR
+    tr_whnf at fR
     tr_simp_R at fR
 
     /-

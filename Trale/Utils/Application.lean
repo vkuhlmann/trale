@@ -611,7 +611,7 @@ macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic =>
   )
 
 
--- After the 'by' it doesn't show the subgoal in the Goals list until you start
+-- FIXME: After the 'by' it doesn't show the subgoal in the Goals list until you start
 -- typing... The syntax mirrors syntax of 'case', so how is it working for 'case'?
 -- Is there some magic missing in this implementation?
 macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident " by " sub:tacticSeq : tactic => `(

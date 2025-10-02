@@ -149,19 +149,19 @@ elab_rules : tactic
   -- | `(tactic| intro $h:term $hs:term*) => evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
   -- | _ => throwUnsupportedSyntax
 
-def flipR [p : Param α β cov con] (r : p.R a b)
+def flipR [p : Param cov con α β] (r : p.R a b)
   : (p.flip.R b a) := by
     exact r
 
-def flipR' [p : Param α β cov con] (r : p.flip.R a b)
+def flipR' [p : Param cov con α β] (r : p.flip.R a b)
   : (p.R b a) := by
     exact r
 
-def Param.toBottom (p : Param α β cov con) : Param00 α β :=
+def Param.toBottom (p : Param cov con α β) : Param00 α β :=
   p.forget (h1 := Param.map0bottom) (h2 := Param.map0bottom)
 
 
-def normalizeR [p : Param α β cov con] (r : p.R a b)
+def normalizeR [p : Param cov con α β] (r : p.R a b)
   : p.toBottom.R a b := by
     exact r
 

@@ -43,7 +43,7 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
   let covMapType1 : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `covMapTypeBase)
   let conMapType1 : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `conMapTypeBase)
 
-  let matcher1 : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType1 $conMapType1)
+  let matcher1 : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelU, levelV} $covMapType1 $conMapType1  $fromType $toType)
 
   unless (← isDefEq baseType matcher1) do
     Term.throwTypeMismatchError none matcher1 baseType base
@@ -59,8 +59,9 @@ def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name
   let covMapType1 : Q(MapType) ← instantiateMVars covMapType1
   let conMapType1 : Q(MapType) ← instantiateMVars conMapType1
 
-  let base : Q(Param $fromType $toType $covMapType1 $conMapType1
-                : Type (max levelU levelV levelW)) <- instantiateMVars base
+  let base
+    : Q(Param.{levelW, levelU, levelV} $covMapType1 $conMapType1 $fromType $toType)
+    <- instantiateMVars base
 
   trace[debug] s!"[tr_fill_from] Looking for yield expression..."
 
@@ -358,8 +359,8 @@ elab "tr_add_param_base" name:ident " := " td:term : tactic =>
     let covMapType2 : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `covMapTypeExtended)
     let conMapType2 : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `conMapTypeExtended)
 
-    let matcher1 : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType1 $conMapType1)
-    let matcher2 : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType2 $conMapType2)
+    let matcher1 : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelU, levelV} $covMapType1 $conMapType1 $fromType $toType)
+    let matcher2 : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelU, levelV} $covMapType2 $conMapType2 $fromType $toType)
 
     -- profileitM
 
@@ -369,8 +370,7 @@ elab "tr_add_param_base" name:ident " := " td:term : tactic =>
       throwTacticEx `tr_extend goal
         ("goal should be of type Param")
 
-    let base : Q(Param $fromType $toType $covMapType1 $conMapType1
-                : Type (max levelU levelV levelW))
+    let base : Q(Param.{levelW, levelU, levelV} $covMapType1 $conMapType1 $fromType $toType)
       ← Tactic.elabTermEnsuringType td matcher1
 
     let matcher1 <- instantiateMVars matcher1

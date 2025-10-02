@@ -31,9 +31,9 @@ def forallApplication
   (a : α)
   (a' : α')
   (aR : p1.R a a')
-  (p2 : ∀ a a' (_ : p1.R a a'), Param (β a) (β' a') cov con)
+  (p2 : ∀ a a' (_ : p1.R a a'), Param cov con (β a) (β' a'))
   :
-  Param (β a) (β' a') cov con := (p2 a a' aR)
+  Param cov con (β a) (β' a') := (p2 a a' aR)
 
 elab "tr_inspect_expr" td:term : tactic =>
   withMainContext do
@@ -71,7 +71,7 @@ elab "tr_split_application'" : tactic =>
       let covMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `covMapType)
       let conMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `conMapType)
 
-      let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW} $fromType $toType $covMapType $conMapType)
+      let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW} $covMapType $conMapType $fromType $toType)
 
       if !(← isExprDefEq matcher goalType) then
         throwTacticEx `tr_split_application goal ("goal should be of type Param")
@@ -337,7 +337,7 @@ elab "tr_split_application'" : tactic =>
 
       -- trace[tr.utils] s!"Got result {result}"
       let resultType : Q(Type (max levelU levelV levelW))
-        := q(Param.{levelW} $result1 $result2 $covMapType $conMapType)
+        := q(Param.{levelW} $covMapType $conMapType $result1 $result2)
 
       -- evalTactic (← `(tactic| show $resultType))
 
@@ -473,12 +473,12 @@ elab "tr_split_application'" : tactic =>
         : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
         := q(
             ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
-            (Param.{levelZ} ($β a) ($β' a') $covMapType $conMapType))
+            (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
 
       -- trace[tr.utils] s!"p2Type: {repr p2Type}"
 
       let p2 : Q(∀ (a : $α) (a' : $α') (_: ($p1).R a a'),
-        (Param.{levelZ} ($β a) ($β' a')  $covMapType $conMapType))
+        (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
         ← mkFreshExprMVar (.some p2Type) (userName := `p2)
 
       -- trace[tr.utils] s!"p2: {repr p2}"

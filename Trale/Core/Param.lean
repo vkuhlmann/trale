@@ -36,19 +36,29 @@ class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
 -- class TrTranslateRight (α : Sort u) : Sort (max 1 u)
 -- class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
 
+-- structure ParamRoot (α : Sort u) (β : Sort v)
+--     (mapCov : MapType)
+--     (mapContra : MapType)
+--   -- : Sort ((max u v w) + 1)
+--    where
+
+--   R : α → β -> Sort w
+
 -- FIXME Being a 'class' sometimes hurts readability, especially when
 -- constructing new params based on previous ones. However, if manipulation of
 -- Params can be done by this library, such that the user (almost) never needs
 -- to do it, this issue is more limited.
-class Param (α : Sort u) (β : Sort v)
+class Param
     (mapCov : MapType)
     (mapContra : MapType)
-  : Sort ((max u v w) + 1) where
+    (α : Sort u) (β : Sort v)
+  -- extends ParamRoot.{w, u, v} α β mapCov mapContra
+  where
 
   R : α → β -> Sort w
   covariant : mapCov.interp R
   contravariant : mapContra.interp (flipRel R)
-  normativeDirection : NormativeDirection := .this
+  -- normativeDirection : NormativeDirection := .this
 
 
 -- ## Param abbreviations
@@ -64,47 +74,47 @@ class Param (α : Sort u) (β : Sort v)
 -- meaning that for including it in a public library, I would need to replicate its
 -- many private dependencies.
 
-abbrev Param00  :=  Param.{w} α β .Map0 .Map0
-abbrev Param01  :=  Param.{w} α β .Map0 .Map1
-abbrev Param02a :=  Param.{w} α β .Map0 .Map2a
-abbrev Param02b :=  Param.{w} α β .Map0 .Map2b
-abbrev Param03  :=  Param.{w} α β .Map0 .Map3
-abbrev Param04  :=  Param.{w} α β .Map0 .Map4
+abbrev Param00  :=  Param.{w} .Map0 .Map0
+abbrev Param01  :=  Param.{w} .Map0 .Map1
+abbrev Param02a :=  Param.{w} .Map0 .Map2a
+abbrev Param02b :=  Param.{w} .Map0 .Map2b
+abbrev Param03  :=  Param.{w} .Map0 .Map3
+abbrev Param04  :=  Param.{w} .Map0 .Map4
 
-abbrev Param10  :=  Param.{w} α β .Map1 .Map0
-abbrev Param11  :=  Param.{w} α β .Map1 .Map1
-abbrev Param12a :=  Param.{w} α β .Map1 .Map2a
-abbrev Param12b :=  Param.{w} α β .Map1 .Map2b
-abbrev Param13  :=  Param.{w} α β .Map1 .Map3
-abbrev Param14  :=  Param.{w} α β .Map1 .Map4
+abbrev Param10  :=  Param.{w} .Map1 .Map0
+abbrev Param11  :=  Param.{w} .Map1 .Map1
+abbrev Param12a :=  Param.{w} .Map1 .Map2a
+abbrev Param12b :=  Param.{w} .Map1 .Map2b
+abbrev Param13  :=  Param.{w} .Map1 .Map3
+abbrev Param14  :=  Param.{w} .Map1 .Map4
 
-abbrev Param2a0 :=  Param.{w} α β .Map2a .Map0
-abbrev Param2a1 :=  Param.{w} α β .Map2a .Map1
-abbrev Param2a2a := Param.{w} α β .Map2a .Map2a
-abbrev Param2a2b := Param.{w} α β .Map2a .Map2b
-abbrev Param2a3 :=  Param.{w} α β .Map2a .Map3
-abbrev Param2a4 :=  Param.{w} α β .Map2a .Map4
+abbrev Param2a0 :=  Param.{w} .Map2a .Map0
+abbrev Param2a1 :=  Param.{w} .Map2a .Map1
+abbrev Param2a2a := Param.{w} .Map2a .Map2a
+abbrev Param2a2b := Param.{w} .Map2a .Map2b
+abbrev Param2a3 :=  Param.{w} .Map2a .Map3
+abbrev Param2a4 :=  Param.{w} .Map2a .Map4
 
-abbrev Param2b0 :=  Param.{w} α β .Map2b .Map0
-abbrev Param2b1 :=  Param.{w} α β .Map2b .Map1
-abbrev Param2b2a := Param.{w} α β .Map2b .Map2a
-abbrev Param2b2b := Param.{w} α β .Map2b .Map2b
-abbrev Param2b3 :=  Param.{w} α β .Map2b .Map3
-abbrev Param2b4 :=  Param.{w} α β .Map2b .Map4
+abbrev Param2b0 :=  Param.{w} .Map2b .Map0
+abbrev Param2b1 :=  Param.{w} .Map2b .Map1
+abbrev Param2b2a := Param.{w} .Map2b .Map2a
+abbrev Param2b2b := Param.{w} .Map2b .Map2b
+abbrev Param2b3 :=  Param.{w} .Map2b .Map3
+abbrev Param2b4 :=  Param.{w} .Map2b .Map4
 
-abbrev Param30  :=  Param.{w} α β .Map3 .Map0
-abbrev Param31  :=  Param.{w} α β .Map3 .Map1
-abbrev Param32a :=  Param.{w} α β .Map3 .Map2a
-abbrev Param32b :=  Param.{w} α β .Map3 .Map2b
-abbrev Param33  :=  Param.{w} α β .Map3 .Map3
-abbrev Param34  :=  Param.{w} α β .Map3 .Map4
+abbrev Param30  :=  Param.{w} .Map3 .Map0
+abbrev Param31  :=  Param.{w} .Map3 .Map1
+abbrev Param32a :=  Param.{w} .Map3 .Map2a
+abbrev Param32b :=  Param.{w} .Map3 .Map2b
+abbrev Param33  :=  Param.{w} .Map3 .Map3
+abbrev Param34  :=  Param.{w} .Map3 .Map4
 
-abbrev Param40  :=  Param.{w} α β .Map4 .Map0
-abbrev Param41  :=  Param.{w} α β .Map4 .Map1
-abbrev Param42a :=  Param.{w} α β .Map4 .Map2a
-abbrev Param42b :=  Param.{w} α β .Map4 .Map2b
-abbrev Param43  :=  Param.{w} α β .Map4 .Map3
-abbrev Param44  :=  Param.{w} α β .Map4 .Map4
+abbrev Param40  :=  Param.{w} .Map4 .Map0
+abbrev Param41  :=  Param.{w} .Map4 .Map1
+abbrev Param42a :=  Param.{w} .Map4 .Map2a
+abbrev Param42b :=  Param.{w} .Map4 .Map2b
+abbrev Param43  :=  Param.{w} .Map4 .Map3
+abbrev Param44  :=  Param.{w} .Map4 .Map4
 
 
 #check (_ : Param11 ?a ?b).covariant
@@ -123,27 +133,32 @@ set_option pp.all true in
 instance
   CoeParam
 
-  (Rp : Param.{w} α β X Y)
+  (Rp : Param.{w} X Y α β)
   [CoeTC (X.interp Rp.R) (X'.interp Rp.R)]
   [CoeTC (Y.interp (flipRel Rp.R)) (Y'.interp (flipRel Rp.R))]
   :
   CoeDep
-  (Param.{w} α β X Y)
+  (Param.{w} X Y α β)
   Rp
-  (Param.{w} α β X' Y')
+  (Param.{w} X' Y' α β)
    where
-   coe :=
-   (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant Rp.normativeDirection : Param.{w} α β X' Y')
+   coe := {
+    R := Rp.R,
+    covariant := Rp.covariant,
+    contravariant := Rp.contravariant,
+    -- normativeDirection := Rp.normativeDirection
+   }
+  --  (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant Rp.normativeDirection : Param.{w} α β X' Y')
 
 
 namespace Param
 
 @[simp]
 def forget'
-  (Rp : Param.{w} α β X Y)
+  (Rp : Param.{w} X Y α β)
   [Coe (X.interp Rp.R) (X'.interp Rp.R)]
   [Coe (Y.interp (flipRel Rp.R)) (Y'.interp (flipRel Rp.R))]
-: Param.{w} α β X' Y'
+: Param.{w} X' Y' α β
  := (CoeParam Rp).coe
 
 theorem map0bottom {X : MapType} : MapType.Map0 ≤ X := by
@@ -158,21 +173,29 @@ def forget
 
   (h1 : X' ≤ X := by decide)
   (h2 : Y' ≤ Y := by decide)
-  (Rp : Param.{w} α β X Y)
+  (Rp : Param.{w} X Y α β)
   :
-  (Param.{w} α β X' Y')
-  := by
+  (Param.{w} X' Y' α β)
+  := {
+    R := Rp.R,
+    covariant := coeMap Rp.covariant h1,
+    contravariant := coeMap Rp.contravariant h2,
+    -- normativeDirection := Rp.normativeDirection
+  }
 
-    constructor
-    case R => exact Rp.R
-    case covariant => exact coeMap Rp.covariant h1
-    case contravariant => exact coeMap Rp.contravariant h2
-    case normativeDirection => exact Rp.normativeDirection.opposite
+    -- by
+    -- constructor
+    -- case R => exact Rp.R
+    -- case covariant => exact coeMap Rp.covariant h1
+    -- case contravariant => exact coeMap Rp.contravariant h2
+    -- case normativeDirection => exact Rp.normativeDirection.opposite
 
 
 @[simp]
 abbrev flip (p : Param α β m1 m2) : Param β α m2 m1 :=
-  { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant, normativeDirection := p.normativeDirection.opposite }
+  { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant,
+  -- normativeDirection := p.normativeDirection.opposite
+  }
 
 @[simp]
 abbrev right (p : Param10 α β) : α -> β :=
@@ -184,10 +207,11 @@ abbrev left (p : Param01 α β) : β -> α :=
 
 @[simp]
 abbrev right_implies_R (p : Param2a0 α β)
-  : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
+  := p.covariant.map_in_R
+  -- : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
 
 @[simp]
-abbrev left_implies_R (p : Param02a α β)
+abbrev left_implies_R {β : Sort v} (p : Param02a α β)
   : forall (a : α) (b : β), p.left b = a -> p.R a b := by
     let h := p.contravariant.map_in_R
     simp
@@ -198,8 +222,11 @@ abbrev left_implies_R (p : Param02a α β)
     apply h2
     trivial
 
+-- We need to give an explicit level name to β, else it will get inferred as a
+-- Type for some reason.
+-- FIXME Why do we need to specify β?
 @[simp]
-abbrev R_implies_right (p : Param2b0 α β)
+abbrev R_implies_right {β : Sort v} (p : Param2b0 α β)
   : forall (a : α) (b : β), p.R a b -> p.right a = b := p.covariant.R_in_map
 
 @[simp]
@@ -207,7 +234,7 @@ abbrev R_implies_rightK (p : Param40 α β)
   := p.covariant.R_in_mapK
 
 @[simp]
-abbrev R_implies_left (p : Param02b α β)
+abbrev R_implies_left {β : Sort v} (p : Param02b α β)
   : forall (a : α) (b : β), p.R a b -> p.left b = a := by
     let h := p.contravariant.R_in_map
     simp
@@ -261,6 +288,8 @@ abbrev R_implies_mapK [p : Param40 α β]
 end tr
 
 
+#check Array
+
 -- instance [p : Param α β cov con] [c :Coe (Param α β cov con) (Param α β cov2 con2)]
 --   : Param α β cov2 con2 := c.coe p
 
@@ -279,16 +308,16 @@ end tr
 
 instance (priority := 80) [p : Param α β cov con] : Param β α con cov := p.flip
 
-@[simp] instance (priority := low) [p : Param α β .Map4 con] : Param α β .Map3 con := p
-@[simp] instance (priority := low) [p : Param α β .Map3 con] : Param α β .Map2a con := p
-@[simp] instance (priority := low) [p : Param α β .Map3 con] : Param α β .Map2b con := p
-@[simp] instance (priority := low) [p : Param α β .Map2a con] : Param α β .Map1 con := p
-@[simp] instance (priority := low) [p : Param α β .Map2b con] : Param α β .Map1 con := p
-@[simp] instance (priority := low) [p : Param α β .Map1 con] : Param α β .Map0 con := p
+@[simp] instance (priority := low) [p : Param .Map4 con α β] : Param .Map3 con α β := p
+@[simp] instance (priority := low) [p : Param .Map3 con α β] : Param .Map2a con α β := p
+@[simp] instance (priority := low) [p : Param .Map3 con α β] : Param .Map2b con α β := p
+@[simp] instance (priority := low) [p : Param .Map2a con α β] : Param .Map1 con α β := p
+@[simp] instance (priority := low) [p : Param .Map2b con α β] : Param .Map1 con α β := p
+@[simp] instance (priority := low) [p : Param .Map1 con α β] : Param .Map0 con α β := p
 
-@[simp] instance (priority := low) [p : Param α β cov .Map4] : Param α β cov .Map3 := p
-@[simp] instance (priority := low) [p : Param α β cov .Map3] : Param α β cov .Map2a := p
-@[simp] instance (priority := low) [p : Param α β cov .Map3] : Param α β cov .Map2b := p
-@[simp] instance (priority := low) [p : Param α β cov .Map2a] : Param α β cov .Map1 := p
-@[simp] instance (priority := low) [p : Param α β cov .Map2b] : Param α β cov .Map1 := p
-@[simp] instance (priority := low) [p : Param α β cov .Map1] : Param α β cov .Map0 := p
+@[simp] instance (priority := low) [p : Param cov .Map4 α β] : Param cov .Map3 α β := p
+@[simp] instance (priority := low) [p : Param cov .Map3 α β] : Param cov .Map2a α β := p
+@[simp] instance (priority := low) [p : Param cov .Map3 α β] : Param cov .Map2b α β := p
+@[simp] instance (priority := low) [p : Param cov .Map2a α β] : Param cov .Map1 α β := p
+@[simp] instance (priority := low) [p : Param cov .Map2b α β] : Param cov .Map1 α β:= p
+@[simp] instance (priority := low) [p : Param cov .Map1 α β] : Param cov .Map0 α β := p

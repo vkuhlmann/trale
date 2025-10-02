@@ -72,26 +72,17 @@ def _root_.Map4_ident : @Map4 α α ident_R := by
 @[simp]
 def _root_.Param44_ident'
   : Param44 α α
-  := by
-    constructor
-
-    case normativeDirection =>
-      exact .this
-
-    case R =>
-      exact ident_R
-
-    case covariant =>
-      exact Map4_ident
-
-    case contravariant =>
+  := {
+    R := ident_R,
+    covariant := Map4_ident,
+    contravariant := by
       have h1 : flipRel (@ident_R α) = ident_R := by
         funext a b
         exact symm_eq
 
       rw [h1]
       exact Map4_ident
-
+  }
 
 @[simp]
 def _root_.Param44_ident

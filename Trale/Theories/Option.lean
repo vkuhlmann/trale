@@ -114,9 +114,9 @@ instance [inst : Related α β] : Related (Option α) (Option β) where
   param := by
     let cov := inst.mapCov
     let contra := inst.mapCon
-    have p : Param α β cov contra := inst.param
+    have p : Param cov contra α β := inst.param
 
-    show Param (Option α) (Option β) cov .Map0
+    show Param cov .Map0 (Option α) (Option β)
     match cov with
     | .Map0 =>
       apply Map0_option

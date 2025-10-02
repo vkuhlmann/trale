@@ -23,7 +23,7 @@ elab "tr_constructor'" : tactic =>
     let covMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `covMapType)
     let conMapType : Q(MapType) ← mkFreshExprMVar (.some q(MapType)) (userName := `conMapType)
 
-    let matcher : Q(Type (max levelU levelV levelW)) := q(Param $fromType $toType $covMapType $conMapType)
+    let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelU, levelV} $covMapType $conMapType $fromType $toType)
 
     if !(← isExprDefEq matcher goalType) then
       throwTacticEx `tr_constructor goal
@@ -60,6 +60,7 @@ elab "tr_constructor'" : tactic =>
 
     let translationMap := [
       (`R.R, `R),
+      (`toParamRoot.R, `R),
       (`covariant.map, `right),
       (`covariant.map_in_R, `right_implies_R),
       (`covariant.R_in_map, `R_implies_right),

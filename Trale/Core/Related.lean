@@ -5,7 +5,7 @@ class Related (α : Type _) (β : Type _) where
   mapCov : MapType
   mapCon : MapType
 
-  param : Param α β mapCov mapCon
+  param : Param mapCov mapCon α β
 
 instance : Related α α where
   mapCov := .Map4

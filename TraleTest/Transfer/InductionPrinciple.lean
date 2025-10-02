@@ -6,6 +6,9 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
+-- import Mathlib
+
+-- #eval Set.empty
 
 set_option trace.tr.utils true
 
@@ -31,6 +34,7 @@ instance toArrow [Param00 α β] [Param00 γ δ] : Param00 (α -> γ) (β -> δ)
   tr_split
 
 def applyR [p1 : Param00 α α'] [p2 : Param00 β β']
+  -- [toArrow : Param00 (α → β) (α' → β')]
   (r3 : toArrow.R f f') (r1 : p1.R a a')
   : (p2.R (f a) (f' a')) := by
 
@@ -79,18 +83,23 @@ macro "tr_advance" : tactic => `(tactic|
 def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
   tr_by nat_rect2
 
-  let _ : Param00 Prop Prop := propParam.forget
+  -- let propParam00 : Param00 Prop Prop := propParam.forget
+  -- let propParam10 : Param10 Prop Prop := propParam.forget
+  -- let propParam2a0 : Param2a0 Prop Prop := propParam.forget
 
   have RN : Param2a3.{0} I Nat := by sorry
   have RN0 : tr.R I0 0 := by sorry
   have RNS m n : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
-  have _ : Param02a (Nat → Prop) (I → Prop) := by
+  let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
     tr_advance
 
   tr_intro P P' PR
   -- case p1 =>
   --   tr_advance -- Needs Param02a I Nat
+  -- unfold inferInstance at PR
+
+  unfold inferInstance at PR
 
   tr_split
   case p1 =>
@@ -100,6 +109,15 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
     tr_flip
     tr_from_map
+
+    have PR : pAux1.R P P' := PR
+    tr_whnf at PR
+    unfold inferInstance at PR
+
+    have rel := PR (by assumption) (by assumption) (by assumption)
+    tr_whnf at rel
+    exact rel.mpr
+
 
     /-
 
@@ -119,23 +137,27 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     ```
     -/
 
-    have nR := by assumption
-    replace nR : Param.R .Map0 .Map0 ?a ?a' := nR
+    -- have nR := by assumption
+    -- replace nR : Param.R .Map0 .Map0 _ _ := nR
+    -- -- replace nR : Param.R .Map0 .Map0 ?a ?a' := nR
 
 
-    have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
+    -- -- have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
 
 
 
-    -- We give them a name, else the tr.R fails
-    show ?e1 → ?e2
-    show tr.R ?e1 ?e2
+    -- -- We give them a name, else the tr.R fails
+    -- show ?e1 → ?e2
+    -- show tr.R ?e1 ?e2
 
+    -- refine applyR (p1 := RN.toBottom) (p2 := propParam00) (r1 := ?r1) (r3 := ?r3)
 
-    apply applyR
+    -- -- apply applyR (p1 := RN.toBottom) (p2 := propParam00)
 
-    tr_flip
-    show Param.R .Map0 .Map0 ?f ?f'
+    -- case r1 => assumption
+
+    -- tr_flip
+    -- show Param.R .Map0 .Map0 ?f ?f'
 
     /-
     ```lean
@@ -155,9 +177,73 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     -/
 
 
-    exact PR.forget
+    /-
+    ```lean
+    exact flipR (normalizeR PR)
+    ```
 
-    assumption
+    synthesized type class instance is not definitionally equal to expression inferred by typing rules, synthesized
+      toArrow
+    inferred
+      Param.toBottom inferInstance
+    -/
+    -- exact flipR (normalizeR PR)
+
+    -- unfold inferInstance at PR
+    -- unfold
+
+    -- have h := @normalizeR _ _ _ _ _ _ toArrow (flipR PR)
+
+    -- have type1 := @Param.R MapType.Map0 MapType.Map0 (I → Prop) (Nat → Prop) (Param.flip inferInstance).toBottom P' P
+    -- have type2 := @Param.R MapType.Map0 MapType.Map0 (I → Prop) (Nat → Prop) toArrow P' P
+
+    -- have h := normalizeR (flipR PR)
+
+    -- have eq : (Param.flip pAux1).toBottom = toArrow := by
+    --   unfold pAux1
+    --   unfold toArrow
+    --   unfold inferInstance
+    --   unfold Param.flip
+    --   unfold flipRel
+    --   unfold Param.toBottom
+    --   unfold Param_arrow.Map0_arrow
+    --   unfold Param.forget
+    --   dsimp [coeMap]
+
+    --   /-
+    --   ⊢ { R := fun a b => Param.R MapType.Map2a MapType.Map0 a b, covariant := { }, contravariant := { } } =
+    --     {
+    --       R := fun f f' =>
+    --         ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
+    --       covariant := { }, contravariant := { } }
+    --   -/
+
+    --   dsimp [Param_arrow.Map2a_arrow]
+    --   /-
+
+    --   ⊢ { R := fun a b => ∀ (a_1 : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a_1 a' → propParam2a0.1 (a a_1) (b a'),
+    --     covariant := { }, contravariant := { } } =
+    --   {
+    --     R := fun f f' =>
+    --       ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
+    --     covariant := { }, contravariant := { } }
+
+    --   Oud:
+    --   ⊢ {
+    --       R := fun a b =>
+    --         ∀ (a_1 : I) (a' : Nat),
+    --           Param.R MapType.Map2a MapType.Map3 a_1 a' → Param.R MapType.Map4 MapType.Map4 (a a_1) (b a'),
+    --       covariant := { }, contravariant := { } } =
+    --     {
+    --       R := fun f f' =>
+    --         ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
+    --       covariant := { }, contravariant := { } }
+    --   -/
+    --   congr
+
+
+    -- rw[eq] at h
+    -- exact h
 
 
     -- have a : Param.R _ _ ?f ?f' := by assumption
@@ -165,33 +251,33 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
 
 
-    assumption
+    -- assumption
 
-    ; assumption
-    assumption
-
-
+    -- ; assumption
+    -- assumption
 
 
 
-    tr_ident
-    show P _ = P' _
-
-    apply applyR
 
 
-    have PR : Param.R _ _ _ _ := PR
-    have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
+    -- tr_ident
+    -- show P _ = P' _
+
+    -- apply applyR
 
 
-    close_PR_nR
-    tr_advance
+    -- have PR : Param.R _ _ _ _ := PR
+    -- have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
+
+
+    -- close_PR_nR
+    -- tr_advance
 
 
 
-    have zeroR := by assumption
-    tr_ident
-    exact PR _ _ zeroR
+    -- have zeroR := by assumption
+    -- tr_ident
+    -- exact PR _ _ zeroR
 
   tr_split
   case p1 =>
@@ -199,12 +285,16 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
     tr_intro n n' nR -- needs Param02a I Nat
 
+    unfold inferInstance at nR
+
     tr_split
 
     case p1 =>
       show Param01 (P' n) (P n')
       have h1 := PR n n' nR
+      unfold inferInstance at h1
       tr_whnf at h1
+
       rw [h1]
       tr_ident
 
@@ -226,5 +316,10 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
   show Param10 (P n) (P' n')
 
-  tr_ident
-  exact PR _ _ nR
+  tr_whnf at PR
+  unfold inferInstance at PR
+  have rel := PR n' n nR
+  tr_whnf at rel
+
+  tr_from_map
+  exact rel.mp

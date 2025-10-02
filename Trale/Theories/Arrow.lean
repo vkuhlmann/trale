@@ -7,13 +7,6 @@ import Trale.Utils.Extend
 import Trale.Utils.Whnf
 import Qq open Qq Lean
 
--- DNC, > 6 minutes
-
--- 8 seconds
--- 6 seconds
--- 2 seconds
-
-
 -- set_option trace.profiler true
 -- set_option trace.profiler.threshold 10
 -- set_option trace.profiler.output.pp true
@@ -59,13 +52,13 @@ instance Map2a_arrow
 : Param2a0 (α → β) (α' → β') := by
   tr_extend Map1_arrow p1 p2
 
-  intro f f' mapF
-
-  -- Goal: ∀ (a : α) (a' : α'), p1.R a a' → p2.R (f a) (f' a')
-  intro x x' xR
+  intro f f' mapF -- f maps to f'
+  intro x x' xR -- x and x' are related
+  -- Goal: p2.R (f x) (f x')
   apply p2.right_implies_R
-  subst mapF
-  congr
+  subst mapF -- substitute f' away
+
+  congr -- find the parts in the equality that still need to match up
 
   -- Goal: x = p1.left x'
   exact (p1.R_implies_left x x' xR).symm
@@ -124,13 +117,13 @@ instance Map3_arrow
 instance Map4_arrow
   (p1 : Param03 α α')
   (p2 : Param40 β β')
-  : Param40 (α -> β) (α' -> β') := by
+  : Param40 (α → β) (α' → β') := by
   tr_extend Map3_arrow p1 p2
 
   -- case R_implies_rightK =>
-  intro f f'
-  -- simp [MapR, Map2a_arrow, Map2b_arrow]
-  intro
-  funext a a' p1H
+  intro f f' fR
+  funext a a' aR
   simp
+  -- FIXME: Want to do this, but getting type mismatch:
+  -- show p1.right_implies_R _ _ (p1.R_implies_right _ _ _) = fR a a' aR
   apply p2.R_implies_rightK

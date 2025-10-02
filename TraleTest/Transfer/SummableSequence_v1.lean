@@ -16,26 +16,6 @@ import TraleTest.Utils.Lemmas.SummableSequence
 --   ∀ f f' (_ : p1.R f f'),
 --   ∀ a a' (_ : p2.R a a'), p3.R (f a) (f' a')
 
-def forallApplication
-  {α α' : Sort _}
-  {β : α -> Sort _}
-  {β' : α' -> Sort _}
-  (p1 : Param10 α α')
-  (a : α)
-  (a' : α')
-  (aR : p1.R a a')
-  (p2 : ∀ a a' (_ : p1.R a a'), Param10 (β a) (β' a'))
-  :
-  Param10 (β a) (β' a') :=
-    by
-    tr_constructor
-
-    case R =>
-      exact (p2 a a' aR).R
-
-    case right =>
-      exact (p2 a a' aR).right
-
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
@@ -84,7 +64,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   apply forallApplication
 
   case p1 =>
-    show Param10 xnnR nnR
+    show Param00 xnnR nnR
     infer_instance
 
   case aR =>
@@ -128,7 +108,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   apply forallApplication
 
   case p1 =>
-    show Param10 xnnR nnR
+    show Param00 xnnR nnR
     infer_instance
 
   case aR =>
@@ -184,7 +164,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   apply forallApplication
 
   case p1 =>
-    show Param10 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
+    show Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
     infer_instance
 
   case aR =>

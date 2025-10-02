@@ -86,7 +86,7 @@ theorem id_exists_mod5_2
   exists f_mod5
   intro x
 
-  simp [f_mod5, f_nat, Param_arrow.Map1_arrow, Param_arrow.MapFun, ModParam]
+  simp [f_mod5, f_nat, Param_arrow.Map1_arrow, ModParam]
 
   apply ModParam.left_implies_R (repr5 x) x
   unfold ModParam

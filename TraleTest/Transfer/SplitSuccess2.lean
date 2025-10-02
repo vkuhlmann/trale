@@ -10,7 +10,7 @@ import Trale.Theories.Forall
 
 import TraleTest.Utils.Lemmas.Modulo
 
-def forallApplication
+def forallApplicationOrig
   {α α' : Sort _}
   {β : α -> Sort _}
   {β' : α' -> Sort _}
@@ -132,7 +132,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
     let B : ℕ → ℕ := fun a => (f' a).repr
     show Param10 (F1 A) (F1 B)
 
-    apply forallApplication
+    apply forallApplicationOrig
 
     case p1 =>
       infer_instance
@@ -158,13 +158,13 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
          I've now added simp to the instParamMap1OfMap2b etc which helps
          somewhat. Still, we should search for a more elegant option.
       -/
-      simp [inferInstance]
+      simp [inferInstance, instParam]
 
-      show A = B
+      show B = A
       subst A B
       funext x
 
-      show ↑(f x) = (f' x).repr
+      show (f' x).repr = ↑(f x)
 
       -- We need some corresponde between f and f', but we have
       -- `fR : Param2a0 .Map2a .Map0 f' f`
@@ -183,7 +183,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
       -/
 
-      exact fR.symm
+      exact fR
 
     intro a a' aR
 
@@ -200,3 +200,4 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
     subst aF
     tr_ident
+    rfl

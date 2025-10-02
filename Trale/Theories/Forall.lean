@@ -71,7 +71,6 @@ def Map2a_forall
   intro a a' aR
 
   apply (p2 a a' aR).right_implies_R
-  simp
 
   have h := congrFun mapFF' a'
 
@@ -125,9 +124,7 @@ def Map4_forall
   tr_extend Map3_forall p1 (p2 . . .)
   intro f f' fr
   funext a a' aR
-  unfold id
   simp
-
 
   let Param_b := p2 a a' aR
 

@@ -8,7 +8,6 @@ import Trale.Utils.Converter
 
 import TraleTest.Utils.Lemmas.SummableSequence
 
-set_option trace.tr.utils true
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
@@ -73,7 +72,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   By the Param rules of lambda abstraction and application, we can get the goal
   relation as:
   -/
-  have goalTypeR : Param.R _ _ (e d c) (e' d' c') := eR d d' dR c c' cR
+  have goalTypeR : tr.R (e d c) (e' d' c') := eR d d' dR c c' cR
   /-
   This is a relation for the 'propParam' Param. I.e. `Param Prop Prop`.
   We use `instantiatePropR` to convert it to the Param between those types.

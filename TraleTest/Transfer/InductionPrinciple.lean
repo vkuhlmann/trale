@@ -15,6 +15,17 @@ set_option trace.tr.utils true
 variable (I : Type _) (I0 : I) (IS : I -> I)
 variable (to_nat : I -> Nat) (of_nat : Nat -> I)
 
+#check
+  let p : Param44 Nat String := ?p
+  (p : Param .Map0 .Map1 Nat String)
+
+
+-- #check
+--   let p1 : Param03.{5} Nat String := ?p1
+--   let p2 : Param40.{1} Nat String := ?p2
+--   (Param_arrow.Map4_arrow p1 p2).R
+
+
 def nat_rect2 : forall P : Nat -> Sort u, P 0 -> (forall n, P n -> P (n + 1)) -> forall n, P n := by
   intro P P0 Pstep
   intro n
@@ -39,7 +50,7 @@ def applyR [p1 : Param00 α α'] [p2 : Param00 β β']
   : (p2.R (f a) (f' a')) := by
 
   exact r3 _ _ r1
-
+#check Lean.Meta.whnfD
 
 -- macro "tr_advance" ppSpace colGt a:term a':term aR:term : tactic => `(tactic|
 --   first
@@ -63,6 +74,8 @@ macro "tr_advance" : tactic => `(tactic|
   first
   | assumption
   | tr_intro _ _ _
+  | tr_flip; tr_intro _ _ _
+  | tr_split
   | tr_flip; tr_split
 
 
@@ -107,16 +120,18 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     tr_advance
     tr_advance
 
-    tr_flip
-    tr_from_map
+    refine (Param_ident.instantiatePropR_bi ?_).forget
+    apply flipR'
+    rw [←Param_ident.param44_ident_symm]
+    refine PR _ _ ?_
+    assumption
 
-    have PR : pAux1.R P P' := PR
-    tr_whnf at PR
-    unfold inferInstance at PR
+    -- tr_whnf
+    -- apply Eq.symm
+    -- unfold inferInstance
+    -- exact PR (by assumption) (by assumption) (by assumption)
 
-    have rel := PR (by assumption) (by assumption) (by assumption)
-    tr_whnf at rel
-    exact rel.mpr
+
 
 
     /-
@@ -281,45 +296,39 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
   tr_split
   case p1 =>
-    tr_flip
-
-    tr_intro n n' nR -- needs Param02a I Nat
-
-    unfold inferInstance at nR
-
-    tr_split
+    tr_advance
+    tr_advance
 
     case p1 =>
-      show Param01 (P' n) (P n')
-      have h1 := PR n n' nR
-      unfold inferInstance at h1
-      tr_whnf at h1
+      show Param01 (P' _) (P _)
 
-      rw [h1]
-      tr_ident
+      -- tr_ident
+      -- apply Eq.symm
+      -- exact PR _ _ (by assumption)
 
+      refine (Param_ident.instantiatePropR_bi ?_).forget
+      refine PR _ _ ?_
+      assumption
 
-    have c := RNS n n' nR
+    -- tr_ident
+    -- apply Eq.symm
+    -- have := RNS (by assumption) (by assumption) (by assumption)
+    -- exact PR _ _ (by assumption)
 
-    have h1 := PR _ _ c
-    tr_whnf at h1
+    -- have := RNS _ _ (by assumption)
 
-    /-
-    h1 : P n'.succ = P' (IS n) := h1✝
-    ⊢ Param10 (P' (IS n)) (P (n' + 1))
-    -/
+    -- refine (Param_ident.instantiatePropR_bi ?_).forget
+    -- exact PR _ _ (by assumption)
 
-    rw [h1]
-    tr_ident
+    refine (Param_ident.instantiatePropR_bi ?_).forget
+    refine PR _ _ ?_
+    refine RNS _ _ ?_
+    assumption
 
   tr_intro n n' nR
 
-  show Param10 (P n) (P' n')
-
-  tr_whnf at PR
-  unfold inferInstance at PR
-  have rel := PR n' n nR
-  tr_whnf at rel
-
-  tr_from_map
-  exact rel.mp
+  refine (Param_ident.instantiatePropR_bi ?_).forget
+  apply flipR'
+  rw [←Param_ident.param44_ident_symm]
+  refine PR _ _ ?_
+  assumption

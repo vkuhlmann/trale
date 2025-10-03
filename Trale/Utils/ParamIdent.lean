@@ -135,3 +135,30 @@ instance : Param α α con cov
 @[simp]
 instance (priority := 40) : Param44 α α
   := Param44_ident
+
+def instantiatePropR_bi
+  {a b : Prop}
+  (r : Param44_ident.R b a)
+  : Param44 a b := by
+
+  rw [r]
+  exact Param44_ident
+
+theorem param44_ident_symm
+  : Param44_ident (α := α) = Param44_ident.flip := by
+
+  unfold Param.flip
+  unfold flipRel
+  unfold Param44_ident
+  unfold flipRel
+  dsimp
+  have eqSymm : @Eq α = fun a b => b = a := by
+    ext
+    exact ⟨Eq.symm, Eq.symm⟩
+
+  -- have eqSymm2 : (∀ (a a_1 : α), a = a_1 → a = a_1) ≍ (∀ (a a_1 : α), a = a_1 → a_1 = a) := by
+  --   simp
+
+  congr
+  all_goals try simp
+  all_goals try exact eqSymm.symm

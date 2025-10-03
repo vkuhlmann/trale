@@ -49,12 +49,30 @@ elab "tr_inspect_expr" td:term : tactic =>
 
     | _ => return ()
 
+structure SplitApplicationConfig where
+  allowHead := true
+declare_config_elab elabSplitAppConfigCore    SplitApplicationConfig
+
+
 #check Simp.SimprocsArray
 
-elab "tr_split_application'" : tactic =>
+#eval (fun x y => x + y) 4 3
+
+-- elab "tr_split_application'" a:stx,*,? : tactic =>
+-- elab "tr_split_application'" a:(Lean.Parser.Tactic.config)? : tactic =>
+-- elab "tr_split_application'" ppSpace colGt a:("("Lean.Parser.Tactic.config ")")? : tactic =>
+
+elab "tr_split_application'" ppSpace colGt "[" a:Lean.Parser.Tactic.optConfig "]" : tactic =>
+-- elab "tr_split_application'" : tactic =>
+
   -- TODO Is there a more elegant way to write the constant function?
   Lean.withTraceNode `tr.utils (fun _ => return "tr_split_application") do
     withMainContext do
+      trace[tr.utils] s!"syntax is {repr a}"
+      let config ← elabSplitAppConfigCore a
+
+      let allowHead := config.allowHead
+
       let goal ← getMainGoal
       let goalType ← getMainTarget
 
@@ -85,6 +103,16 @@ elab "tr_split_application'" : tactic =>
       trace[tr.utils] s!"toType: {toType}"
       trace[tr.utils] s!"covMap: {covMapType}"
       trace[tr.utils] s!"conMap: {conMapType}"
+
+      /-
+        Given two function applications, finds the last (most outer) argument
+        where both function applications have a non-fvar. Returns a triple of
+        the head, the targeted argument, and the trailing arguments.
+
+        For example, for `findFirstNonFvars (f a b c d, []) (f' a' b' c' d', [])`
+        where `b` and `b'` are expressions, and `c`, `c'`, `d`, `d'` are fvars,
+        the result is `(f a, b, [c, d]), (f' a', b', [c', d'])`.
+      -/
 
       let rec findFirstNonFvars
         (fromType toType : (Expr × List Expr))
@@ -153,9 +181,15 @@ elab "tr_split_application'" : tactic =>
               (toType, .none, toArgs),
             )
 
+      /-
+        Wraps an expression `e` with loose bvars in `count` lambda expressions,
+        to reseal the bvars. Takes a mandatory list `exampleValues` used to infer
+        the binder types of the lambda's.
+      -/
       let rec sealLambda
         (e : Expr) (count : Nat) (exampleValues : List Expr) : MetaM (Expr × List Expr) := do
         trace[tr.utils] s!"Doing sealLambda for count {count}, (exampleValues.length: {exampleValues.length})"
+        -- FIXME Can this function be re-enabled safely?
         if count > 0 then
           throwError "Disabled sealLambda for testing"
         match count, exampleValues with
@@ -165,6 +199,25 @@ elab "tr_split_application'" : tactic =>
             let (body, remaining) ← sealLambda e n as
             return (Expr.lam Name.anonymous (← inferType a) body BinderInfo.default, remaining)
 
+      /-
+        Moves fvar arguments to the outside of the a function application.
+
+        For example, if `b` is a constant, and `a`, `c` and `d` are fvars, then
+        `hoistFVarsToLambda' (f a b c d) (f' a' b' c' d') true`
+        yields
+        `(((fun x y z => f x b y z), [a, c, d]), ((fun x y z => f x b' y z), [a', c', d']))`
+
+        and
+        `hoistFVarsToLambda' (f a b c d) (f' a' b' c' d') false`
+        yields
+        `(((fun x => f x b), [a, c, d]), ((fun x => f x b'), [a', c', d']))`.
+
+        Indeed, `needsSeal` can be false for a trailing part of the application
+        where only fvars occur, eliminating excessive lambda wrapping. In
+        invocation, set `needsSeal` to false, it is only needed in recursive
+        calls.
+
+      -/
       let rec hoistFVarsToLambda'
         (e1 e2 : Expr)
         -- (lambdaDepth : Nat)
@@ -206,6 +259,16 @@ elab "tr_split_application'" : tactic =>
       -- Can't proof easily because it uses the MetaM now
       -- have sealDepthIsZeroWhenNoSeal : ∀ e1 e2, (←hoistFVarsToLambda' e1 e2 false).3 == 0 := by
 
+      /-
+      Extracts the head of a function application to a lambda.
+
+      For example, if `b` is a constant, and `a`, `c` and `d` are fvars, then
+      `hoistFVarsToLambda (f a b c d) (f' a' b' c' d')`
+      yields
+      `((fun z => z a c d),    (fun x => f x b),`
+      ` (fun z => z a' c' d'), (fun x => f x b'))`
+
+      -/
       let hoistFVarsToLambda (e1 e2 : Expr) : MetaM ((Expr × Expr) × (Expr × Expr)) := do
         let ((a1, a1Vars), (a2, a2Vars), _) ← hoistFVarsToLambda' e1 e2 false
 
@@ -239,6 +302,11 @@ elab "tr_split_application'" : tactic =>
       let (a, a') ← match target1, target2 with
       | .none, _
       | _, .none =>
+        -- If no non-fvars in the arguments are found, then we will extract the
+        -- head of the function application instead.
+
+        if !allowHead then
+          throwTacticEx `tr_split_applicaton' goal "No non-fvars found in body"
 
         let ((f1, a1), (f2, a2)) ← hoistFVarsToLambda fromType toType
 
@@ -590,6 +658,14 @@ elab "tr_split_application'" : tactic =>
       --   trace[tr.utils] s!"No application"
 
       -- getForallArity
+
+
+macro "tr_split_application'" : tactic => `(
+  tactic| (
+    tr_split_application' []
+  )
+)
+
 
 macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
 macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident : tactic => `(

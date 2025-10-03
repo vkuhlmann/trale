@@ -72,6 +72,9 @@ macro "close_PR_nR" : tactic => `(tactic|
 
 macro "tr_advance" : tactic => `(tactic|
   first
+  -- | run_tac
+  --     trace[tr.utils] s!"Doing tr_advance"
+  --     -- Lean.Meta.throwTacticEx `debug "aaa"
   | assumption
   | tr_intro _ _ _
   | tr_flip; tr_intro _ _ _
@@ -86,11 +89,31 @@ macro "tr_advance" : tactic => `(tactic|
       exact PR _ _ nR
     )
 
+  -- | run_tac
+  --     trace[tr.utils] s!"Trying split_application"
+  --     Lean.Meta.throwTacticEx `debug "aaa"
+  -- | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+  --   --  repeat apply_assumption
+  --   )
+
   | (tr_split_application; try (
         (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
   | (tr_flip; tr_split_application; try (
         (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
+
+
   )
+
+def arrow_02a_rel
+  {p1 p2}
+  {f : α → β}
+  {f' : α' → β'}
+  (r2 : (Param_arrow.Map2a_arrow p1 p2).flip.R f f')
+  (r1 : p1.R a' a)
+  :  (p2.flip.toBottom.R (f a) (f' a')) := by
+
+  exact r2 _ _ r1
+
 
 
 def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
@@ -102,15 +125,13 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
   have RN : Param2a3.{0} I Nat := by sorry
   have RN0 : tr.R I0 0 := by sorry
-  have RNS m n : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
+  have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
   let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
     tr_advance
 
   tr_intro P P' PR
-  -- case p1 =>
-  --   tr_advance -- Needs Param02a I Nat
-  -- unfold inferInstance at PR
+  dsimp
 
   unfold inferInstance at PR
 
@@ -118,181 +139,30 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   case p1 =>
     show Param01 (P 0) (P' I0)
     tr_advance
+    -- tr_advance
     tr_advance
+    try tr_split_application' [(allowHead:= false)]
+    -- sorry
+    -- tr_split_application
+    -- (case' p2 => intro _ _ _; rotate_left 1)
+    -- case aR =>
+    --   tr_whnf
+    --   sorry
+
+    -- case aR => sorry
+    -- intro _ _ _
+
+
+    -- tr_advance
+
 
     refine (Param_ident.instantiatePropR_bi ?_).forget
     apply flipR'
     rw [←Param_ident.param44_ident_symm]
-    refine PR _ _ ?_
+    apply denormalizeR
+    apply arrow_02a_rel
     assumption
-
-    -- tr_whnf
-    -- apply Eq.symm
-    -- unfold inferInstance
-    -- exact PR (by assumption) (by assumption) (by assumption)
-
-
-
-
-    /-
-
-    ```lean
-    have nR := by assumption
-    replace nR : Param.R .Map0 .Map0 ?a ?a' := nR
-    ```
-
-    ```plaintext
-    Type mismatch
-      nR
-    has type
-      Param.R MapType.Map0 MapType.Map0 a✝¹ a'✝
-    but is expected to have type
-      Param.R MapType.Map0 MapType.Map0 ?a ?a'
-
-    ```
-    -/
-
-    -- have nR := by assumption
-    -- replace nR : Param.R .Map0 .Map0 _ _ := nR
-    -- -- replace nR : Param.R .Map0 .Map0 ?a ?a' := nR
-
-
-    -- -- have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
-
-
-
-    -- -- We give them a name, else the tr.R fails
-    -- show ?e1 → ?e2
-    -- show tr.R ?e1 ?e2
-
-    -- refine applyR (p1 := RN.toBottom) (p2 := propParam00) (r1 := ?r1) (r3 := ?r3)
-
-    -- -- apply applyR (p1 := RN.toBottom) (p2 := propParam00)
-
-    -- case r1 => assumption
-
-    -- tr_flip
-    -- show Param.R .Map0 .Map0 ?f ?f'
-
-    /-
-    ```lean
-    apply normalizeR
-    ```
-
-    Tactic `apply` failed: could not unify the conclusion of `@normalizeR`
-      {a : ?α} → {b : ?β} → [p : Param ?α ?β ?cov ?con] → Param.R ?cov ?con a b → Param.R MapType.Map0 MapType.Map0 a b
-    with the goal
-      Param.R MapType.Map0 MapType.Map0 P' P
-
-    Note: The full type of `@normalizeR` is
-      {α : Sort ?u.339074} →
-        {β : Sort ?u.339073} →
-          {cov con : MapType} →
-            {a : α} → {b : β} → [p : Param α β cov con] → Param.R cov con a b → Param.R MapType.Map0 MapType.Map0 a b
-    -/
-
-
-    /-
-    ```lean
-    exact flipR (normalizeR PR)
-    ```
-
-    synthesized type class instance is not definitionally equal to expression inferred by typing rules, synthesized
-      toArrow
-    inferred
-      Param.toBottom inferInstance
-    -/
-    -- exact flipR (normalizeR PR)
-
-    -- unfold inferInstance at PR
-    -- unfold
-
-    -- have h := @normalizeR _ _ _ _ _ _ toArrow (flipR PR)
-
-    -- have type1 := @Param.R MapType.Map0 MapType.Map0 (I → Prop) (Nat → Prop) (Param.flip inferInstance).toBottom P' P
-    -- have type2 := @Param.R MapType.Map0 MapType.Map0 (I → Prop) (Nat → Prop) toArrow P' P
-
-    -- have h := normalizeR (flipR PR)
-
-    -- have eq : (Param.flip pAux1).toBottom = toArrow := by
-    --   unfold pAux1
-    --   unfold toArrow
-    --   unfold inferInstance
-    --   unfold Param.flip
-    --   unfold flipRel
-    --   unfold Param.toBottom
-    --   unfold Param_arrow.Map0_arrow
-    --   unfold Param.forget
-    --   dsimp [coeMap]
-
-    --   /-
-    --   ⊢ { R := fun a b => Param.R MapType.Map2a MapType.Map0 a b, covariant := { }, contravariant := { } } =
-    --     {
-    --       R := fun f f' =>
-    --         ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
-    --       covariant := { }, contravariant := { } }
-    --   -/
-
-    --   dsimp [Param_arrow.Map2a_arrow]
-    --   /-
-
-    --   ⊢ { R := fun a b => ∀ (a_1 : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a_1 a' → propParam2a0.1 (a a_1) (b a'),
-    --     covariant := { }, contravariant := { } } =
-    --   {
-    --     R := fun f f' =>
-    --       ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
-    --     covariant := { }, contravariant := { } }
-
-    --   Oud:
-    --   ⊢ {
-    --       R := fun a b =>
-    --         ∀ (a_1 : I) (a' : Nat),
-    --           Param.R MapType.Map2a MapType.Map3 a_1 a' → Param.R MapType.Map4 MapType.Map4 (a a_1) (b a'),
-    --       covariant := { }, contravariant := { } } =
-    --     {
-    --       R := fun f f' =>
-    --         ∀ (a : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a a' → Param.R MapType.Map0 MapType.Map0 (f a) (f' a'),
-    --       covariant := { }, contravariant := { } }
-    --   -/
-    --   congr
-
-
-    -- rw[eq] at h
-    -- exact h
-
-
-    -- have a : Param.R _ _ ?f ?f' := by assumption
-
-
-
-
-    -- assumption
-
-    -- ; assumption
-    -- assumption
-
-
-
-
-
-    -- tr_ident
-    -- show P _ = P' _
-
-    -- apply applyR
-
-
-    -- have PR : Param.R _ _ _ _ := PR
-    -- have PR : Param.R _ _ (_ : _ -> _) (_ : _ -> _) := by assumption
-
-
-    -- close_PR_nR
-    -- tr_advance
-
-
-
-    -- have zeroR := by assumption
-    -- tr_ident
-    -- exact PR _ _ zeroR
+    assumption
 
   tr_split
   case p1 =>
@@ -302,28 +172,21 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     case p1 =>
       show Param01 (P' _) (P _)
 
-      -- tr_ident
-      -- apply Eq.symm
-      -- exact PR _ _ (by assumption)
-
       refine (Param_ident.instantiatePropR_bi ?_).forget
-      refine PR _ _ ?_
+      apply denormalizeR
+      apply arrow_02a_rel
+      assumption
       assumption
 
-    -- tr_ident
-    -- apply Eq.symm
-    -- have := RNS (by assumption) (by assumption) (by assumption)
-    -- exact PR _ _ (by assumption)
-
-    -- have := RNS _ _ (by assumption)
-
-    -- refine (Param_ident.instantiatePropR_bi ?_).forget
-    -- exact PR _ _ (by assumption)
-
     refine (Param_ident.instantiatePropR_bi ?_).forget
-    refine PR _ _ ?_
-    refine RNS _ _ ?_
-    assumption
+    -- repeat apply_assumption
+    -- apply denormalizeR
+    -- apply arrow_02a_rel
+    -- assumption
+
+    apply_assumption
+    apply_assumption
+    apply_assumption
 
   tr_intro n n' nR
 

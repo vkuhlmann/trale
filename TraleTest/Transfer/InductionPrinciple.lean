@@ -59,18 +59,30 @@ macro "tr_advance" : tactic => `(tactic|
   | tr_split
   | tr_flip; tr_split
 
+    | (
+        tr_split_application';
+        case' p2 => intro _ _ _
+        first
+        | case p1 => infer_instance
+          case' aR => tr_whnf
+        | case' aR => tr_whnf
+          case' p1 => skip -- Fix the ordering
 
-  | exact RN0
-  | (
-      have nR := by assumption;
-      tr_ident;
-      exact PR _ _ nR
-    )
-
-  | (tr_split_application; try (
-        (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
-  | (tr_flip; tr_split_application; try (
-        (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
+        -- case' p1 => try infer_instance
+        -- case' aR => tr_whnf
+        -- case' p1 => skip -- Fix the ordering. But this causes error if p1 is
+                            -- already closed.
+        )
+    | (
+        tr_flip;
+        tr_split_application';
+        case' p2 => intro _ _ _
+        first
+        | case p1 => infer_instance
+          case' aR => tr_whnf
+        | case' aR => tr_whnf
+          case' p1 => skip -- Fix the ordering
+      )
 
   | (refine (Param_ident.instantiatePropR_bi ?_).forget;
      tr_step_rel)

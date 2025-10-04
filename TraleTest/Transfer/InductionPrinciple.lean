@@ -51,13 +51,17 @@ macro "tr_step_rel" : tactic => do
   )
 
 macro "tr_advance" : tactic => `(tactic|
-  first
-  | assumption
-  | apply_assumption
-  | tr_intro _ _ _
-  | tr_flip; tr_intro _ _ _
-  | tr_split
-  | tr_flip; tr_split
+  ((run_tac
+    -- This will produce the 'No goals to be solved' error if we are done.
+    Lean.Elab.Tactic.getMainGoal
+  );
+    first
+    | assumption
+    | apply_assumption
+    | tr_intro _ _ _
+    | tr_flip; tr_intro _ _ _
+    | tr_split
+    | tr_flip; tr_split
 
     | (
         tr_split_application';
@@ -84,9 +88,10 @@ macro "tr_advance" : tactic => `(tactic|
           case' p1 => skip -- Fix the ordering
       )
 
-  | (refine (Param_ident.instantiatePropR_bi ?_).forget;
-     tr_step_rel)
-  | fail "No step available"
+    | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+       tr_step_rel)
+    | fail "No step available"
+    )
   )
 
 

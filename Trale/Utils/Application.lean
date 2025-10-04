@@ -75,6 +75,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       let goal ← getMainGoal
       let goalType ← getMainTarget
+      let tag ← goal.getTag
 
       -- trace[tr.utils] s!"Type is {goalType}"
       -- trace[tr.utils] s!"Type as expression is {repr goalType}"
@@ -503,7 +504,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       -- This will be a goal
       let p1 : Q(Param00.{levelZ} $α $α') ←
-        mkFreshExprMVar (.some q((Param00.{levelZ} $α $α'))) (userName := `p1)
+        mkFreshExprMVar (.some q((Param00.{levelZ} $α $α'))) (userName := .str tag "p1")
 
       -- This will be inferred
       -- let a : Q($α) := target1
@@ -561,7 +562,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       let p2 : Q(∀ (a : $α) (a' : $α') (_: ($p1).R a a'),
         (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
-        ← mkFreshExprMVar (.some p2Type) (userName := `p2)
+        ← mkFreshExprMVar (.some p2Type) (userName := .str tag "p2")
 
       -- trace[tr.utils] s!"p2: {repr p2}"
 
@@ -574,7 +575,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       -- These will be goals
       let aR
         -- : Q(($p1).R $a $a')
-        ← mkFreshExprMVar (.some q(($p1).R $a $a')) (userName := `aR)
+        ← mkFreshExprMVar (.some q(($p1).R $a $a')) (userName := .str tag "aR")
 
       let sometest2 := q(4)
 

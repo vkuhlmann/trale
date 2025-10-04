@@ -103,32 +103,30 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   have RN0 : tr.R I0 0 := by sorry
   have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
-  let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
-    tr_advance
+  tr_advance
+  tr_advance
+
+  -- ⊢ Param01 (a✝¹ 0) (a'✝ I0)
+  tr_advance
+  -- ⊢ Param02a (Nat → Prop) (I → Prop)
+  tr_advance
+  -- ⊢ RN.1 I0 0
+  tr_advance
+  -- ⊢ Param MapType.Map0 MapType.Map1 (a✝³ a✝¹) (a'✝¹ a'✝)
+  tr_advance
+  -- ⊢ Param.R MapType.Map0 MapType.Map2b a'✝ a✝¹
+  tr_advance
 
   tr_advance
   tr_advance
-  ·
-    tr_advance
-    tr_advance
-    tr_advance
-    tr_advance
-
   tr_advance
-  ·
-    tr_advance
-    tr_advance
-
-    tr_advance
-    tr_advance
-
-    tr_advance
-    tr_advance
-    tr_advance
-
-    tr_advance
-    tr_advance
-
+  tr_advance
+  tr_advance
+  tr_advance
+  tr_advance
+  tr_advance
+  tr_advance
+  tr_advance
   tr_advance
   tr_advance
   tr_advance

@@ -165,6 +165,10 @@ def normalizeR [p : Param cov con α β] (r : p.R a b)
   : p.toBottom.R a b := by
     exact r
 
+def denormalizeR [p : Param cov con α β] (r : p.toBottom.R a b)
+  : p.R a b := by
+    exact r
+
 theorem flipFlipCancels [p : Param cov con α β] : p.flip.flip = p := by
   congr
 

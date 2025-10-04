@@ -48,6 +48,14 @@ def instantiatePropR
   tr_from_map
   exact r
 
+def instantiatePropR_r
+  {a b : Prop}
+  (r : propParam.R b a)
+  : Param04 a b := by
+
+  tr_flip
+  tr_from_map
+  exact r
 
 theorem R_eq
   [Param2b0 α α']

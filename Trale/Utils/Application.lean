@@ -62,7 +62,7 @@ declare_config_elab elabSplitAppConfigCore    SplitApplicationConfig
 -- elab "tr_split_application'" a:(Lean.Parser.Tactic.config)? : tactic =>
 -- elab "tr_split_application'" ppSpace colGt a:("("Lean.Parser.Tactic.config ")")? : tactic =>
 
-elab "tr_split_application'" ppSpace colGt "[" a:Lean.Parser.Tactic.optConfig "]" : tactic =>
+elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig : tactic =>
 -- elab "tr_split_application'" : tactic =>
 
   -- TODO Is there a more elegant way to write the constant function?
@@ -295,6 +295,17 @@ elab "tr_split_application'" ppSpace colGt "[" a:Lean.Parser.Tactic.optConfig "]
 
         return ((applierFun1, a1), (applierFun2, a2))
 
+      let rec getFunctionHead (e : Expr) : Expr :=
+        match e with
+        | .app f _ => getFunctionHead f
+        | _ => e
+
+      let shouldExtract (e1 e2 : Expr) :=
+        match e1, e2 with
+        | .fvar _, .fvar _ => false
+        | .lam _ _ _ _, .lam _ _ _ _ => false
+        | _, _ => true
+
 
       let mut ((body1, target1, args1), (body2, target2, args2))
         ← findFirstNonFvars (fromType, []) (toType, [])
@@ -307,6 +318,9 @@ elab "tr_split_application'" ppSpace colGt "[" a:Lean.Parser.Tactic.optConfig "]
 
         if !allowHead then
           throwTacticEx `tr_split_applicaton' goal "No non-fvars found in body"
+
+        if !shouldExtract (getFunctionHead fromType) (getFunctionHead toType) then
+          throwTacticEx `tr_split_applicaton' goal "No non-fvars found in body, and head is fvar of lambda"
 
         let ((f1, a1), (f2, a2)) ← hoistFVarsToLambda fromType toType
 
@@ -660,14 +674,38 @@ elab "tr_split_application'" ppSpace colGt "[" a:Lean.Parser.Tactic.optConfig "]
       -- getForallArity
 
 
-macro "tr_split_application'" : tactic => `(
-  tactic| (
-    tr_split_application' []
-  )
-)
+-- macro "tr_split_application'" : tactic => `(
+--   tactic| (
+--     tr_split_application'
+--   )
+-- )
+
+
+-- TODO Make the derived macro's accept config options.
+/-
+  I was unable to pass around the config options through simple wrappers.
+  Because in `Split.lean` working with builtin_tactic didn't work, I haven't
+  tried that one yet.
+
+  ```lean
+  -- syntax (name := tr_split_application_basic) "tr_split_application" notFollowedBy(ident) ppSpace Lean.Parser.Tactic.optConfig : tactic
+
+  -- elab_rules : tactic
+  --   | `(tactic| tr_split_application) => do
+  --     evalTactic (← `(tactic| tr_split_application' <;> try infer_instance))
+  --   | `(tactic| tr_split_application $cfg) => do
+  --     evalTactic (← `(tactic| tr_split_application' $cfg <;> try infer_instance))
+
+  -- -- @[builtin_tactic tr_split_application_basic]
+
+
+  -- macro "tr_split_application" notFollowedBy(ident) cfg:Lean.Parser.Tactic.optConfig : tactic => `(tactic|tr_split_application' $cfg <;> try infer_instance)
+  ```
+-/
 
 
 macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
+
 macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
   tactic| (
     (tr_split_application'); (

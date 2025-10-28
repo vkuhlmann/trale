@@ -65,20 +65,20 @@ instance : ToString MapType where
 
 def leMapType (a b : MapType) : Bool :=
   match a, b with
-    | .Map0, _ => true
-    | .Map1, .Map1 => true
-    | .Map1, .Map2a => true
-    | .Map1, .Map2b => true
-    | .Map1, .Map3 => true
-    | .Map1, .Map4 => true
-    | .Map2a, .Map2a => true
-    | .Map2a, .Map3 => true
-    | .Map2a, .Map4 => true
-    | .Map2b, .Map2b => true
-    | .Map2b, .Map3 => true
-    | .Map2b, .Map4 => true
-    | .Map3, .Map3 => true
-    | .Map3, .Map4 => true
+    | .Map0, _
+    | .Map1, .Map1
+    | .Map1, .Map2a
+    | .Map1, .Map2b
+    | .Map1, .Map3
+    | .Map1, .Map4
+    | .Map2a, .Map2a
+    | .Map2a, .Map3
+    | .Map2a, .Map4
+    | .Map2b, .Map2b
+    | .Map2b, .Map3
+    | .Map2b, .Map4
+    | .Map3, .Map3
+    | .Map3, .Map4
     | .Map4, .Map4 => true
     | _, _ => false
 
@@ -92,12 +92,15 @@ instance : DecidableLE MapType :=
 
     split
     rotate_right 1
-    ·
+
+    · -- The cases '_, _' from leMapType
       show Decidable (false = true)
-      exact Decidable.isFalse (by simp)
+      exact Decidable.isFalse (Bool.false_ne_true)
+
+    -- The cases '.MapX, .MapY' from leMapType
     repeat (
       show Decidable (true = true)
-      exact Decidable.isTrue (by simp)
+      exact Decidable.isTrue rfl
     )
 
 theorem mapTypeTrans {a b c : MapType} (h1 : a ≤ b) (h2 : b ≤ c) : a ≤ c := by

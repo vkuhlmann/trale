@@ -55,7 +55,7 @@ class Param
   -- extends ParamRoot.{w, u, v} α β mapCov mapContra
   where
 
-  R : α → β -> Sort w
+  R : α → β → Sort w
   covariant : mapCov.interp R
   contravariant : mapContra.interp (flipRel R)
   -- normativeDirection : NormativeDirection := .this
@@ -133,19 +133,19 @@ set_option pp.all true in
 instance
   CoeParam
 
-  (Rp : Param.{w} X Y α β)
-  [CoeTC (X.interp Rp.R) (X'.interp Rp.R)]
-  [CoeTC (Y.interp (flipRel Rp.R)) (Y'.interp (flipRel Rp.R))]
+  (p : Param.{w} X Y α β)
+  [CoeTC (X.interp p.R) (X'.interp p.R)]
+  [CoeTC (Y.interp (flipRel p.R)) (Y'.interp (flipRel p.R))]
   :
   CoeDep
   (Param.{w} X Y α β)
-  Rp
+  p
   (Param.{w} X' Y' α β)
    where
    coe := {
-    R := Rp.R,
-    covariant := Rp.covariant,
-    contravariant := Rp.contravariant,
+    R := p.R,
+    covariant := p.covariant,
+    contravariant := p.contravariant,
     -- normativeDirection := Rp.normativeDirection
    }
   --  (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant Rp.normativeDirection : Param.{w} α β X' Y')
@@ -173,23 +173,14 @@ def forget
 
   (h1 : X' ≤ X := by decide)
   (h2 : Y' ≤ Y := by decide)
-  (Rp : Param.{w} X Y α β)
+  (p : Param.{w} X Y α β)
   :
   (Param.{w} X' Y' α β)
   := {
-    R := Rp.R,
-    covariant := coeMap Rp.covariant h1,
-    contravariant := coeMap Rp.contravariant h2,
-    -- normativeDirection := Rp.normativeDirection
+    R := p.R,
+    covariant := coeMap p.covariant h1,
+    contravariant := coeMap p.contravariant h2,
   }
-
-    -- by
-    -- constructor
-    -- case R => exact Rp.R
-    -- case covariant => exact coeMap Rp.covariant h1
-    -- case contravariant => exact coeMap Rp.contravariant h2
-    -- case normativeDirection => exact Rp.normativeDirection.opposite
-
 
 @[simp]
 abbrev flip (p : Param α β m1 m2) : Param β α m2 m1 :=
@@ -288,7 +279,6 @@ abbrev R_implies_mapK [p : Param40 α β]
 end tr
 
 
-#check Array
 
 -- instance [p : Param α β cov con] [c :Coe (Param α β cov con) (Param α β cov2 con2)]
 --   : Param α β cov2 con2 := c.coe p

@@ -189,12 +189,21 @@ abbrev flip (p : Param α β m1 m2) : Param β α m2 m1 :=
   }
 
 @[simp]
-abbrev right (p : Param10 α β) : α -> β :=
+abbrev right' (p : Param10 α β) : α -> β :=
   p.covariant.map
 
 @[simp]
-abbrev left (p : Param01 α β) : β -> α :=
+abbrev right (p : Param cov con α β) (a : α) (h : .Map1 ≤ cov := by decide) : β :=
+  (p.forget h map0bottom).covariant.map a
+
+
+@[simp]
+abbrev left' (p : Param01 α β) : β -> α :=
   p.contravariant.map
+
+@[simp]
+abbrev left (p : Param cov con α β) (b : β) (h : .Map1 ≤ con := by decide) : α :=
+  (p.forget map0bottom h).contravariant.map b
 
 @[simp]
 abbrev right_implies_R (p : Param2a0 α β)

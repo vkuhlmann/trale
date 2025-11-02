@@ -14,12 +14,29 @@ import Trale.Utils.ParamFromFunction
 import Trale.Utils.Application
 import Qq open Qq Lean Meta Elab Tactic
 
+open Trale.Utils
+
 macro "tr_by" a:term:10 : tactic => `(tactic|
-  apply fun x => Param.right x $a
+  apply fun x => Param.right' x $a
 )
 
+macro "tr_from_map" ppSpace colGt a:term:10 : tactic => `(tactic|
+  first
+  | refine (paramFromMap $a).forget
+  | apply Trale.Utils.paramFromInjection $a
+  | apply Trale.Utils.paramFromSurjection $a
+  | refine (paramFromMap $a).forget.flip
+  | apply (Trale.Utils.paramFromInjection $a).flip
+  | apply (Trale.Utils.paramFromSurjection $a).flip
+  | fail "No suitable constructing function found"
+)
+
+
 macro "tr_from_map" : tactic => `(tactic|
-  refine (Param_from_map ?_).forget
+  tr_from_map ?_
+  -- first
+  -- | refine (Param_from_map ?_).forget
+  -- | apply Trale.Utils.createInjection
 )
 
 macro "tr_ident" : tactic => `(tactic|
@@ -44,14 +61,37 @@ macro "tr_split_forall" : tactic => `(tactic|
   | apply Param_forall.Map4_forall; rotate_left 1
   )
 
+/-
+There are three special things happening in the following code:
+
+1. The combination of `focus`+`case'` is used to fix the order of goals.
+
+2. We set explicit arguments (`(p1 := ..) `) because they are typeclass
+   arguments, but may not be obtained through other steps, rather than
+   typeclass synthesis.
+
+3. We use the construction `apply (fun ... => ...)` instead of `refine`, because
+   the latter will result in goal tags which are not prefix with the current
+   goal tag. This will mess with our ability to use `case'`; normally, when
+   using `case' p2`, this will match tags ending on `p2`, e.g. `p1.p1.p2`.
+   However, if there is a goal whose full tag is `p2`, then it will be targeted,
+   even when outside the focus scope.
+
+   Without a focus, this would cause wrong ordering of goals, within a focus,
+   this will cause an error of the goal not being found.
+
+-/
 macro "tr_split_arrow" : tactic => `(tactic|
-  first
-  | apply Param_arrow.Map0_arrow
-  | apply Param_arrow.Map1_arrow
-  | apply Param_arrow.Map2a_arrow
-  | apply Param_arrow.Map2b_arrow
-  | apply Param_arrow.Map3_arrow
-  | apply Param_arrow.Map4_arrow
+  focus
+  ((first
+  | apply (fun p1 p2 => Param_arrow.Map0_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Param_arrow.Map1_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Param_arrow.Map2b_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Param_arrow.Map3_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Param_arrow.Map4_arrow (p1 := p1) (p2 := p2))
+  ); case' p1 => skip -- Fix goal ordering
+  )
   )
 
 macro "tr_split_exists" : tactic => `(tactic|
@@ -104,13 +144,13 @@ macro "tr_step" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
 elab_rules : tactic
   -- | `(tactic| tr_intro) notFollowedBy("|") (ppSpace colGt term:max)* : tactic =>
   | `(tactic| tr_intro)                     =>  do
-        evalTactic (← `(tactic| tr_split; (case' p2 => intro)))
+        evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro)))
 
   | `(tactic| tr_intro $h:ident)            => do
-        evalTactic (← `(tactic| tr_split; (case' p2 => intro $h:ident)))
+        evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro $h:ident)))
 
   | `(tactic| tr_intro $h:term $hs:term*)   =>  do
-        evalTactic (← `(tactic| tr_split; (case' p2 => intro $h:term $hs:term*)))
+        evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro $h:term $hs:term*)))
 
   -- evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
 

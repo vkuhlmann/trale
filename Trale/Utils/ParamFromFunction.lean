@@ -2,6 +2,8 @@ import Trale.Core.Param
 import Trale.Utils.Constructor
 import Trale.Utils.ParamIdent
 
+namespace Trale.Utils
+
 def Param_id : Param44 α α := Param44_ident
 
 def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
@@ -9,7 +11,7 @@ def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
   exact Param_id
 
 @[simp]
-def Param_from_map
+def paramFromMap
   (f : α -> α')
 : Param40 α α' := by
   tr_constructor
@@ -20,12 +22,12 @@ def Param_from_map
   simp
   simp
 
-namespace SplitSurj
-def toParam
+-- Split surjection.
+def paramFromSurjection
   {retract : α → β} {sect : β → α}
   (sectK : forall (b : β), retract (sect b) = b)
   : Param42a α β :=
-  { R := fun a b => retract a = b,
+  { R := (retract · = ·),
     covariant := {
       map := retract,
       map_in_R := (fun a b => (by
@@ -48,11 +50,9 @@ def toParam
         exact sectK b
       )
      } }
-end SplitSurj
 
-
-namespace SplitInj
-def toParam
+-- Split injection.
+def paramFromInjection
   {sect : α → β} {retract : β → α}
   (sectK : forall a, retract (sect a) = a)
   : Param42b α β := by
@@ -73,4 +73,53 @@ def toParam
     exact sectK _
 
 
-end SplitInj
+theorem injectiveFunctionInvert'
+  (p :  Param42b A B)
+  (x : A)
+  : p.left (p.right x) = x := by
+
+  let x' := (p : Param10 _ B).right x
+  let xR : p.R x x' := p.right_implies_R x x' rfl
+
+  show p.left x' = x
+  exact p.R_implies_left x x' xR
+
+theorem injectiveFunctionInvert
+  (p :  Param .Map4 .Map2b A B)
+  (x : A)
+  : p.contravariant.map (p.covariant.map x) = x := by
+
+  let x' := p.covariant.map x
+  let xR : p.R x x' := p.covariant.map_in_R x x' rfl
+
+  show p.contravariant.map x' = x
+  exact p.contravariant.R_in_map x' x xR
+
+
+-- def paramFromSectionK
+--   {sect : α → β} {retract : β → α}
+--   (sectK : forall a, retract (sect a) = a)
+--   : Param2a4 α β := by
+--   tr_constructor
+
+--   -- R
+--   · exact (. = retract .)
+
+--   -- 4
+--   · exact sect
+--   · intro a a' aF
+--     subst aF
+--     exact (sectK _).symm
+--   · intro a a' aR
+--     subst aR
+
+--     exact (sectK _)
+
+--   repeat simp only [imp_self, implies_true]
+
+--   -- 2b
+--   · exact retract
+--   · dsimp
+--     intro x x' xR
+--     subst xR
+--     exact sectK _

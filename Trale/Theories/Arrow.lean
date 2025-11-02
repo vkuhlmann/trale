@@ -5,7 +5,10 @@ import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Whnf
-import Qq open Qq Lean
+import Qq
+
+open Qq Lean
+
 
 -- set_option trace.profiler true
 -- set_option trace.profiler.threshold 10
@@ -17,8 +20,8 @@ variable {α : Sort u} {α' : Sort u} {β : Sort v} {β' : Sort v}
 
 
 instance Map0_arrow
-  (p1 : Param00 α α')
-  (p2 : Param00 β β')
+  [p1 : Param00 α α']
+  [p2 : Param00 β β']
 : Param00 (α → β) (α' → β') := by
   tr_constructor
 
@@ -27,10 +30,10 @@ instance Map0_arrow
 
 
 instance Map1_arrow
-  (p1 : Param01 α α')
-  (p2 : Param10 β β')
+  [p1 : Param01 α α']
+  [p2 : Param10 β β']
 : Param10 (α → β) (α' → β') := by
-  tr_extend Map0_arrow p1 p2
+  tr_extend Map0_arrow (p1 := p1) (p2 := p2)
 
   exact fun f => p2.right ∘ f ∘ p1.left
 
@@ -47,10 +50,12 @@ instance Map1_arrow
 
 
 instance Map2a_arrow
-  (p1 : Param02b α α')
-  (p2 : Param2a0 β β')
+  [p1 : Param02b α α']
+  [p2 : Param2a0 β β']
 : Param2a0 (α → β) (α' → β') := by
-  tr_extend Map1_arrow p1 p2
+  -- We cannot use instance inference, because the types (α, α', ..) are
+  -- metavariables at this piont.
+  tr_extend Map1_arrow (p1 := p1) (p2 := p2)
 
   intro f f' mapF -- f maps to f'
   intro x x' xR -- x and x' are related
@@ -77,11 +82,11 @@ instance Map2a_arrow
 
 -- (* (02a, 2b0) + funext -> 2b0 *)
 instance Map2b_arrow
-  (p1 : Param02a α α')
-  (p2 : Param2b0 β β')
+  [p1 : Param02a α α']
+  [p2 : Param2b0 β β']
   : Param2b0 (α -> β) (α' -> β') := by
 
-  tr_extend Map1_arrow p1 p2
+  tr_extend Map1_arrow (p1 := p1) (p2 := p2)
 
   intro f f'
   intro relH
@@ -100,25 +105,38 @@ instance Map3_arrow'
   : Param30 (α -> β) (α' -> β') :=
   by
 
-  tr_add_param_base param_base2 := Map2b_arrow p1 p2
-  tr_extend Map2a_arrow p1 p2 <;> tr_fill_from_hypothesis param_base2
+  tr_add_param_base param_base2 := Map2b_arrow (p1 := p1) (p2 := p2)
+  tr_extend Map2a_arrow (p1 := p1) (p2 := p2) <;> tr_fill_from_hypothesis param_base2
 
 
 -- (* (03, 30) + funext -> 30 *)
 instance Map3_arrow
-  (p1 : Param03 α α')
-  (p2 : Param30 β β')
+  [p1 : Param03 α α']
+  [p2 : Param30 β β']
   : Param30 (α -> β) (α' -> β') :=
   by
-  tr_extend_multiple [Map2a_arrow p1 p2, Map2b_arrow p1 p2]
+  tr_extend_multiple [
+    Map2a_arrow (p1 := p1) (p2 := p2),
+    Map2b_arrow (p1 := p1) (p2 := p2)
+  ]
 
 
 -- (* (04(????), 40) + funext -> 40 *)
 instance Map4_arrow
-  (p1 : Param03 α α')
-  (p2 : Param40 β β')
+  [p1 : Param03 α α']
+  [p2 : Param40 β β']
   : Param40 (α → β) (α' → β') := by
-  tr_extend Map3_arrow p1 p2
+  tr_extend Map3_arrow (p1 := p1) (p2 := p2)
+
+  /- Alternatively:
+
+  ```lean
+  have _ : Param30 β β' := p2
+  tr_extend (inferInstance : Param30 (α -> β) (α' -> β'))
+  ```
+
+  But this gives problems because the inferInstance is not properly unfolded.
+  -/
 
   -- case R_implies_rightK =>
   intro f f' fR

@@ -113,6 +113,91 @@ theorem mapTypeTrans' {a b c : MapType} (h1 : a ≥ b) (h2 : b ≥ c) : a ≥ c 
 instance : @Trans MapType MapType MapType LE.le LE.le LE.le where
   trans := mapTypeTrans
 
+instance : Union MapType where
+  union
+    | .Map2a, .Map2b => .Map3
+    | .Map2b, .Map2a => .Map3
+    | a, b =>
+      if a ≤ b then
+        b
+      else
+        a
+
+theorem maptype_U_maptype_symm
+  (a b : MapType)
+  : a ∪ b = b ∪ a := by
+
+  cases a <;> cases b <;> rfl
+
+theorem maptype_U_maptype_geq_maptype
+  (a b : MapType)
+  : a ∪ b ≥ a := by
+
+  cases a <;> cases b <;> decide
+
+/-
+ theorem maptype_U_maptype_tight
+   (a b c : MapType)
+   (h : a ∪ b ≥ c)
+   : (a ≥ c ∨ b ≥ c) := by
+
+   cases a <;> cases b <;> cases c
+   any_goals first
+     | left; decide
+     | right; decide
+
+   all_goals
+     exfalso; simp [Union.union, LE.le, leMapType] at h
+
+   fail "False statement"
+-/
+
+theorem maptype_U_maptype_monotone
+  (a b c : MapType)
+  (h : a ≥ c)
+  : a ∪ b ≥ c ∪ b := by
+
+  cases a <;>
+    cases b <;>
+      cases c <;> first
+        | decide
+        | contradiction
+
+
+instance : Inter MapType where
+  inter
+    | .Map2a, .Map2b => .Map1
+    | .Map2b, .Map2a => .Map1
+    | a, b =>
+      if a ≤ b then
+        a
+      else
+        b
+
+theorem maptype_inter_symm
+  (a b : MapType)
+  : a ∩ b = b ∩ a := by
+
+  cases a <;> cases b <;> rfl
+
+theorem maptype_inter_leq_maptype
+  (a b : MapType)
+  : a ∩ b ≤ a := by
+
+  cases a <;> cases b <;> rfl
+
+
+theorem maptype_inter_monotone
+  (a b c : MapType)
+  (h : a ≥ c)
+  : a ∩ b ≥ c ∩ b := by
+
+  cases a <;>
+    cases b <;>
+      cases c <;> first
+        | decide
+        | contradiction
+
 
 
   -- decidableLe a b : Decidable (a ≤ b) := by

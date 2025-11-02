@@ -6,8 +6,9 @@ import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Whnf
 import Qq
+import Trale.Theories.Flip
 
-open Qq Lean
+open Qq Lean Trale.Utils
 
 
 -- set_option trace.profiler true
@@ -17,6 +18,48 @@ open Qq Lean
 namespace Param_arrow
 
 variable {α : Sort u} {α' : Sort u} {β : Sort v} {β' : Sort v}
+
+def arrowR
+  (p1 : Param00 α α')
+  (p2 : Param00 β β')
+  : (α → β) -> (α' → β') -> Sort _
+  := fun f f' =>
+    forall a a', p1.R a a' -> p2.R (f a) (f' a')
+
+def flipArrowR
+  {p1 : Param00 α α'}
+  {p2 : Param00 β β'}
+  (r : arrowR p1 p2 f f')
+  : arrowR p1.flip p2.flip f' f
+  := fun a' a aR' => r a a' (flipR aR')
+
+theorem flipArrowR_involution
+  : flipArrowR (flipArrowR r) = r := by rfl
+
+instance arrowR_rel
+  [p1 : Param00 α α']
+  [p2 : Param00 β β']
+  : Param44 (arrowR p1 p2 f f') (arrowR p1.flip p2.flip f' f) := by
+  tr_constructor
+
+  -- R
+  exact (flipArrowR · = ·)
+
+  -- 4
+  exact flipArrowR
+  simp
+  simp
+  simp
+
+  -- 4
+  exact flipArrowR
+  simp
+  apply flipArrowR_involution
+  · intro x x' xR
+    subst xR
+    exact flipArrowR_involution
+  simp
+
 
 
 instance Map0_arrow

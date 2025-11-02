@@ -149,37 +149,6 @@ elab_rules : tactic
   -- | `(tactic| intro $h:term $hs:term*) => evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
   -- | _ => throwUnsupportedSyntax
 
-def flipR [p : Param cov con α β] (r : p.R a b)
-  : (p.flip.R b a) := by
-    exact r
-
-def flipR' [p : Param cov con α β] (r : p.flip.R a b)
-  : (p.R b a) := by
-    exact r
-
-def Param.toBottom (p : Param cov con α β) : Param00 α β :=
-  p.forget (h1 := Param.map0bottom) (h2 := Param.map0bottom)
-
-
-def normalizeR [p : Param cov con α β] (r : p.R a b)
-  : p.toBottom.R a b := by
-    exact r
-
-def denormalizeR [p : Param cov con α β] (r : p.toBottom.R a b)
-  : p.R a b := by
-    exact r
-
-theorem flipFlipCancels [p : Param cov con α β] : p.flip.flip = p := by
-  congr
-
-macro "tr_flip" : tactic => `(tactic|
-  first |apply Param.flip |apply flipR |apply flipR'
-  )
-
-macro "tr_root_R" : tactic => `(tactic|
-  first |apply Param.flip |apply flipR |apply flipR'
-  )
-
 macro "tr_sorry" a:term:10 : tactic => `(tactic|
   (show Param.{0} _ _ _ _; sorry)
   )

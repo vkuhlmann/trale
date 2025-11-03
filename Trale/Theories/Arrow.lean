@@ -5,6 +5,7 @@ import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Whnf
+import Trale.Utils.AddFlipped
 import Qq
 import Trale.Theories.Flip
 
@@ -91,7 +92,9 @@ instance Map1_arrow
 --     case map =>
 --       exact MapFun p1 p2
 
+set_option trace.tr.utils true
 
+@[tr_add_flipped Param_arrow.arrowR Param_arrow.arrowR_rel]
 instance Map2a_arrow
   [p1 : Param02b α α']
   [p2 : Param2a0 β β']
@@ -122,6 +125,7 @@ instance Map2a_arrow
 
   -- rw [mapAtoA']
 
+#check Map2a_arrow_flipped
 
 -- (* (02a, 2b0) + funext -> 2b0 *)
 instance Map2b_arrow

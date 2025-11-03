@@ -25,8 +25,10 @@ structure ParamParts where
   covMapType : Q(MapType)
   conMapType : Q(MapType)
 
+-- inductive ParamParseError
+--   | NotParam : "Not a param"
 
-def getParamParts (e : Expr) : MetaM ParamParts := do
+def getParamParts (e : Expr) : MetaM (Except String ParamParts) := do
   let levelU <- mkFreshLevelMVar
   let levelV <- mkFreshLevelMVar
   let levelW <- mkFreshLevelMVar
@@ -40,16 +42,20 @@ def getParamParts (e : Expr) : MetaM ParamParts := do
   let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelU, levelV} $covMapType $conMapType $fromType $toType)
 
   if !(← isExprDefEq matcher e) then
-    throwError "goal should be of type Param"
+    -- throwError "goal should be of type Param"
+    return .error "goal should be of type Param"
 
   let fromType : Q(Sort $levelU) ← instantiateMVars fromType
   let toType : Q(Sort $levelV) ← instantiateMVars toType
   let covMapType : Q(MapType) ← instantiateMVars covMapType
   let conMapType : Q(MapType) ← instantiateMVars conMapType
 
-  return {
-    levelU, levelV, levelW, fromType, toType,
-    covMapType, conMapType
+  let levelU ← instantiateLevelMVars levelU
+  let levelV ← instantiateLevelMVars levelV
+  let levelW ← instantiateLevelMVars levelW
+
+  return .ok {
+    levelU, levelV, levelW, fromType, toType, covMapType, conMapType
   }
 
 def flipParamCore (p : ParamParts) : Σ l : Level, Q(Sort $l) :=
@@ -60,7 +66,10 @@ def flipParamCore (p : ParamParts) : Σ l : Level, Q(Sort $l) :=
   ⟨_, q(Param.{levelW, levelV, levelU} $conMapType $covMapType $toType $fromType)⟩
 
 def flipParam (e : Expr) : MetaM Expr := do
-  let p ← getParamParts e
+  let p ← (getParamParts e)
+  match p with
+  | .error s => throwError s
+  | .ok p =>
   let ⟨_, expr⟩ := flipParamCore p
 
   return expr
@@ -83,6 +92,18 @@ def elabAddFlipped : Syntax → CoreM Config
     }
   | _ => throwUnsupportedSyntax
 
+def tryFlip (m : MVarId) : MetaM (Option Expr) := do
+  let p ← (getParamParts (←m.getType))
+  match p with
+  | .error _ => return .none
+  | .ok p =>
+
+  let ⟨_, flipped⟩ := flipParamCore p
+
+  let newMVar ← mkFreshExprMVar (.some flipped) (userName := ←m.getTag)
+
+  return newMVar
+
 initialize registerBuiltinAttribute {
     name := `tr_add_flipped
     descr := "Register the flipped variation"
@@ -98,7 +119,7 @@ initialize registerBuiltinAttribute {
       let levelParams := info.levelParams
       let value : Expr := .const src (levelParams.map mkLevelParam)
       -- let type : Expr ← liftAttrM (liftMetaM (inferType value))
-      let type := info.type
+      let origType := info.type
 
       -- trace[tr.utils] s!"Type is {repr type}"
 
@@ -107,32 +128,57 @@ initialize registerBuiltinAttribute {
       trace[tr.utils] s!"Config RR: {config.RR}"
 
       -- liftCoreM <|
-      let ((covMapType, conMapType, tail, completeType, args), state) ← MetaM.run do
+      let ((covMapType, conMapType, tail, levelX, type, args), state) ← MetaM.run do
+        trace[tr.utils] s!"Orig type: {repr origType}"
+
         let (args, argsBi, tail) ← forallMetaTelescope info.type
 
         -- let {covMapType, conMapType, ..} ← patternMatchParam tail
         -- let {
         --   covMapType, conMapType, levelU, levelV, levelW, fromType, toType
         -- } ← getParamParts tail
-        let p ← getParamParts tail
+        let p ←
+          match (← getParamParts tail) with
+          | .error s => throwError s
+          | .ok a => pure a
 
         -- let flippedType := q(Param.{levelW, levelV, levelU} .Map0 $covMapType $toType $fromType)
         let ⟨level, flippedType⟩ := flipParamCore p
 
         trace[tr.utils] s!"Trace test from within the MetaM run"
 
+        let flippedArgs ← args.mapM fun e => do
+          pure $ (← tryFlip e.mvarId!).getD e
 
         let argsTypes ← (args.map (·.mvarId!)).mapM Lean.MVarId.getType'
-
+        let flippedTypes ← (flippedArgs.map (·.mvarId!)).mapM Lean.MVarId.getType'
 
         trace[tr.utils] s!"Args types: {argsTypes}"
+        trace[tr.utils] s!"Flipped types: {argsTypes}"
 
-        let completeType ← mkLambdaFVars args flippedType
+        -- let completeType ← mkLambdaFVars flippedArgs flippedType
+        let completeType ←
+          (flippedArgs.zip argsBi).foldrM
+            (fun (arg, bi) body =>
+              mkForallFVars #[arg] body
+              (binderInfoForMVars := bi)
+            )
+            flippedType
 
+        -- let completeType ← mkForallFVars args flippedType
 
+        let levelX ← mkFreshLevelMVar
+        -- let type ← mkFreshExprMVarQ q(Sort $levelX)
 
+        trace[tr.utils] s!"Complete type (1) is {repr completeType}"
+        let completeTypeType ← inferType completeType
+        trace[tr.utils] s!"Complete type type (1) is {repr completeTypeType}"
 
-        return (p.covMapType, p.conMapType, tail, completeType, args)
+        if !(←isExprDefEq q(Sort $levelX) completeTypeType) then
+          throwError "Failed to unify flipped type with Sort _"
+
+        -- let type : Q() ← instantiateMVars type
+        return (p.covMapType, p.conMapType, tail, ←instantiateLevelMVars levelX, completeType, args)
 
       trace[tr.utils] s!"Tail is {repr tail}"
 
@@ -140,17 +186,28 @@ initialize registerBuiltinAttribute {
       trace[tr.utils] s!"Args: {args}"
 
       -- trace[tr.utils] s!"Flipped type is {repr flippedType}"
-      trace[tr.utils] s!"Complete type is {completeType}"
+      trace[tr.utils] s!"Complete type is {type}"
+      trace[tr.utils] s!"Level is {levelX}"
 
 
-      addDecl <| .defnDecl {
+      -- addDecl <| .defnDecl {
+      --   name,
+      --   -- value,
+      --   value := .app (.const ``sorryAx [levelX]) type -- q(sorryAx $type false),
+      --   -- value := q(sorryAx.{levelX} $type false),
+      --   levelParams,
+      --   type := origType,
+      --   hints := ReducibilityHints.regular 100,
+      --   safety := DefinitionSafety.safe
+      -- }
+
+      addDecl <| .axiomDecl {
         name,
-        value
         levelParams,
-        type,
-        hints := ReducibilityHints.regular 100,
-        safety := DefinitionSafety.safe
+        type := type,
+        isUnsafe := false
       }
+
 
       trace[tr.utils] s!"Registered {name}"
 

@@ -185,29 +185,19 @@ initialize registerBuiltinAttribute {
 
       trace[tr.utils] s!"Args: {args}"
 
-      -- trace[tr.utils] s!"Flipped type is {repr flippedType}"
       trace[tr.utils] s!"Complete type is {type}"
       trace[tr.utils] s!"Level is {levelX}"
 
+      let value := mkAppN (.const ``sorryAx [levelX]) #[type, q(false)]
 
-      -- addDecl <| .defnDecl {
-      --   name,
-      --   -- value,
-      --   value := .app (.const ``sorryAx [levelX]) type -- q(sorryAx $type false),
-      --   -- value := q(sorryAx.{levelX} $type false),
-      --   levelParams,
-      --   type := origType,
-      --   hints := ReducibilityHints.regular 100,
-      --   safety := DefinitionSafety.safe
-      -- }
-
-      addDecl <| .axiomDecl {
+      addDecl <| .defnDecl {
         name,
+        value,
         levelParams,
         type := type,
-        isUnsafe := false
+        hints := ReducibilityHints.regular 100,
+        safety := DefinitionSafety.safe
       }
-
 
       trace[tr.utils] s!"Registered {name}"
 

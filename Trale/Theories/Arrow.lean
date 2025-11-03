@@ -126,6 +126,7 @@ instance Map2a_arrow
   -- rw [mapAtoA']
 
 #check Map2a_arrow_flipped
+#print axioms Map2a_arrow_flipped
 
 -- (* (02a, 2b0) + funext -> 2b0 *)
 instance Map2b_arrow

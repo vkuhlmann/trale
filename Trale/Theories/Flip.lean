@@ -29,16 +29,17 @@ def flip1
   exact R
   exact base.right
 
-def flip2a
+set_option pp.universes true in
+def flip2a.{u,v,w,x}
   -- Alpha needs to have an explicit universe level, else it
   -- will become a Type.
   -- FIXME: Why does it become a Type without?
-  {α : Sort u} {β}
+  {α : Sort u} {β : Sort v}
   (base : Param2a0.{w} β α)
   (R : α → β → Sort w)
-  (conv : ∀ {a b}, Param10 (base.R b a) (R a b))
+  (conv : ∀ {a b}, Param10.{x} (base.R b a) (R a b))
   : Param02a.{w} α β := by
-  tr_extend flip1 base R
+  tr_extend flip1.{_,_,_} base R
 
   exact (conv.right $ base.right_implies_R . . .)
 

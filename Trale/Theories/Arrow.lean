@@ -21,6 +21,8 @@ namespace Param_arrow
 variable {α : Sort u} {α' : Sort u} {β : Sort v} {β' : Sort v}
 
 def arrowR
+  {α' α : Sort u}
+  {β' β : Sort v}
   (p1 : Param00 α α')
   (p2 : Param00 β β')
   : (α → β) -> (α' → β') -> Sort _
@@ -38,9 +40,12 @@ theorem flipArrowR_involution
   : flipArrowR (flipArrowR r) = r := by rfl
 
 instance arrowR_rel
+  {α' α : Sort u}
+  {β' β : Sort v}
   [p1 : Param00 α α']
   [p2 : Param00 β β']
-  : Param44 (arrowR p1 p2 f f') (arrowR p1.flip p2.flip f' f) := by
+  {f f'}
+  : Param44 (arrowR p1.flip p2.flip f' f) (arrowR p1 p2 f f') := by
   tr_constructor
 
   -- R
@@ -60,6 +65,15 @@ instance arrowR_rel
     subst xR
     exact flipArrowR_involution
   simp
+
+instance arrowR_rel'
+  {α' α : Sort u}
+  {β' β : Sort v}
+  [p1 : Param00 α α']
+  [p2 : Param00 β β']
+  {f f'}
+  : Param10 (arrowR p1.flip p2.flip f' f) (arrowR p1 p2 f f') :=
+  arrowR_rel.forget
 
 
 
@@ -94,7 +108,7 @@ instance Map1_arrow
 
 set_option trace.tr.utils true
 
-@[tr_add_flipped Param_arrow.arrowR Param_arrow.arrowR_rel]
+@[tr_add_flipped Param_arrow.arrowR Param_arrow.arrowR_rel']
 instance Map2a_arrow
   [p1 : Param02b α α']
   [p2 : Param2a0 β β']
@@ -126,7 +140,8 @@ instance Map2a_arrow
   -- rw [mapAtoA']
 
 #check Map2a_arrow_flipped
-#print axioms Map2a_arrow_flipped
+#print axioms Map2a_arrow_flipped -- 'Param_arrow.Map2a_arrow_flipped' does not depend on any axioms
+#print Map2a_arrow_flipped
 
 -- (* (02a, 2b0) + funext -> 2b0 *)
 instance Map2b_arrow

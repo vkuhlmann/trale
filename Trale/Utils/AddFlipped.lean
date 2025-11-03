@@ -98,11 +98,39 @@ def tryFlip (m : MVarId) : MetaM (Option Expr) := do
   | .error _ => return .none
   | .ok p =>
 
-  let ⟨_, flipped⟩ := flipParamCore p
+  -- let ⟨_, flipped⟩ := flipParamCore p
+  let {
+    levelU, levelV, levelW, fromType, toType, covMapType, conMapType
+  } := p
 
-  let newMVar ← mkFreshExprMVar (.some flipped) (userName := ←m.getTag)
+  let flipped : Q(Type (max levelU levelV levelW)) := q(Param.{levelW, levelV, levelU} $conMapType $covMapType $toType $fromType)
 
+  let newMVar : Q($flipped) ← mkFreshExprMVar (.some flipped) (userName := ←m.getTag)
+
+  m.assign q(Param.flip $newMVar)
   return newMVar
+
+def tryToBottom (m : MVarId) : MetaM (Option Expr) := do
+  let p ← (getParamParts (←m.getType))
+  match p with
+  | .error _ => return .none
+  | .ok p =>
+
+  -- let ⟨_, flipped⟩ := flipParamCore p
+  let {
+    levelU, levelV, levelW, fromType, toType, covMapType, conMapType
+  } := p
+
+  let mType : Q(Type (max levelU levelV levelW)) := q(
+    Param.{levelW, levelU, levelV} $covMapType $conMapType $fromType $toType
+  )
+
+  let mVal ← mkFreshExprMVarQ mType
+  if !(←isDefEq mVal (.mvar m)) then
+    throwError "In tryToBottom: isDefEq check failed"
+
+  return q(Param.toBottom $mVal)
+
 
 initialize registerBuiltinAttribute {
     name := `tr_add_flipped
@@ -117,7 +145,7 @@ initialize registerBuiltinAttribute {
 
       let info ← getConstVal src
       let levelParams := info.levelParams
-      let value : Expr := .const src (levelParams.map mkLevelParam)
+      let origValue : Expr := .const src (levelParams.map mkLevelParam)
       -- let type : Expr ← liftAttrM (liftMetaM (inferType value))
       let origType := info.type
 
@@ -128,7 +156,7 @@ initialize registerBuiltinAttribute {
       trace[tr.utils] s!"Config RR: {config.RR}"
 
       -- liftCoreM <|
-      let ((covMapType, conMapType, tail, levelX, type, args), state) ← MetaM.run do
+      let ((covMapType, conMapType, tail, levelX, type, args, body), state) ← MetaM.run do
         trace[tr.utils] s!"Orig type: {repr origType}"
 
         let (args, argsBi, tail) ← forallMetaTelescope info.type
@@ -150,11 +178,32 @@ initialize registerBuiltinAttribute {
         let flippedArgs ← args.mapM fun e => do
           pure $ (← tryFlip e.mvarId!).getD e
 
+        let flippedArgsToBottom ← flippedArgs.mapM fun e => do
+          pure $ (← tryToBottom e.mvarId!).getD e
+
         let argsTypes ← (args.map (·.mvarId!)).mapM Lean.MVarId.getType'
-        let flippedTypes ← (flippedArgs.map (·.mvarId!)).mapM Lean.MVarId.getType'
+        let flippedTypes ← flippedArgs.mapM inferType
 
         trace[tr.utils] s!"Args types: {argsTypes}"
         trace[tr.utils] s!"Flipped types: {argsTypes}"
+
+        -- let levelY ← mkFreshLevelMVar
+
+        let RR_type ←
+          match config.RR with
+          | .const a levels => pure (←getConstInfo a).type
+          | a => inferType a
+        let (_, _, RR_tail) ← forallMetaTelescope RR_type
+
+        -- let RR_applied := mkAppN RR_type flippedArgs
+        -- let RR_tail ← whnf $ mkAppN RR_applied #[←mkFreshExprMVar .none, ←mkFreshExprMVar .none]
+
+        trace[tr.utils] s!"Tail is {RR_tail}"
+
+        let RR_tail_parts ←
+          match (←getParamParts (RR_tail)) with
+          | .error s => throwError s
+          | .ok a => pure a
 
         -- let completeType ← mkLambdaFVars flippedArgs flippedType
         let completeType ←
@@ -164,6 +213,50 @@ initialize registerBuiltinAttribute {
               (binderInfoForMVars := bi)
             )
             flippedType
+
+        let body ← mkLambdaFVars flippedArgs (
+          mkAppN
+          -- (←mkConstWithLevelParams ``flip2a) -- the universe levels of this need to be filled in
+          (.const ``flip2a [p.levelV, p.levelU, p.levelW, RR_tail_parts.levelW])
+          #[
+            p.toType,
+            p.fromType,
+            mkAppN origValue args,
+            mkAppN config.valR flippedArgsToBottom,
+            mkAppN config.RR flippedArgsToBottom
+          ]
+        )
+
+--         (kernel) application type mismatch
+--   @flip2a (@Map2a_arrow α α' β β' p1.flip p2.flip)
+-- argument has type
+--   Param2a0 (α → β) (α' → β')
+-- but function has type
+--   {α β : Sort (imax u v)} →
+--     (base : Param2a0 β α) →
+--       (R : α → β → Sort (imax u u u_1 u_2)) →
+--         ({a : α} → {b : β} → Param10 (Param.R MapType.Map2a MapType.Map0 b a) (R a b)) → Param02a α β
+
+/-
+
+(kernel) application type mismatch
+  flip2a (@Map2a_arrow α α' β β' p1.flip p2.flip) (@arrowR α α' β β' p1.toBottom p2.toBottom)
+    (@arrowR_rel α α' β β' p1.toBottom p2.toBottom)
+argument has type
+  {f : α' → β'} →
+    {f' : α → β} →
+      Param10 (@arrowR α α' β β' p1.toBottom p2.toBottom f f')
+        (@arrowR α' α β' β (Param.flip p1.toBottom) (Param.flip p2.toBottom) f' f)
+but function has type
+  ({a : α' → β'} →
+      {b : α → β} → Param10 (Param.R MapType.Map2a MapType.Map0 b a) (@arrowR α α' β β' p1.toBottom p2.toBottom a b)) →
+    Param02a (α' → β') (α → β)
+
+-/
+
+        trace[tr.utils] s!"Body is {body}"
+
+          -- pure .const `test []
 
         -- let completeType ← mkForallFVars args flippedType
 
@@ -178,7 +271,7 @@ initialize registerBuiltinAttribute {
           throwError "Failed to unify flipped type with Sort _"
 
         -- let type : Q() ← instantiateMVars type
-        return (p.covMapType, p.conMapType, tail, ←instantiateLevelMVars levelX, completeType, args)
+        return (p.covMapType, p.conMapType, tail, ←instantiateLevelMVars levelX, completeType, args, body)
 
       trace[tr.utils] s!"Tail is {repr tail}"
 
@@ -188,7 +281,8 @@ initialize registerBuiltinAttribute {
       trace[tr.utils] s!"Complete type is {type}"
       trace[tr.utils] s!"Level is {levelX}"
 
-      let value := mkAppN (.const ``sorryAx [levelX]) #[type, q(false)]
+      -- let value := mkAppN (.const ``sorryAx [levelX]) #[type, q(false)]
+      let value := body
 
       addDecl <| .defnDecl {
         name,

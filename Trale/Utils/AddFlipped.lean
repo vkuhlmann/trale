@@ -4,7 +4,7 @@ import Trale.Utils.Glueing
 import Trale.Theories.Flip
 import Qq
 
-open Lean Meta Elab Std Qq Command
+open Lean Meta Elab Std Qq Command Term
 
 
 namespace Trale.Utils
@@ -12,7 +12,7 @@ namespace Trale.Utils
 syntax (name := tr_add_flipped) "tr_add_flipped" (ppSpace ident) (ppSpace ident) ? : attr
 
 structure Config : Type where
-  valR : Expr
+  -- valR : Expr
   RR : Expr
 
 structure ParamParts where
@@ -77,15 +77,15 @@ def flipParam (e : Expr) : MetaM Expr := do
 
 
 def elabAddFlipped : Syntax → CoreM Config
-  | `(attr| tr_add_flipped%$tk $valR $RR) => do
-    trace[tr.utils] s!"valR: ${valR}"
+  | `(attr| tr_add_flipped%$tk $RR) => do
+    -- trace[tr.utils] s!"valR: ${valR}"
     trace[tr.utils] s!"RR: ${RR}"
 
-    let valR_name := valR.getId
+    -- let valR_name := valR.getId
     let RR_name := RR.getId
 
     return {
-      valR := ←mkConstWithLevelParams valR_name,
+      -- valR := ←mkConstWithLevelParams valR_name,
       RR := ←mkConstWithLevelParams RR_name
       -- valR := ← elabTermEnsuringTypeQ
       -- valR := ←(Term.elabTerm valR .none)
@@ -152,7 +152,7 @@ initialize registerBuiltinAttribute {
       -- trace[tr.utils] s!"Type is {repr type}"
 
       let config ← elabAddFlipped stx
-      trace[tr.utils] s!"Config valR: {config.valR}"
+      -- trace[tr.utils] s!"Config valR: {config.valR}"
       trace[tr.utils] s!"Config RR: {config.RR}"
 
       -- liftCoreM <|
@@ -193,7 +193,7 @@ initialize registerBuiltinAttribute {
           match config.RR with
           | .const a levels => pure (←getConstInfo a).type
           | a => inferType a
-        let (_, _, RR_tail) ← forallMetaTelescope RR_type
+        let (RR_args, RR_args_bi, RR_tail) ← forallMetaTelescope RR_type
 
         -- let RR_applied := mkAppN RR_type flippedArgs
         -- let RR_tail ← whnf $ mkAppN RR_applied #[←mkFreshExprMVar .none, ←mkFreshExprMVar .none]
@@ -214,6 +214,40 @@ initialize registerBuiltinAttribute {
             )
             flippedType
 
+        let baseCovMapType : Q(MapType) := p.covMapType
+        let baseConMapType : Q(MapType) := p.conMapType
+        let baseLevelU := p.levelU
+        let baseLevelV := p.levelV
+        let baseLevelW := p.levelW
+        let baseFromType : Q(Sort baseLevelU) := p.fromType
+        -- let baseFromType ← mkFreshExprMVarQ q(Sort baseLevelU)
+        let baseToType : Q(Sort baseLevelV) := p.toType
+        -- let baseToType ← mkFreshExprMVarQ q(Sort baseLevelV)
+
+        let base ← mkFreshExprMVarQ q(
+          Param.{baseLevelW} $baseCovMapType $baseConMapType $baseFromType
+          $baseToType
+        )
+
+        let baseCandidate ← whnf (mkAppN origValue args)
+        if !(← isExprDefEq base baseCandidate) then
+          throwTypeMismatchError
+            "Failed to unify base with the expected type"
+            (← inferType base) (← inferType baseCandidate) baseCandidate
+
+        -- #check Array
+        let valR_inferred ←
+          mkLambdaFVars RR_args --(RR_args.extract args.size)
+          RR_tail_parts.toType
+
+        -- if !(←isDefEq valR_inferred config.valR) then
+        --   throwTypeMismatchError
+        --     "Failed to unify valR with the inferred one"
+        --     (←inferType config.valR) (←inferType valR_inferred) valR_inferred
+
+        -- let abc := q(2)
+        -- let body2 ← q(flip2a $base)
+
         let body ← mkLambdaFVars flippedArgs (
           mkAppN
           -- (←mkConstWithLevelParams ``flip2a) -- the universe levels of this need to be filled in
@@ -221,8 +255,9 @@ initialize registerBuiltinAttribute {
           #[
             p.toType,
             p.fromType,
-            mkAppN origValue args,
-            mkAppN config.valR flippedArgsToBottom,
+            base,
+            -- mkAppN config.valR flippedArgsToBottom,
+            mkAppN valR_inferred flippedArgsToBottom,
             mkAppN config.RR flippedArgsToBottom
           ]
         )

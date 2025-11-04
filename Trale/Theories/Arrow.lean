@@ -108,7 +108,7 @@ instance Map1_arrow
 
 set_option trace.tr.utils true
 
-@[tr_add_flipped Param_arrow.arrowR Param_arrow.arrowR_rel']
+@[tr_add_flipped Param_arrow.arrowR_rel']
 instance Map2a_arrow
   [p1 : Param02b α α']
   [p2 : Param2a0 β β']

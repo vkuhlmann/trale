@@ -193,15 +193,32 @@ initialize registerBuiltinAttribute {
           match config.RR with
           | .const a levels => pure (←getConstInfo a).type
           | a => inferType a
-        let (RR_args, RR_args_bi, RR_tail) ← forallMetaTelescope RR_type
+
+        let RR_full ← reduce $ mkAppN config.RR flippedArgsToBottom
+        trace[tr.utils] s!"RR_full: {RR_full}"
+
+        trace[tr.utils] s!"RR_type (1): {RR_type}"
+        -- let RR_type := mkAppN RR_type flippedArgsToBottom
+        -- trace[tr.utils] s!"RR_type (2): {RR_type}"
+        -- let RR_type ← reduce RR_type
+        -- trace[tr.utils] s!"RR_type (3): {RR_type}"
+        let (RR_type_args, RR_type_args_bi, RR_type_tail) ← forallMetaTelescope RR_type
+
+        for (a, b) in RR_type_args.zip flippedArgsToBottom do
+          if !(←isDefEq a b) then
+            throwError s!"Failed to unify {a} with {b}"
+
+        let RR_type_args_extra := RR_type_args.extract flippedArgsToBottom.size
+
 
         -- let RR_applied := mkAppN RR_type flippedArgs
         -- let RR_tail ← whnf $ mkAppN RR_applied #[←mkFreshExprMVar .none, ←mkFreshExprMVar .none]
 
-        trace[tr.utils] s!"Tail is {RR_tail}"
+        trace[tr.utils] s!"RR_type_args: {RR_type_args}"
+        trace[tr.utils] s!"Tail is {RR_type_tail}"
 
-        let RR_tail_parts ←
-          match (←getParamParts (RR_tail)) with
+        let RR_type_tail_parts ←
+          match (←getParamParts RR_type_tail) with
           | .error s => throwError s
           | .ok a => pure a
 
@@ -237,8 +254,36 @@ initialize registerBuiltinAttribute {
 
         -- #check Array
         let valR_inferred ←
-          mkLambdaFVars RR_args --(RR_args.extract args.size)
-          RR_tail_parts.toType
+          mkLambdaFVars RR_type_args --(RR_args.extract args.size)
+          RR_type_tail_parts.toType
+
+        let RR_type_tail_cov := RR_type_tail_parts.covMapType
+        let RR_type_tail_con := RR_type_tail_parts.conMapType
+
+        let donorCondition := q($RR_type_tail_cov ≥ MapType.Map1)
+        let decidableCondition <- mkFreshExprMVarQ q(Decidable $donorCondition) (kind := .natural) (userName := `extendDonorConditionDecidable)
+        let donorConditionValue <- mkFreshExprMVarQ q($donorCondition) (kind := .natural) (userName := `extendDonorConditionValue)
+
+        -- #check (runTermElabM)
+        let (a, state) ← TermElabM.run do
+          -- runTermElabM (←synthesizeInstMVarCore decidableCondition.mvarId!)
+          -- let decidableCondition <- mkFreshExprMVarQ q(Decidable ($RR_tail_cov ≥ MapType.Map1)) (kind := .natural) (userName := `extendDonorConditionDecidable)
+          if  !(←synthesizeInstMVarCore decidableCondition.mvarId!) then
+            throwError s!"Failed to decide on ({donorCondition}"
+
+          return decidableCondition
+
+        if !(<- isExprDefEq decidableCondition q(Decidable.isTrue $donorConditionValue)) then
+          throwError  s!"Failed to proof ({donorCondition}) is true"
+
+
+        trace[tr.utils] s!"DecidableCondition (1): {decidableCondition}"
+        let decidableCondition ← instantiateMVars decidableCondition
+        trace[tr.utils] s!"DecidableCondition (2): {decidableCondition}"
+
+        trace[tr.utils] s!"Condition value (1): {donorConditionValue}"
+        let donorConditionValue ← instantiateMVars donorConditionValue
+        trace[tr.utils] s!"Condition value (2): {donorConditionValue}"
 
         -- if !(←isDefEq valR_inferred config.valR) then
         --   throwTypeMismatchError
@@ -248,17 +293,60 @@ initialize registerBuiltinAttribute {
         -- let abc := q(2)
         -- let body2 ← q(flip2a $base)
 
+        -- #check instDecidableLEMapType
+        -- #check sorryAx
+
+        let (RR_full_args, _, RR_full_tail) ← lambdaMetaTelescope RR_full
+
+        for (a, b) in RR_type_args_extra.zip RR_full_args do
+          if !(←isDefEq a b) then
+            throwError s!"Failed to unify {a} with {b}"
+
+        trace[tr.utils] s!"RR_full_args: {RR_full_args}"
+
+        let RR_forget ←
+          -- mkLambdaFVars (RR_args.extract flippedArgsToBottom.size)
+          mkLambdaFVars RR_full_args
+          -- =<< (mkLambdaFVars RR_type_args_extra
+            $ mkAppN
+            (.const ``Param.forget [RR_type_tail_parts.levelW, RR_type_tail_parts.levelU, RR_type_tail_parts.levelV])
+            #[
+              RR_type_tail_parts.fromType, RR_type_tail_parts.toType,
+              -- q(sorry : Sort $RR_tail_parts.levelU),
+              -- q(sorry : Sort $RR_tail_parts.levelV),
+              RR_type_tail_cov, RR_type_tail_con,
+              q(MapType.Map1), q(MapType.Map0),
+              donorConditionValue,
+              -- q(sorry : MapType.Map1 ≤ MapType.Map1),
+              q(@map0bottom $RR_type_tail_con),
+              -- q(instDecidableLEMapType MapType.Map0 MapType.Map0),
+              -- RR_full
+              RR_full_tail
+            ]
+          -- )
+
+        trace[tr.utils] s!"RR_full: {RR_full}"
+
+        trace[tr.utils] s!"RR_forget (1): {RR_forget}"
+
+        trace[tr.utils] s!"RR_forget (2): {←instantiateMVars RR_forget}"
+
+
+        trace[tr.utils] s!"RR_forget tye: {←inferType RR_forget}"
+
+        trace[tr.utils] s!"RR_full type: {←inferType RR_full}"
+
         let body ← mkLambdaFVars flippedArgs (
           mkAppN
           -- (←mkConstWithLevelParams ``flip2a) -- the universe levels of this need to be filled in
-          (.const ``flip2a [p.levelV, p.levelU, p.levelW, RR_tail_parts.levelW])
+          (.const ``flip2a [p.levelV, p.levelU, p.levelW, RR_type_tail_parts.levelW])
           #[
             p.toType,
             p.fromType,
             base,
             -- mkAppN config.valR flippedArgsToBottom,
             mkAppN valR_inferred flippedArgsToBottom,
-            mkAppN config.RR flippedArgsToBottom
+            RR_forget
           ]
         )
 
@@ -306,7 +394,10 @@ but function has type
           throwError "Failed to unify flipped type with Sort _"
 
         -- let type : Q() ← instantiateMVars type
-        return (p.covMapType, p.conMapType, tail, ←instantiateLevelMVars levelX, completeType, args, body)
+        return (
+          p.covMapType, p.conMapType, tail, ←instantiateLevelMVars levelX,
+          completeType, args, body
+        )
 
       trace[tr.utils] s!"Tail is {repr tail}"
 

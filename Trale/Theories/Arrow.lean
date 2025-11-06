@@ -66,16 +66,6 @@ instance arrowR_rel
     exact flipArrowR_involution
   simp
 
-instance arrowR_rel'
-  {α' α : Sort u}
-  {β' β : Sort v}
-  [p1 : Param00 α α']
-  [p2 : Param00 β β']
-  {f f'}
-  : Param10 (arrowR p1.flip p2.flip f' f) (arrowR p1 p2 f f') :=
-  arrowR_rel.forget
-
-
 
 instance Map0_arrow
   [p1 : Param00 α α']
@@ -108,7 +98,7 @@ instance Map1_arrow
 
 set_option trace.tr.utils true
 
-@[tr_add_flipped Param_arrow.arrowR_rel']
+@[tr_add_flipped Param_arrow.arrowR_rel]
 instance Map2a_arrow
   [p1 : Param02b α α']
   [p2 : Param2a0 β β']

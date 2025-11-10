@@ -244,6 +244,38 @@ theorem Param2a_flip_R_eq
     -- (Param.right_implies_R (Map2a_arrow (p1 := p2) (p2 := p1.flip)))
 
 
+#check Map2a_arrow_flipped
+#print axioms Map2a_arrow_flipped -- 'Param_arrow.Map2a_arrow_flipped' does not depend on any axioms
+#print Map2a_arrow_flipped
+
+#reduce
+  let : Param42a String Nat := ?p
+  -- inferInstanceAs (Param2a0 (Nat -> Nat) (Nat -> String))
+  inferInstanceAs (Param02a (Nat -> Nat) (Nat -> String))
+
+example [Param2a1 String Nat]
+  : Param12a (Nat -> Nat) (Nat -> String)
+  := inferGlued
+
+
+#check Map2b_arrow_flipped
+
+-- def abc
+--   {α α' : Sort u} {β β' : Sort v}
+--   [p1 : Param MapType.Map2a MapType.Map0 α' α] [p2 : Param MapType.Map0 MapType.Map2b β' β] :
+--   Param MapType.Map0 MapType.Map2b (α' → β') (α → β)
+--   := flip2b Map2b_arrow _ Param_arrow.arrowR_rel
+
+example [Param2b1 String Nat]
+  : Param12b (Nat -> Nat) (Nat -> String)
+  := inferGlued
+
+
+example [Param42a String Nat]
+  : Param2a3 (Nat -> Nat) (Nat -> String)
+  := inferGlued
+
+
 -- def flip02a_arrow
 
 

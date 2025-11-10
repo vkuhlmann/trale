@@ -39,6 +39,31 @@ def flipArrowR
 theorem flipArrowR_involution
   : flipArrowR (flipArrowR r) = r := by rfl
 
+-- def paramFromInvolution
+--   {invert : Type u → Type u}
+--   (h : ∀ r, invert (invert r) = r)
+--   : Param44 x (invert x) := by
+
+--   tr_constructor
+
+--   -- R
+--   exact (invert · = ·)
+
+--   -- 4
+--   exact invert
+--   simp
+--   simp
+--   simp
+
+--   -- 4
+--   exact flipArrowR
+--   simp
+--   apply flipArrowR_involution
+--   · intro x x' xR
+--     subst xR
+--     exact flipArrowR_involution
+--   simp
+
 instance arrowR_rel
   {α' α : Sort u}
   {β' β : Sort v}
@@ -72,9 +97,10 @@ instance Map0_arrow
   [p2 : Param00 β β']
 : Param00 (α → β) (α' → β') := by
   tr_constructor
+  exact arrowR p1 p2
 
-  exact fun f f' =>
-    forall a a', p1.R a a' -> p2.R (f a) (f' a')
+  -- exact fun f f' =>
+  --   forall a a', p1.R a a' -> p2.R (f a) (f' a')
 
 
 instance Map1_arrow
@@ -133,6 +159,16 @@ instance Map2a_arrow
 #print axioms Map2a_arrow_flipped -- 'Param_arrow.Map2a_arrow_flipped' does not depend on any axioms
 #print Map2a_arrow_flipped
 
+#reduce
+  let : Param42a String Nat := ?p
+  -- inferInstanceAs (Param2a0 (Nat -> Nat) (Nat -> String))
+  inferInstanceAs (Param02a (Nat -> Nat) (Nat -> String))
+
+example [Param2a1 String Nat]
+  : Param12a (Nat -> Nat) (Nat -> String)
+  := inferGlued
+
+@[tr_add_flipped Param_arrow.arrowR_rel]
 -- (* (02a, 2b0) + funext -> 2b0 *)
 instance Map2b_arrow
   [p1 : Param02a α α']
@@ -151,6 +187,10 @@ instance Map2b_arrow
   apply p1.left_implies_R
   simp
 
+example [Param2b1 String Nat]
+  : Param12b (Nat -> Nat) (Nat -> String)
+  := inferGlued
+
 -- (* (03, 30) + funext -> 30 *)
 instance Map3_arrow'
   (p1 : Param03 α α')
@@ -162,6 +202,8 @@ instance Map3_arrow'
   tr_extend Map2a_arrow (p1 := p1) (p2 := p2) <;> tr_fill_from_hypothesis param_base2
 
 
+
+@[tr_add_flipped Param_arrow.arrowR_rel]
 -- (* (03, 30) + funext -> 30 *)
 instance Map3_arrow
   [p1 : Param03 α α']
@@ -173,6 +215,10 @@ instance Map3_arrow
     Map2b_arrow (p1 := p1) (p2 := p2)
   ]
 
+
+example [Param42a String Nat]
+  : Param2a3 (Nat -> Nat) (Nat -> String)
+  := inferGlued
 
 -- (* (04(????), 40) + funext -> 40 *)
 instance Map4_arrow

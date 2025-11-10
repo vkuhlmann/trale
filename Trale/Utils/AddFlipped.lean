@@ -74,6 +74,39 @@ def flipParam (e : Expr) : MetaM Expr := do
 
   return expr
 
+def synthesizeDecidable! (donorConditionValue : Expr) : MetaM Unit := do
+  let donorConditionDonor ← inferType donorConditionValue
+  let donorCondition ← mkFreshExprMVarQ q(Prop)
+  if !(←isDefEq donorCondition donorConditionDonor) then
+    throwError "Failed to match type to decide with Prop"
+
+  let decidableCondition <- mkFreshExprMVarQ q(Decidable $donorCondition) --(kind := .natural) (userName := `donorConditionDecidable)
+  let donorConditionVal <- mkFreshExprMVarQ q($donorCondition) --(kind := .natural) (userName := `donorConditionValue)
+
+  -- #check (runTermElabM)
+  let (a, state) ← TermElabM.run do
+    -- runTermElabM (←synthesizeInstMVarCore decidableCondition.mvarId!)
+    -- let decidableCondition <- mkFreshExprMVarQ q(Decidable ($RR_tail_cov ≥ MapType.Map1)) (kind := .natural) (userName := `extendDonorConditionDecidable)
+    if  !(←synthesizeInstMVarCore decidableCondition.mvarId!) then
+      throwError s!"Failed to decide on ({donorCondition}"
+
+    return decidableCondition
+
+  if !(<- isExprDefEq decidableCondition q(Decidable.isTrue $donorConditionVal)) then
+    throwError  s!"Failed to proof ({donorCondition}) is true"
+
+
+  trace[tr.utils] s!"DecidableCondition (1): {decidableCondition}"
+  let decidableCondition ← instantiateMVars decidableCondition
+  trace[tr.utils] s!"DecidableCondition (2): {decidableCondition}"
+
+  trace[tr.utils] s!"Condition value (1): {donorConditionVal}"
+  let donorConditionVal ← instantiateMVars donorConditionVal
+  trace[tr.utils] s!"Condition value (2): {donorConditionVal}"
+  if !(←isDefEq donorConditionValue donorConditionVal) then
+    throwError s!"Failed to output the decided value in the expression"
+
+
 
 
 def elabAddFlipped : Syntax → CoreM Config
@@ -257,33 +290,94 @@ initialize registerBuiltinAttribute {
           mkLambdaFVars RR_type_args --(RR_args.extract args.size)
           RR_type_tail_parts.toType
 
+
+        let baseCov ← recoverMapTypeFromExpr baseCovMapType
+        match baseCov with
+        | .none =>
+          throwError s!"Failed to infer concrete map type"
+        | .some baseCov =>
+
+
+        let flipFunction := match baseCov with
+          | .Map4 => ``flip4
+          | .Map3 => ``flip3
+          | .Map2a => ``flip2a
+          | .Map2b => ``flip2b
+          | .Map1 => ``flip1
+          | .Map0 => ``flip0
+
+        let convR_to_body ← reduce <| mkAppN
+          (.const flipFunction [p.levelV, p.levelU, p.levelW, RR_type_tail_parts.levelW])
+          #[
+            p.toType,
+            p.fromType,
+            base,
+            mkAppN valR_inferred flippedArgsToBottom
+          ]
+
+        trace[tr.utils] s!"convR_to_body type: {convR_to_body}"
+
+        let convR_type ← match convR_to_body with
+          | .lam _ bt _ _ => pure bt
+          | _ => throwError "Failed to infer type of the flip method's conv parameter"
+
+        trace[tr.utils] s!"convR_type: {convR_type}"
+
+        let (convR_type_args, convR_type_args_bi, convR_type_tail) ← forallMetaBoundedTelescope convR_type 2
+
+        -- let abc := convR_type.mvarId!.assign
+
+        -- for (a, b) in convR_type_args.zip RR_full_args do
+        --   if !(←isDefEq a b) then
+        --     throwError s!"Failed to unify {a} (type: {← inferType a}) with {b} (type: {←inferType b})"
+
+        -- let convR_type ← reduce <| mkAppN convR_type RR_full_args
+        trace[tr.utils] s!"convR_type args: {convR_type_args}"
+        trace[tr.utils] s!"convR_type tail: {convR_type_tail}"
+
+        let p ←
+          match (← getParamParts convR_type_tail) with
+          | .error s => throwError s
+          | .ok a => pure a
+
+        trace[tr.utils] s!"convR_type cov: {p.covMapType}"
+        trace[tr.utils] s!"convR_type con: {p.conMapType}"
+
         let RR_type_tail_cov := RR_type_tail_parts.covMapType
         let RR_type_tail_con := RR_type_tail_parts.conMapType
 
-        let donorCondition := q($RR_type_tail_cov ≥ MapType.Map1)
-        let decidableCondition <- mkFreshExprMVarQ q(Decidable $donorCondition) (kind := .natural) (userName := `extendDonorConditionDecidable)
-        let donorConditionValue <- mkFreshExprMVarQ q($donorCondition) (kind := .natural) (userName := `extendDonorConditionValue)
-
-        -- #check (runTermElabM)
-        let (a, state) ← TermElabM.run do
-          -- runTermElabM (←synthesizeInstMVarCore decidableCondition.mvarId!)
-          -- let decidableCondition <- mkFreshExprMVarQ q(Decidable ($RR_tail_cov ≥ MapType.Map1)) (kind := .natural) (userName := `extendDonorConditionDecidable)
-          if  !(←synthesizeInstMVarCore decidableCondition.mvarId!) then
-            throwError s!"Failed to decide on ({donorCondition}"
-
-          return decidableCondition
-
-        if !(<- isExprDefEq decidableCondition q(Decidable.isTrue $donorConditionValue)) then
-          throwError  s!"Failed to proof ({donorCondition}) is true"
 
 
-        trace[tr.utils] s!"DecidableCondition (1): {decidableCondition}"
-        let decidableCondition ← instantiateMVars decidableCondition
-        trace[tr.utils] s!"DecidableCondition (2): {decidableCondition}"
+        -- let donorCondition := q($RR_type_tail_cov ≥ $p.covMapType)
+        -- let decidableCondition <- mkFreshExprMVarQ q(Decidable $donorCondition) (kind := .natural) (userName := `extendDonorConditionDecidable)
+        -- let donorConditionValue <- mkFreshExprMVarQ donorCondition (kind := .natural) (userName := `extendDonorConditionValue)
 
-        trace[tr.utils] s!"Condition value (1): {donorConditionValue}"
-        let donorConditionValue ← instantiateMVars donorConditionValue
-        trace[tr.utils] s!"Condition value (2): {donorConditionValue}"
+        -- -- #check (runTermElabM)
+        -- let (a, state) ← TermElabM.run do
+        --   -- runTermElabM (←synthesizeInstMVarCore decidableCondition.mvarId!)
+        --   -- let decidableCondition <- mkFreshExprMVarQ q(Decidable ($RR_tail_cov ≥ MapType.Map1)) (kind := .natural) (userName := `extendDonorConditionDecidable)
+        --   if  !(←synthesizeInstMVarCore decidableCondition.mvarId!) then
+        --     throwError s!"Failed to decide on ({donorCondition}"
+
+        --   return decidableCondition
+
+        -- if !(<- isExprDefEq decidableCondition q(Decidable.isTrue $donorConditionValue)) then
+        --   throwError  s!"Failed to proof ({donorCondition}) is true"
+
+
+        -- trace[tr.utils] s!"DecidableCondition (1): {decidableCondition}"
+        -- let decidableCondition ← instantiateMVars decidableCondition
+        -- trace[tr.utils] s!"DecidableCondition (2): {decidableCondition}"
+
+        -- trace[tr.utils] s!"Condition value (1): {donorConditionValue}"
+        -- let donorConditionValue ← instantiateMVars donorConditionValue
+        -- trace[tr.utils] s!"Condition value (2): {donorConditionValue}"
+
+        let covWeaken ← mkFreshExprMVarQ q($RR_type_tail_cov ≥ $p.covMapType)
+        let conWeaken ← mkFreshExprMVarQ q($RR_type_tail_con ≥ $p.conMapType)
+
+        synthesizeDecidable! covWeaken
+        synthesizeDecidable! conWeaken
 
         -- if !(←isDefEq valR_inferred config.valR) then
         --   throwTypeMismatchError
@@ -315,10 +409,11 @@ initialize registerBuiltinAttribute {
               -- q(sorry : Sort $RR_tail_parts.levelU),
               -- q(sorry : Sort $RR_tail_parts.levelV),
               RR_type_tail_cov, RR_type_tail_con,
-              q(MapType.Map1), q(MapType.Map0),
-              donorConditionValue,
+              p.covMapType, p.conMapType,
+              covWeaken,
               -- q(sorry : MapType.Map1 ≤ MapType.Map1),
-              q(@map0bottom $RR_type_tail_con),
+              -- q(@map0bottom $RR_type_tail_con),
+              conWeaken,
               -- q(instDecidableLEMapType MapType.Map0 MapType.Map0),
               -- RR_full
               RR_full_tail
@@ -336,16 +431,12 @@ initialize registerBuiltinAttribute {
 
         trace[tr.utils] s!"RR_full type: {←inferType RR_full}"
 
+
+
         let body ← mkLambdaFVars flippedArgs (
           mkAppN
-          -- (←mkConstWithLevelParams ``flip2a) -- the universe levels of this need to be filled in
-          (.const ``flip2a [p.levelV, p.levelU, p.levelW, RR_type_tail_parts.levelW])
+          convR_to_body
           #[
-            p.toType,
-            p.fromType,
-            base,
-            -- mkAppN config.valR flippedArgsToBottom,
-            mkAppN valR_inferred flippedArgsToBottom,
             RR_forget
           ]
         )

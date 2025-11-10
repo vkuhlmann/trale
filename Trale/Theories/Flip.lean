@@ -7,22 +7,27 @@ import Trale.Utils.Extend
 import Trale.Utils.Whnf
 import Trale.Utils.Normalize
 import Trale.Utils.Glueing
+import Trale.Utils.ParamFromFunction
 import Qq open Qq Lean
 
 open Trale.Utils
 
 def flip0
-  (_ : Param00.{w} β α)
-  (R : α → β → Sort w)
+  {α : Sort u} {β : Sort v}
+  (base : Param00.{w} β α)
+  {R : α → β → Sort w}
+  (_ : ∀ {a b}, Param00.{x} (base.R b a) (R a b))
   : Param00.{w} α β := by
 
   tr_constructor
   exact R
 
 def flip1
+  {α : Sort u} {β : Sort v}
   (base : Param10.{w} β α)
-  (R : α → β → Sort w)
+  {R : α → β → Sort w}
   -- (_ : ∀ {a b}, Param00 (base.R b a) (R a b))
+  (_ : ∀ {a b}, Param10.{x} (base.R b a) (R a b))
   : Param01.{w} α β := by
 
   tr_constructor
@@ -30,36 +35,42 @@ def flip1
   exact base.right
 
 set_option pp.universes true in
-def flip2a.{u,v,w,x}
+def flip2a
   -- Alpha needs to have an explicit universe level, else it
   -- will become a Type.
   -- FIXME: Why does it become a Type without?
   {α : Sort u} {β : Sort v}
   (base : Param2a0.{w} β α)
-  (R : α → β → Sort w)
+  {R : α → β → Sort w}
   (conv : ∀ {a b}, Param10.{x} (base.R b a) (R a b))
   : Param02a.{w} α β := by
-  tr_extend flip1.{_,_,_} base R
+  tr_extend flip1 base conv
 
   exact (conv.right $ base.right_implies_R . . .)
 
-def flip2b
-  {α : Sort u} {β}
-  (base : Param2b0 β α)
-  (R : α → β → Sort _)
-  (conv : ∀ {a b}, Param11 (base.R b a) (R a b))
-  : Param02b α β := by
+#check flip2a
+#eval show MetaM Unit from do
+  let decl ← getConstInfo ``flip2a
+  IO.println s!"decl type: {repr decl.type}"
+-- #print Type flip2a
 
-  tr_extend flip1 base R
+def flip2b
+  {α : Sort u} {β : Sort v}
+  (base : Param2b0.{w} β α)
+  (R : α → β → Sort w)
+  (conv : ∀ {a b}, Param11.{x} (base.R b a) (R a b))
+  : Param02b.{w} α β := by
+
+  tr_extend flip1 base conv.forget
 
   exact (base.R_implies_right . . $ conv.left .)
 
 def flip3
-  {α : Sort u} {β}
-  (base : Param30 β α)
-  (R : α → β → Sort _)
-  (conv : ∀ {a b}, Param11 (base.R b a) (R a b))
-  : Param03 α β := by
+  {α : Sort u} {β : Sort v}
+  (base : Param30.{w} β α)
+  (R : α → β → Sort w)
+  (conv : ∀ {a b}, Param11.{x} (base.R b a) (R a b))
+  : Param03.{w} α β := by
 
   -- let base1 := flip2a base R conv.forget
   -- let base2 := flip2b base R conv.forget
@@ -72,14 +83,14 @@ def flip3
   -- case left_implies_R =>
   --   exact base1.contravariant.map_in_R
 
-  tr_extend_multiple [flip2a base R conv.forget, flip2b base R conv.forget]
+  tr_extend_multiple [flip2a base conv.forget, flip2b base R conv.forget]
 
 def flip4
-  {α : Sort u} {β}
-  (base : Param40 β α)
-  (R : α → β → Sort _)
-  (conv : ∀ {a b}, Param2b2a (base.R b a) (R a b))
-  : Param04 α β := by
+  {α : Sort u} {β : Sort v}
+  (base : Param40.{w} β α)
+  (R : α → β → Sort w)
+  (conv : ∀ {a b}, Param2b2a.{x} (base.R b a) (R a b))
+  : Param04.{w} α β := by
 
   tr_extend flip3 base R conv.forget
 

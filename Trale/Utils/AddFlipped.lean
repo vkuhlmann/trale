@@ -410,7 +410,7 @@ but function has type
       -- let value := mkAppN (.const ``sorryAx [levelX]) #[type, q(false)]
       let value := body
 
-      addDecl <| .defnDecl {
+      addAndCompile <| .defnDecl {
         name,
         value,
         levelParams,
@@ -418,6 +418,8 @@ but function has type
         hints := ReducibilityHints.regular 100,
         safety := DefinitionSafety.safe
       }
+
+      let (_, _) ← MetaM.run <| addInstance name AttributeKind.global 1000
 
       trace[tr.utils] s!"Registered {name}"
 

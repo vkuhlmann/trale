@@ -3,7 +3,7 @@ import Trale.Utils.Whnf
 import Lean
 
 def Param.toBottom (p : Param cov con α β) : Param00 α β :=
-  p.forget (h1 := Param.map0bottom) (h2 := Param.map0bottom)
+  p.forget (h1 := map0bottom) (h2 := map0bottom)
 
 
 namespace Trale.Utils

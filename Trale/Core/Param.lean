@@ -161,12 +161,6 @@ def forget'
 : Param.{w} X' Y' α β
  := (CoeParam Rp).coe
 
-theorem map0bottom {X : MapType} : MapType.Map0 ≤ X := by
-  cases X <;> decide
-
-theorem map4top {X : MapType} : X ≤ MapType.Map4 := by
-  cases X <;> decide
-
 @[simp]
 def forget
   {X Y X' Y': MapType}

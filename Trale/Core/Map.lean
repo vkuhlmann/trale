@@ -103,6 +103,14 @@ instance : DecidableLE MapType :=
       exact Decidable.isTrue rfl
     )
 
+theorem map0bottom {X : MapType} : MapType.Map0 ≤ X := by
+  cases X <;> decide
+
+theorem map4top {X : MapType} : X ≤ MapType.Map4 := by
+  cases X <;> decide
+
+#eval instDecidableLEMapType .Map0 .Map0
+
 theorem mapTypeTrans {a b c : MapType} (h1 : a ≤ b) (h2 : b ≤ c) : a ≤ c := by
   simp [LE.le, leMapType]
   cases a <;> cases c <;> simp <;> cases b <;> contradiction

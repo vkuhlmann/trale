@@ -1,7 +1,7 @@
 import Lean
 
 open Lean Expr Elab Tactic MVarId in
-elab "tr_whnf" : tactic =>
+elab "tr_whnf'" : tactic =>
   Lean.Elab.Tactic.withMainContext do
     let goal ← Lean.Elab.Tactic.getMainGoal
     let goalType ← Lean.Elab.Tactic.getMainTarget
@@ -36,7 +36,7 @@ elab "make_whnf" td:term : term => do
 
 
 open Lean Expr Elab Tactic MVarId Meta in
-elab "tr_whnf" "at" ppSpace colGt t:ident : tactic =>
+elab "tr_whnf'" "at" ppSpace colGt t:ident : tactic =>
   withMainContext do
     let goal ← getMainGoal
 
@@ -63,3 +63,37 @@ elab "tr_whnf" "at" ppSpace colGt t:ident : tactic =>
     -- which does make sense since we're currently still referring to the original
     -- fvar. Should we open it, and refer to its value, if that is assigned?
     liftMetaTactic1 (·.tryClear fvarId)
+
+
+-- syntax (name := tr_whnf) "tr_whnf'" : tactic
+open Lean.Parser.Tactic in
+syntax (name := tr_whnf) "tr_whnf " (location)? : tactic
+
+
+open Lean Elab Tactic Meta Term
+
+def elabWhnf (e : Expr) (p : Expr) (mkDefeqError : Expr → Expr → MetaM MessageData := elabChangeDefaultError) :
+    TacticM Expr := do
+    withAssignableSyntheticOpaque do
+    unless ← isDefEq p e do
+      throwError MessageData.ofLazyM (es := #[p, e]) do
+        let (p, tgt) ← addPPExplicitToExposeDiff p e
+        mkDefeqError p tgt
+    instantiateMVars p
+
+elab_rules : tactic
+  -- | `(tactic| subst_last%$t) =>
+-- macro_rules --@[builtin_tactic change] def evalChange : Tactic
+  | `(tactic| tr_whnf $[$loc:location]?) => do
+    withLocation (expandOptLocation (Lean.mkOptionalNode loc))
+      (atLocal := fun h => do
+        let newType ← whnf (← h.getType)
+        let (hTy', mvars) ← withCollectingNewGoalsFrom (elabWhnf (← h.getType) newType) (← getMainTag) `change
+        liftMetaTactic fun mvarId => do
+          return (← mvarId.changeLocalDecl h hTy') :: mvars)
+      (atTarget := do
+        let newType ← whnf (← getMainTarget)
+        let (tgt', mvars) ← withCollectingNewGoalsFrom (elabWhnf (← getMainTarget) newType) (← getMainTag) `change
+        liftMetaTactic fun mvarId => do
+          return (← mvarId.replaceTargetDefEq tgt') :: mvars)
+      (failed := fun _ => throwError "'change' tactic failed")

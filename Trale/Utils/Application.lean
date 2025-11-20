@@ -2,6 +2,7 @@ import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
+import Trale.Utils.Trace
 import Lean.Util
 import Qq
 open Qq Lean Elab Command Tactic Term Expr Meta
@@ -14,7 +15,7 @@ open Qq Lean Elab Command Tactic Term Expr Meta
 --   ∀ f f' (_ : p1.R f f'),
 --   ∀ a a' (_ : p2.R a a'), p3.R (f a) (f' a')
 
-initialize Lean.registerTraceClass `tr.utils
+
 -- builtin_initialize Lean.registerTraceClass `tr_split_application
 
 -- #eval show IO Unit from do
@@ -53,6 +54,28 @@ structure SplitApplicationConfig where
   allowHead := true
 declare_config_elab elabSplitAppConfigCore    SplitApplicationConfig
 
+#check
+  (let x := 3; Fin x)
+  -- ((let x := 3; Fin x) : ((y : Nat) → Fin y : Type))
+
+-- #check
+--   ∀ x : Nat,
+--   Fin x
+
+#reduce (let x := 3; x + 5)
+
+
+example : (let x := 3; Fin 7) := by
+  let h := make_whnf (let x := 3; x + 5)
+
+
+  tr_whnf
+
+  -- simp at h
+
+
+  sorry
+
 
 #check Simp.SimprocsArray
 
@@ -73,6 +96,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       let allowHead := config.allowHead
 
+      trace[tr.utils] s!"Obtaining goal"
       let goal ← getMainGoal
       let goalType ← getMainTarget
       let tag ← goal.getTag
@@ -80,6 +104,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       -- trace[tr.utils] s!"Type is {goalType}"
       -- trace[tr.utils] s!"Type as expression is {repr goalType}"
 
+      trace[tr.utils] s!"Performing pattern match"
       let levelU ← mkFreshLevelMVar
       let levelV ← mkFreshLevelMVar
       let levelW ← mkFreshLevelMVar
@@ -92,9 +117,12 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       let matcher : Q(Type (max levelU levelV levelW)) := q(Param.{levelW} $covMapType $conMapType $fromType $toType)
 
+      trace[tr.utils] s!"Checking defEq"
       if !(← isExprDefEq matcher goalType) then
+        trace[tr.utils] s!"Throwing 'goal should be of type Param'"
         throwTacticEx `tr_split_application goal ("goal should be of type Param")
 
+      trace[tr.utils] s!"Checked defEq"
       let fromType : Q(Sort $levelU) ← instantiateMVars fromType
       let toType : Q(Sort $levelV) ← instantiateMVars toType
       let covMapType : Q(MapType) ← instantiateMVars covMapType
@@ -552,30 +580,56 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       -- : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) ))
       -- := q(∀ a a' (_ : ($p1).R a a'), (Param10 ($β a) ($β' a') : Type (max (max levelX1 levelY1) (max levelX2 levelY2) levelZ)))
 
-      let p2Type
-        : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
-        := q(
-            ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
-            (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
-
       -- trace[tr.utils] s!"p2Type: {repr p2Type}"
 
-      let p2 : Q(∀ (a : $α) (a' : $α') (_: ($p1).R a a'),
-        (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
-        ← mkFreshExprMVar (.some p2Type) (userName := .str tag "p2")
+      -- p2.mvarId!.ass
 
       -- trace[tr.utils] s!"p2: {repr p2}"
 
-      let a : Q($α) := a
-      let a' : Q($α') := a'
+      let aVal := a
+      let a : Q($α) ← mkFreshExprMVar α (userName := .mkSimple "a")
+      a.mvarId!.assign aVal
+
+      let aVal' := a'
+      let a' : Q($α') ← mkFreshExprMVar α' (userName := .mkSimple "a'")
+      a'.mvarId!.assign aVal'
 
       let aRtype := q(($p1).R $a $a')
       -- trace[tr.utils] s!"aRtype: {repr aRtype}"
 
       -- These will be goals
       let aR
-        -- : Q(($p1).R $a $a')
+        : Q(($p1).R $a $a')
         ← mkFreshExprMVar (.some q(($p1).R $a $a')) (userName := .str tag "aR")
+
+
+      let p2Type
+        -- : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
+        := q(
+            -- ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
+            let a : $α := $a; let a' : $α' := $a';
+            let aR: ($p1).R a a' := $aR;
+            -- ∀ (_ : ($p1).R a a'),
+            (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
+
+
+      let p2base : Q(let a : $α := $a; let a' : $α' := $a';
+        let aR: ($p1).R a a' := $aR;
+        (Param.{levelZ} $covMapType $conMapType ($β $a) ($β' $a')))
+        ← mkFreshExprMVar (.some p2Type) (userName := .str tag "p2")
+
+      trace[tr.utils] s!"p2 base is {format p2base}"
+
+      let (p2FvarIds, p2mvarId) ← p2base.mvarId!.introNP 3
+
+      p2mvarId.withContext do
+
+      let p2 : Q(Param.{levelZ} $covMapType $conMapType ($β $a) ($β' $a')) :=
+        .mvar p2mvarId
+
+      -- let p2 := p2base
+
+      trace[tr.utils] s!"p2 is {format p2}"
 
       let sometest2 := q(4)
 
@@ -601,29 +655,38 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       -- let complete := q(forallApplication $p1 $a $a' $aR $p2)
       -- let complete := q(@forallApplication _ _ $β $β' $p1 $a $a' $aR $p2)
       -- let almostComplete := q(fun aR => @forallApplication $covMapType $conMapType _ _ $β $β' $p1 $a $a' aR $p2)
-      let almostComplete := q(fun aR => @forallApplication $covMapType $conMapType _ _ $β $β' $p1 $a $a' aR $p2)
-      let complete : Expr := .app almostComplete aR
+      -- let almostComplete := q(fun aR => @forallApplication $covMapType $conMapType _ _ $β $β' $p1 $a $a' aR $p2)
+      -- let complete : Expr := .app almostComplete aR
 
-      let completeResult : Simp.Result ← unfold complete ``forallApplication
-      let complete := completeResult.expr
+      -- let completeResult : Simp.Result ← unfold complete ``forallApplication
+      -- let complete := completeResult.expr
 
       -- The function `mkSimpContext`
-      let (complete, _) ←
-        dsimp complete
-          (← Simp.mkContext)
-          -- (simprocs := #[{}])
-          -- (simprocs := #[←Simp.Simprocs.add {} ``forallApplication false])
+      -- let (complete, _) ←
+      --   dsimp p2
+      --     (← Simp.mkContext)
+      --     -- (simprocs := #[{}])
+      --     -- (simprocs := #[←Simp.Simprocs.add {} ``forallApplication false])
 
-      -- trace[tr.utils] s!"Complete is {repr complete}"
-      -- trace[tr.utils] s!"Complete is {← ppTerm <| ← PrettyPrinter.delab complete}"
-      let complete ← instantiateMVars complete
+      -- -- trace[tr.utils] s!"Complete is {repr complete}"
+      -- -- trace[tr.utils] s!"Complete is {← ppTerm <| ← PrettyPrinter.delab complete}"
+      -- let complete ← instantiateMVars complete
+
+      let complete := ← instantiateMVars p2
 
       trace[tr.utils] s!"Goal type is {format goalType}"
 
       trace[tr.utils] s!"Complete type is {format (← inferType complete)}"
 
       if !(← isDefEq goalType (← inferType complete)) then
+        throwTypeMismatchError
+          "Could not unify goal type (1) with assembled type"
+          goalType (← inferType complete) complete
+          -- `tr_split_application
+
         throwTacticEx `tr_split_application goal "Could not unify goal type (1) with assembled type"
+
+      trace[tr.utils] s!"Passed type unification test 1."
 
       if !(← isDefEq (← goal.getType) (← inferType complete)) then
         throwTacticEx `tr_split_application goal "Could not unify goal type (2) with assembled type"
@@ -648,7 +711,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       ```
       -/
 
-      goal.assign complete
+      goal.assign p2base
 
       replaceMainGoal [p1.mvarId!, aR.mvarId!, p2.mvarId!]
 

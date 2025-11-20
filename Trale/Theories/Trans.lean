@@ -7,15 +7,10 @@ import Trale.Utils.Extend
 import Trale.Utils.Whnf
 import Qq open Qq Lean
 
-#check default
-example : ∀ a : α, @default _ (Inhabited.mk a) = a := by
-  sorry
-
-
 /-
 In Trocq plugin:
 
-```
+```coq
 Definition R_trans {A B C : Type} (R1 : A -> B -> Type) (R2 : B -> C -> Type) : A -> C -> Type :=
   fun a c => {b : B & R1 a b * R2 b c}.
 ```
@@ -47,7 +42,7 @@ def Map2a_trans
   dsimp
   intro a c acF
 
-  let b := p1.forget.right a
+  let b := p1.right a
   let abR := p1.right_implies_R a b (by rfl)
   let bcR := p2.right_implies_R b c (by congr)
 
@@ -92,7 +87,7 @@ def Map3_trans
 theorem Map2b_prop1
   (p1 : Param2b0 α α')
   (aR : p1.R a a')
-  : p1.forget.right a = a' := by
+  : p1.right a = a' := by
 
   exact p1.R_implies_right _ _ aR
 
@@ -133,57 +128,60 @@ def Map4_trans
   let lhs := ?lhs
   show lhs = acR
 
-  have ⟨b, abR, bcR⟩ := acR
+  have ⟨b, abR, bcR⟩ := (acR : (b : β) ×' p1.R a b ×' p2.R b c)
+  replace abR : p1.R a b := abR
   have ⟨b', abR', bcR'⟩ := lhs
 
-  have bEq : b = b' := by
-    exact Map2b_prop2 _ abR' abR
+  sorry
 
-    sorry
+  -- have bEq : b = b' := by
+  --   exact Map2b_prop2 _ abR' abR
 
-
-
-  -- suffices ((abR = abR') ∧ (bcR = bcR')) by
-  -- · congr
-
-
-
-
-
-
-
-
-  have ⟨b, abR, bcR⟩ := acR
-
-  have abK := tr.R_implies_mapK _ _ abR
-  have bcK := tr.R_implies_mapK _ _ bcR
-
-
-
-  -- unfold tr.map_implies_R
-  -- unfold Map2a.map_in_R
-  -- unfold instParamMap2aOfMap3
-  apply Eq.trans
-  case b =>
-    tr_whnf
-    simp
-    exact ⟨b, ⟨abR, bcR⟩⟩
-
-
-
-
-
-
-
-
-  simp
-
-  -- match ⊢ with
-  -- | ⟨b', ⟨abR', bcR'⟩⟩ = ⟨b, ⟨abR, bcR⟩⟩ =>
   --   sorry
 
 
 
+  -- -- suffices ((abR = abR') ∧ (bcR = bcR')) by
+  -- -- · congr
 
-  -- show (⟨_, _⟩ : Param.R _ _ a c) = ⟨_, _⟩
-  show (_ : Param.R _ _ a c) = ⟨_, _⟩
+
+
+
+
+
+
+
+  -- have ⟨b, abR, bcR⟩ := acR
+
+  -- have abK := tr.R_implies_mapK _ _ abR
+  -- have bcK := tr.R_implies_mapK _ _ bcR
+
+
+
+  -- -- unfold tr.map_implies_R
+  -- -- unfold Map2a.map_in_R
+  -- -- unfold instParamMap2aOfMap3
+  -- apply Eq.trans
+  -- case b =>
+  --   tr_whnf
+  --   simp
+  --   exact ⟨b, ⟨abR, bcR⟩⟩
+
+
+
+
+
+
+
+
+  -- simp
+
+  -- -- match ⊢ with
+  -- -- | ⟨b', ⟨abR', bcR'⟩⟩ = ⟨b, ⟨abR, bcR⟩⟩ =>
+  -- --   sorry
+
+
+
+
+  -- -- show (⟨_, _⟩ : Param.R _ _ a c) = ⟨_, _⟩
+  -- show (_ : Param.R _ _ a c) = ⟨_, _⟩

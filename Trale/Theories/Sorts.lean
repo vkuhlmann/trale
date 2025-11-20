@@ -3,6 +3,9 @@ import Trale.Utils.Extend
 import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
+import Trale.Utils.ParamFromFunction
+
+open Trale.Utils
 
 instance (priority := low) sortParam.{w} : Param00 (Sort u) (Sort u) := by
   tr_constructor
@@ -44,18 +47,13 @@ def instantiatePropR
   {a b : Prop}
   (r : propParam.R a b)
   : Param40 a b := by
-
-  tr_from_map
-  exact r
+  tr_from_map r
 
 def instantiatePropR_r
   {a b : Prop}
   (r : propParam.R b a)
   : Param04 a b := by
-
-  tr_flip
-  tr_from_map
-  exact r
+  tr_from_map r
 
 theorem R_eq
   [Param2b0 α α']

@@ -4,6 +4,7 @@ import Lean.Expr
 import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Utils.Extend
+import Trale.Utils.Glueing
 import Qq open Qq Lean
 
 namespace Param_sigma
@@ -21,8 +22,8 @@ def Map0_sigma
 
   intro x@⟨a, ba⟩ x'@⟨a', ba'⟩
 
-  exact ∃ (aR : p1.R a a'),
-          (p2 a a' aR).R ba ba'
+  exact Σ' (aR : p1.R a a'),
+           (p2 a a' aR).R ba ba'
 
 
 def Map1_sigma
@@ -69,6 +70,28 @@ def Map2a_sigma
 
   exists aR
   exact (p2 a a' aR).right_implies_R ba ba' h2
+
+-- example
+--   {α α' : Prop}
+--   {β : α -> Prop}
+--   {β' : α' -> Prop}
+--   [p1 : Param2a2a α α']
+--   (p2 : ∀ a a', p1.R a a' -> Param2a2a (β a) (β' a'))
+--   : Param2a1 (Σ' a, β a) (Σ' a', β' a') := by
+--   apply Trale.Utils.glued (Map2a_sigma p1 (p2 . . .))
+--     (Map1_sigma p1.flip (∀ a a', fun aR => (p2 a a' aR).flip)).flip
+
+--   funext (a, b) (a', b')
+
+--   show ((p1.R a a') × (p2.R b b'))
+--         =
+--        ((p1.flip.R a' a) × (p2.flip.R b' b))
+
+--   show ((p1.R a a') × (p2.R b b'))
+--         =
+--        ((p1.R a a') × (p2.R b b'))
+
+--   rfl
 
 
 def Map2b_sigma
@@ -118,12 +141,99 @@ def Map3_sigma
   ]
 
 
+-- FIXME: Proof uses sorry
 def Map4_sigma
   (p1 : Param40 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param30 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' -> Param40 (β a) (β' a'))
   : Param40 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend Map3_sigma p1 (p2 . . .)
 
   intro ⟨a, ba⟩ ⟨a', ba'⟩ ⟨aR, baR⟩
+  dsimp
+
+
+  have h2 := p1.R_implies_rightK a a' aR
+  dsimp at baR
+  dsimp at aR
+
+  have h := (p2 a a' aR).R_implies_rightK ba ba' baR
+
+  -- have h3 : ∀ (aR1 aR2 : ?R), aR2 = aR2 := by
+  --   sorry
+  -- match aR with
+  -- | _ =>
+  rw [← h]
+  apply PSigma.eta
+
+  rotate_right 1
+  assumption
   simp
+  congr
+
+  sorry
+  -- subst h2
+
+
+  -- dsimp
+
+
+
+  -- assumption
+
+
+  -- -- show (⟨?aR', ?baR'⟩ : ?_ ×' ?_) = _
+  -- show ?lhs = ?rhs
+  -- let lhs := ?lhs
+  -- show lhs = _
+
+  -- let aR' := lhs.fst
+  -- have h3 : aR' = aR := by
+  --   congr
+
+  -- have h4 : lhs = ⟨aR, ?secondPart⟩ := by
+  --   -- apply lhs.ext
+  --   have : ⟨lhs.fst, lhs.snd⟩ = lhs := by congr
+
+
+
+  --   rw [←h3]
+
+  --   sorry
+
+  -- -- (⟨aR, baR⟩ : ?_ ×' ?_)
+
+
+
+
+
+
+  -- rw [←h]
+
+  -- -- rw [←h2] at h
+
+  -- -- subst h2
+  -- rw [←h2]
+
+
+
+
+
+  -- -- have a :
+  -- --   Param.R MapType.Map4 MapType.Map0 ba ba' = (p2 ⟨a, ba⟩.fst ⟨a', ba'⟩.fst aR).1 ⟨a, ba⟩.snd ⟨a', ba'⟩.snd
+  -- --   := by sorry
+
+
+  -- simp
+  -- apply And.intro
+  -- · exact p1.R_implies_rightK _ _ _
+  -- ·
+  --   congr
+  --   repeat exact p1.R_implies_rightK _ _ _
+
+  --   dsimp
+
+
+
+
+  --   -- exact (p2 a a' aR).R_implies_rightK ba ba' baR

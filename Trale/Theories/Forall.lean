@@ -11,9 +11,9 @@ import Qq open Qq Lean
 
 namespace Param_forall
 
-universe u v x w1 w2 w3
+universe u u' v v' x w1 w2 w3
 
-variable {α : Sort u} {α' : Sort u} {β : α -> Sort v} {β' : α' -> Sort v}
+variable {α : Sort u} {α' : Sort u'} {β : α -> Sort v} {β' : α' -> Sort v'}
 
 @[simp]
 abbrev P1
@@ -31,7 +31,7 @@ abbrev P2
 @[simp]
 abbrev P3
   (P3_R_type : Sort _ -> Sort _ -> Sort w3)
-  (β : α -> Sort v) (β' : α' -> Sort v)
+  (β : α -> Sort v) (β' : α' -> Sort v')
   := P3_R_type (forall a, β a) (forall a', β' a')
 
 
@@ -72,21 +72,40 @@ def Map2a_forall
 
   apply (p2 a a' aR).right_implies_R
 
-  have h := congrFun mapFF' a'
+  dsimp at mapFF'
+  subst mapFF'
+  dsimp
 
-  have m : p1.contravariant.map a' = a := by
-      exact p1.R_implies_left a a' aR
+  have := p1.R_implies_left a a' aR
+  subst this
+  congr
+  -- show_term
 
-  have h2 := p1.contravariant.R_in_mapK
-  specialize h2 a' a aR
-  subst m
-  have h3 : (p1.contravariant.map_in_R a' (p1.contravariant.map a')
-            (Eq.refl (p1.contravariant.map a'))) = aR := by
+  repeat exact (p1.R_implies_leftK _ _ _).symm
 
-    exact h2
+  -- congr
 
-  subst h3
-  exact h
+  -- have h := congrFun mapFF' a'
+
+  -- have m : p1.contravariant.map a' = a := by
+  --     exact p1.R_implies_left a a' aR
+
+  -- have h2 := p1.contravariant.R_in_mapK
+  -- specialize h2 a' a aR
+  -- subst m
+  -- have h3 : (p1.contravariant.map_in_R a' (p1.contravariant.map a')
+  --           (Eq.refl (p1.contravariant.map a'))) = aR := by
+
+  --   exact h2
+
+  -- subst h3
+  -- exact h
+
+#check
+  let a := Map2a_forall ?p1 ?p2
+  by
+  unfold P3 at a
+  exact a
 
 
 def Map2b_forall

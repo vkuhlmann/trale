@@ -126,15 +126,15 @@ syntax (name := tr_intro_syntax_not_working) "tr_intro_not_working" notFollowedB
 
 syntax (name := tr_intro_syntax) "tr_intro" notFollowedBy("|") (ppSpace colGt term:max)* : tactic
 
-
+-- FIXME Make work again for tr_split_application
 macro "tr_step" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
     tactic| (
       first
       | infer_instance
       | (tr_intro $a $a' $aR)
-      | (tr_split_application $a $a' $aR)
+      | (tr_split_application _ _ _)
+      -- | (tr_split_application $(⟨a⟩) $(⟨a'⟩) $(⟨aR⟩))
       | decide
-
     )
   )
 

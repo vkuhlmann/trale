@@ -5,7 +5,6 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Theories.Sorts
 import Aesop
-import Trale.Utils.Attr
 
 import Mathlib.Data.Real.Basic
 import Mathlib.Data.NNReal.Defs

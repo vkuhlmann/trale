@@ -89,7 +89,7 @@ def oangle_v_p
 
 
 
-  let c := oangle_real (a. p₁) p₂ p₃
+  -- let c := oangle_real (a. p₁) p₂ p₃
 
 
   let : Param10 (Module.Oriented ℝ V (Fin 2)) (Module.Oriented ℝ (ℝ × ℝ) (Fin 2)) := by
@@ -126,6 +126,7 @@ def oangle_v_p
 
 
 
+  tr_sorry sorry
   tr_sorry sorry
 
 

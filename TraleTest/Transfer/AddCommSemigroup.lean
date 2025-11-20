@@ -6,10 +6,11 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
-import TraleTest.Utils.Lemmas.Modulo
-import TraleTest.Utils.Lemmas.Zmod5
-import TraleTest.Utils.Lemmas.TrAdvance
+import TraleTest.Lemmas.Modulo
+import TraleTest.Lemmas.Zmod5
+import TraleTest.Lemmas.TrAdvance
 
+open TraleTest.Lemmas
 -- set_option trace.tr.utils true
 
 -------------------------------------------------------

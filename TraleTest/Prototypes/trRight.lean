@@ -6,7 +6,8 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence
+open TraleTest.Lemmas Trale.Utils
 
 set_option trace.tr.utils true
 
@@ -26,7 +27,7 @@ def mytest2 (a b : nnR) : (a + b = b + a) := by
     let mapCon : Q(MapType) <- mkFreshExprMVar q(MapType) (kind := .natural) (userName := `mapCon)
     -- let myInstValue <- mkFreshExprMVar q(Param42b.{0} nnR xnnR : Sort max 2 2 0) (kind := .natural) (userName := `myInstValue)
     -- let myInstValue <- mkFreshExprMVar q(Param42b.{0} nnR $toType : Sort max 2 2 0) (kind := .natural) (userName := `myInstValue)
-    let myInstValue <- mkFreshExprMVar q(Param.{0} nnR $toType $mapCov $mapCon : Sort max 2 2 0) (kind := .natural) (userName := `myInstValue)
+    let myInstValue <- mkFreshExprMVar q(Param.{0} $mapCov $mapCon nnR $toType : Sort max 2 2 0) (kind := .natural) (userName := `myInstValue)
     if !(←synthesizeInstMVarCore myInstValue.mvarId!) then
       trace[tr.utils] s!"Failed to initialize value"
       return
@@ -137,7 +138,7 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
     let newGoals ← goal.applyN (
       .lam .anonymous paramType (
         mkAppN
-        (.const ``Param.right [levelX, levelY, .zero])
+        (.const ``Param.right' [levelX, levelY, .zero])
         #[
           transformedType,
           goalType,
@@ -216,11 +217,11 @@ def mytest3 (a b : nnR) : (a + b = b + a) := by
 
   show Param10 (d = c) (d' = c')
 
-  simp [inferInstance, instParam, paramNNR, SplitInj.toParam] at aR bR cR dR
+  simp [inferInstance, instParam, paramNNR, paramFromInjection] at aR bR cR dR
   subst aR bR cR dR
 
   tr_from_map
   intro h
 
   rw [←truncate_extend d', ←truncate_extend c']
-  congr
+  exact congrArg truncate h

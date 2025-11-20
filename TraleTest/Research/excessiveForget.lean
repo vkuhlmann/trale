@@ -6,7 +6,8 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence
+open TraleTest.Lemmas
 
 -- set_option trace.tr.utils true
 
@@ -34,7 +35,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
 #check
   let p : Param11 ?a ?b := ?p
-  p.forget.right
+  p.forget.right'
 
 /-
 

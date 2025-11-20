@@ -603,20 +603,12 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
         ← mkFreshExprMVar (.some q(($p1).R $a $a')) (userName := .str tag "aR")
 
 
-      let p2Type
-        -- : Q(Sort (max levelX1 levelX2 levelZ (levelY2+1) (levelY1+1) (levelZ+1)))
-        := q(
-            -- ∀ (a : $α) (a' : $α') (_ : ($p1).R a a'),
-            let a : $α := $a; let a' : $α' := $a';
+      let p2base
+        ← mkFreshExprMVarQ
+          q(let a : $α := $a; let a' : $α' := $a';
             let aR: ($p1).R a a' := $aR;
-            -- ∀ (_ : ($p1).R a a'),
             (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
-
-
-      let p2base : Q(let a : $α := $a; let a' : $α' := $a';
-        let aR: ($p1).R a a' := $aR;
-        (Param.{levelZ} $covMapType $conMapType ($β $a) ($β' $a')))
-        ← mkFreshExprMVar (.some p2Type) (userName := .str tag "p2")
+          (userName := .str tag "p2")
 
       trace[tr.utils] s!"p2 base is {format p2base}"
 
@@ -767,22 +759,28 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
   ```
 -/
 
+macro "tr_split_application'" : tactic => `(tactic|(tr_split_application'))
 
 macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
 
-macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
+-- #check binderIdent
+
+macro "tr_split_application'" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent : tactic => `(
   tactic| (
     (tr_split_application'); (
-      try (
-        (case' p2 => intro $a $a' $aR);rotate_left 1); tr_whnf
+      try
+        (
+          (case' p2 => rename_last $a $a' $aR);rotate_left 1
+        ); tr_whnf
       )
     )
   )
-macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
+
+macro "tr_split_application" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent : tactic => `(
   tactic| (
     (tr_split_application); (
       try (
-        (case' p2 => intro $a $a' $aR);rotate_left 1); tr_whnf
+        (case' p2 => rename_last $a $a' $aR);rotate_left 1); tr_whnf
         -- tr_simp_R at aR
       )
     )
@@ -792,15 +790,15 @@ macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident : tactic =>
 -- FIXME: After the 'by' it doesn't show the subgoal in the Goals list until you start
 -- typing... The syntax mirrors syntax of 'case', so how is it working for 'case'?
 -- Is there some magic missing in this implementation?
-macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident " by " sub:tacticSeq : tactic => `(
+macro "tr_split_application" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent " by " sub:tacticSeq : tactic => `(
   tactic| (
     (tr_split_application $a $a' $aR; case aR => $sub)
   ))
-macro "tr_split_application'" ppSpace colGt a:ident a':ident aR:ident " by " sub:tacticSeq : tactic => `(
+macro "tr_split_application'" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent " by " sub:tacticSeq : tactic => `(
   tactic| (
     (tr_split_application' $a $a' $aR; case aR => $sub)
   ))
-macro "tr_split_application" ppSpace colGt a:ident a':ident aR:ident " => " sub:tacticSeq : tactic => `(
+macro "tr_split_application" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent " => " sub:tacticSeq : tactic => `(
   tactic| (
     (tr_split_application $a $a' $aR; case aR => $sub)
   ))

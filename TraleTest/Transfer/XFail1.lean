@@ -31,7 +31,7 @@ def BogusParam : Param2a2a Nat Bogus := by
 def f_nat : Nat -> Nat := id
 
 def f_bogus : Bogus -> Bogus := by
-  apply fun x => Param.right.{1,1,_} x f_nat
+  apply fun x => Param.right'.{1,1,_} x f_nat
 
   /-
   ⊢ Param10 (ℕ → ℕ) (Bogus → Bogus)

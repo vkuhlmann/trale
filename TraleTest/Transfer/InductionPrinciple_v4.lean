@@ -7,6 +7,8 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
 
+open Trale.Utils
+
 set_option trace.tr.utils true
 
 variable (I : Type _) (I0 : I) (IS : I -> I)
@@ -25,7 +27,7 @@ def arrow_02a_rel
   {p1 p2}
   {f : α → β}
   {f' : α' → β'}
-  (r2 : (Param_arrow.Map2a_arrow p1 p2).flip.R f f')
+  (r2 : (Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
   (r1 : p1.R a' a)
   :  (p2.flip.toBottom.R (f a) (f' a')) := by
 
@@ -77,7 +79,10 @@ macro "tr_advance" : tactic => `(tactic|
   | fail "No step available"
   )
 
-
+  #check
+    let tsepArray : Lean.Syntax.TSepArray `term "," := ?td
+    let els := tsepArray.getElems
+    sorry
 
 def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
   tr_by nat_rect2

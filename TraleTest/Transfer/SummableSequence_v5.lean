@@ -7,7 +7,7 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 
 import TraleTest.Utils.Lemmas.SummableSequence
-
+open TraleTest.Utils.Lemmas.SummableSequence
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
@@ -20,7 +20,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   let _ : Param00 Prop Prop := propParam.forget
 
   let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    tr_split; tr_split
+    infer_instance
 
   -- Part 1: split the foralls
   tr_intro a a' aR

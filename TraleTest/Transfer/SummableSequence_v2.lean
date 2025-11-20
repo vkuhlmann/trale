@@ -5,7 +5,8 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence
+open TraleTest.Lemmas
 
 set_option trace.tr.utils false
 
@@ -80,7 +81,8 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- subst F1 F2 A1 A2
 
   simp
-  intro c c' cR
+  rename_last c c' cR
+  clear_value cR
 
   -- tr_split_application
   /-
@@ -161,8 +163,8 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     rw [h1]
     rw [summationHomeo]
 
-  simp
-  intro d d' dR
+  rename_last d d' dR
+  clear_value dR
 
   show Param10 (G1 d) (G2 d')
 
@@ -185,6 +187,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- show Param10 ((fun (f : _ -> _ -> Sort _) => f _ _) _) ((fun (f : _ -> _ -> Sort _) => f _ _) _)
 
   let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+    refine ?subgoals
     tr_split'
     case p1 => infer_instance
 

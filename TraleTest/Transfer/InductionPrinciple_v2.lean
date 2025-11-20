@@ -7,6 +7,8 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
 
+open Trale.Utils
+
 set_option trace.tr.utils true
 
 variable (I : Type _) (I0 : I) (IS : I -> I)

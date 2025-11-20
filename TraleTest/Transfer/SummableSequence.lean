@@ -6,9 +6,13 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.TrAdvance
+import TraleTest.Lemmas.SummableSequence
 
 set_option trace.tr.utils true
+
+namespace TraleTest.Transfer.SummableSequence
+open TraleTest.Lemmas
 
 /-
 
@@ -88,45 +92,114 @@ exact instantiate (bR a a' aR)
 
 -/
 
+#check (6 : Nat)
+#check (Nat : Type)
+--#check (Nat : Type 1)
+#check ((Nat, Type) : Type × Type 1)
+#check (((a : Nat) → Fin a) : Type)
+#check (((a : Nat) → Fin a) : Type)
+
+inductive MyTest where
+   | mk (n : Nat) (a : Fin n) (b : Type)
+
+#check MyTest.mk 4 9 Nat
+#check MyTest
+
+
 instance [Param00 α β] [Param00 γ δ] : Param00 (α -> γ) (β -> δ) := by
   tr_split
 
-macro "tr_advance" : tactic => `(tactic|
-  first
-  | assumption
-  | tr_intro _ _ _
-  | (tr_split_application; try (
-        (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
+-- macro "tr_advance" : tactic => `(tactic|
+--   first
+--   | assumption
+--   | tr_intro _ _ _
+--   | (tr_split_application; try (
+--         (case' p2 => intro _ _ _);rotate_left 1))
 
-  | apply R_add_xnnR
-  | refine R_sum_xnnR _ _ ?_
-  | exact R_eq
-  | apply seq_nnR_add
-  )
+-- --   | aesop (rule_sets := [default, builtin, trale])
+--   | apply R_add_xnnR
+--   | refine R_sum_xnnR _ _ ?_
+--   | exact R_eq
+--   | apply seq_nnR_add
+--   | fail "No step available"
+--   )
+
+#check Aesop.runRuleTac
+
+example (a : nnR) (a' : xnnR)
+     (b : nnR) (b' : xnnR)
+     : Param.R .Map0 .Map0 (a + b) (a' + b') := by
+
+     refine' _
+     -- choose a using xxx
+
+     aesop (rule_sets := [trale])
+
+     sorry
+
+-- example (a b c : nnR)
+--      : (a + b) + c = c + (b + a) := by
+
+--      -- rw [nnR_comm]
+--      aesop
+
+
+--      sorry
+
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 
   let _ : Param00 Prop Prop := propParam.forget
 
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
-  tr_advance
+--   let _ := R_add_xnnR
+--   let _ := R_sum_xnnR
+--   let _ := R_eq
 
-  let eR := by assumption
-  refine' (instantiatePropR (eR _ _ _ _ _ _)).forget
+  repeat first
+     | apply R_add_xnnR
+     | refine R_sum_xnnR _ _ ?_
+     | exact R_eq
+     | apply seq_nnR_add -- This one is optional
+     | tr_advance
 
-  assumption
-  assumption
+
+--   tr_advance
+--   tr_advance
+--   tr_advance
+
+--   show Param.R MapType.Map0 MapType.Map0 (Σ _ + Σ _) (Σ _ + Σ _)
+-- --   show tr.R _ _
+-- --   show tr.R (_ + _) (_ + _)
+-- --   tr_flip
+-- --   aesop (rule_sets := [trale])
+-- --   apply R_add_xnnR
+
+
+
+
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+--   tr_advance
+
+--   tr_advance
+--   tr_advance
+
+
+--   let eR := by assumption
+--   refine' (instantiatePropR (eR _ _ _ _ _ _)).forget
+
+--   assumption
+--   assumption
+
+
+#print sum_nnR_add

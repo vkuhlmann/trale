@@ -3,7 +3,8 @@ import Trale.Utils.Simp
 import Trale.Utils.Split
 import Trale.Utils.ParamFromFunction
 
-import TraleTest.Utils.Lemmas.Zmod5
+import TraleTest.Lemmas.Zmod5
+open TraleTest.Lemmas
 
 /-
 
@@ -84,14 +85,6 @@ theorem id_exists_mod5_2
   : ∃ (f : Zmod5 → Zmod5), ∀ (x : Zmod5), f x = x := by
 
   exists f_mod5
-  intro x
-
-  simp [f_mod5, f_nat, Param_arrow.Map1_arrow, ModParam]
-
-  apply ModParam.left_implies_R (repr5 x) x
-  unfold ModParam
-
-  simp
 
 /-
 
@@ -308,7 +301,7 @@ theorem id_exists_mod5_4
     rw [h]
 
     show mod5 (repr5 a') = a'
-    exact repr5K
+    apply repr5K
 
     -- intro h
 

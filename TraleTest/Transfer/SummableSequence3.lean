@@ -6,13 +6,13 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-import TraleTest.Utils.Lemmas.TrAdvance
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.TrAdvance
+import TraleTest.Lemmas.SummableSequence
 
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Utils.Lemmas.SummableSequence
+open TraleTest.Lemmas
 
 theorem sum_eq_reverse_sum_seq_xnnR
   (a b c : seq_xnnR)

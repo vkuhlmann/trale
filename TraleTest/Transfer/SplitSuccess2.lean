@@ -8,7 +8,8 @@ import Trale.Utils.ParamIdent
 
 import Trale.Theories.Forall
 
-import TraleTest.Utils.Lemmas.Modulo
+import TraleTest.Lemmas.Modulo
+open TraleTest.Lemmas
 
 def forallApplicationOrig
   {α α' : Sort _}
@@ -159,6 +160,11 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
          somewhat. Still, we should search for a more elegant option.
       -/
       simp [inferInstance, instParam]
+
+      suffices B = A by
+        tr_whnf
+        rw [this]
+        simp
 
       show B = A
       subst A B

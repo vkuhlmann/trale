@@ -38,7 +38,7 @@ macro "tr_advance" : tactic => `(tactic|
 def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
   tr_by nat_rect2
 
-  let _ : Param00 Prop Prop := propParam.forget
+  let _ : Param00 Prop Prop := propParam
 
   have RN : Param2a3.{0} I Nat := by sorry
   -- have I0_maps_to_zero : RN.right I0 = 0 := by sorry
@@ -53,14 +53,12 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     clear h
 
     tr_intro P P' PR
-    case p1 =>
-      tr_flip
-      tr_split -- Needs Param02b I Nat
+    -- p1 is autoclosed by instance inference. It needs Param02b I Nat
 
     tr_split
     case p1 =>
       show Param01 (P 0) (P' I0)
-      tr_flip
+      -- tr_flip
 
       -- rw [←I0_maps_to_zero]
       -- dsimp
@@ -92,7 +90,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
       case p1 =>
         show Param01 (P' n) (P n')
-        have h1 := PR n n' nR
+        have h1 := PR n' n nR
         tr_whnf at h1
         rw [h1]
         tr_ident
@@ -116,7 +114,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     show Param10 (P n) (P' n')
 
     tr_ident
-    exact PR _ _ nR
+    exact (PR _ _ nR).symm
 
   let goalR := by assumption
   exact (instantiatePropR goalR).forget

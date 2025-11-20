@@ -6,7 +6,8 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 
-import TraleTest.Utils.Lemmas.Modulo
+import TraleTest.Lemmas.Modulo
+open TraleTest.Lemmas
 
 theorem P1 : ∀ f : (a : Nat) → Fin (a+1),
              ∑ b ∈ {1, 2, 3}, (f b).val ≤ 6
@@ -96,7 +97,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
     suffices F1 A = F1 B by
       rw [this]
-      infer_instance
+      tr_ident
 
     congr
     funext a

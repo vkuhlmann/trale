@@ -1,0 +1,2 @@
+-- https://leanprover-community.github.io/mathlib4_docs/Mathlib/Tactic/ToAdditive/Frontend.html#ToAdditive.to_additive
+-- https://github.com/leanprover-community/mathlib4/blob/18a54b03b696bfa1a81859f884c01077592a7775/Mathlib/Tactic/ToAdditive/Frontend.lean#L545

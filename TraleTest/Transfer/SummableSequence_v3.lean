@@ -6,7 +6,8 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence
+open TraleTest.Lemmas
 
 set_option trace.tr.utils true
 
@@ -21,10 +22,10 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- TODO: Make this work with infer_instance
   -- We need to use `propParam` instance for `Param Prop Prop`, not the
   -- instance defined by equality.
-  let _ : Param00 Prop Prop := propParam.forget
+  let _ : Param00 Prop Prop := propParam
 
-  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    tr_split; tr_split
+  -- let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+  --   tr_split; tr_split
 
   -- Part 1: split the foralls
   tr_intro a a' aR
@@ -71,7 +72,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   --                        ___
   --
   tr_split_application e e' eR by
-    dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam]
+    dsimp [inferInstance, Param_arrow.Map0_arrow, propParam]
 
     intro x x' xR
     intro y y' yR
@@ -86,7 +87,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam] at eR
+  dsimp [inferInstance, Param_arrow.Map0_arrow, propParam] at eR
 
   tr_from_map
   show e d c → e' d' c'

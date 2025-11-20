@@ -4,7 +4,8 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 
-import TraleTest.Utils.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence
+open TraleTest.Lemmas
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
@@ -155,8 +156,8 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- show Param10 ((. _ _) _ _) ((. _ _) _ _)
   -- show Param10 ((fun (f : _ -> _ -> Sort _) => f _ _) _) ((fun (f : _ -> _ -> Sort _) => f _ _) _)
 
-  let eqParam : Param40 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    apply Param_from_map
+  let eqParam : Param2b0 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
+    tr_from_map
     intro f x y
     exact f (.fin x) (.fin y)
 
@@ -165,10 +166,9 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
 
   case p1 =>
     show Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop)
-    infer_instance
+    exact eqParam.forget
 
   case aR =>
-    dsimp [Param_from_map]
     funext x y
 
     show C1 (xnnR.fin x) (xnnR.fin y) = C2 x y
@@ -189,7 +189,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  apply (Param_id' _).forget
+  tr_ident
   show e d c = e' d' c'
 
   rw [← eF]

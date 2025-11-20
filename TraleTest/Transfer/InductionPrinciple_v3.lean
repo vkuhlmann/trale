@@ -9,6 +9,7 @@ import Trale.Theories.Sorts
 -- import Mathlib
 
 -- #eval Set.empty
+open Trale.Utils
 
 set_option trace.tr.utils true
 
@@ -56,7 +57,7 @@ def arrow_02a_rel
   {p1 p2}
   {f : α → β}
   {f' : α' → β'}
-  (r2 : (Param_arrow.Map2a_arrow p1 p2).flip.R f f')
+  (r2 : (Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
   (r1 : p1.R a' a)
   :  (p2.flip.toBottom.R (f a) (f' a')) := by
 

@@ -10,7 +10,7 @@ import Trale.Utils.Constructor
 open Lean Qq Elab Command Tactic Term Expr Meta PrettyPrinter
 
 
-def recoverMapTypeFromExpr (expr : Q(MapType)) : MetaM (Option MapType) := do
+def recoverMapTypeFromExpr? (expr : Q(MapType)) : MetaM (Option MapType) := do
   if (← isExprDefEq expr q(MapType.Map4)) then
     return MapType.Map4
 
@@ -30,6 +30,13 @@ def recoverMapTypeFromExpr (expr : Q(MapType)) : MetaM (Option MapType) := do
     return MapType.Map0
 
   return none
+
+def recoverMapTypeFromExpr! (expr : Q(MapType)) := do
+  match (←recoverMapTypeFromExpr? expr) with
+  | .none =>
+      throwError s!"Failed to infer concrete map type"
+  | .some a => pure a
+
 
 
 def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name -> Option Expr) := do

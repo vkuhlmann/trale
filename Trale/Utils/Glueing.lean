@@ -29,3 +29,10 @@ def glued
       rw [this]
       exact a
     exact h
+
+def inferGlued
+  [p1 : Param cov .Map0 α β]
+  [p2 : Param .Map0 con α β]
+  (h : p1.R = p2.R := by rfl) :
+  Param cov con α β :=
+  glued p1 p2 h

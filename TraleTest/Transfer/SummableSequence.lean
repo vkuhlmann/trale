@@ -133,7 +133,7 @@ example (a : nnR) (a' : xnnR)
      refine' _
      -- choose a using xxx
 
-     aesop (rule_sets := [trale])
+     -- aesop (rule_sets := [trale])
 
      sorry
 

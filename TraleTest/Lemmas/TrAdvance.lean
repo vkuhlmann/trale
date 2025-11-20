@@ -10,7 +10,9 @@ import Trale.Utils.Normalize
 import Trale.Theories.Forall
 import Trale.Theories.Sorts
 
-import TraleTest.Utils.Lemmas.Modulo
+import TraleTest.Lemmas.Modulo
+
+namespace TraleTest.Lemmas
 
 open Trale.Utils
 
@@ -64,6 +66,8 @@ set_option trace.tr.utils true
 --   )
 --   )
 
+
+
 macro "tr_advance" : tactic => `(tactic|
   (
   --   (run_tac
@@ -80,7 +84,8 @@ macro "tr_advance" : tactic => `(tactic|
       | tr_split
       | tr_flip; tr_split); try subst_last
     | exact (Param44_ident'' rfl).forget
-    | (intro x x' xR; subst xR)
+    | (intro x x' xR; rw [xR])
+    | (intro x x' xR; rw [←xR])
     | exact congrArg _
     | (
         let : Param.R _ _ _ _ := by assumption;

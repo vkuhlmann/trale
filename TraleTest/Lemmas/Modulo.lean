@@ -4,12 +4,12 @@ import Trale.Utils.Constructor
 import Trale.Utils.Split
 -- import Mathlib.Data.Finset.Sum
 
+namespace TraleTest.Lemmas
+
 structure Modulo (n : Nat) where
   base : Nat
 
-namespace Modulo
-def repr (a : Modulo n) : Nat := a.base % n
-end Modulo
+def Modulo.repr (a : Modulo n) : Nat := a.base % n
 
 instance : Add (Modulo n) where
   add a b := ⟨a.base + b.base⟩

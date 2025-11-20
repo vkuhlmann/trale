@@ -4,24 +4,40 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Theories.Sorts
+import Aesop
+import Trale.Utils.Attr
+
+import Mathlib.Data.Real.Basic
+import Mathlib.Data.NNReal.Defs
+import Mathlib.Data.ENNReal.Basic
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
+-- declare_aesop_rule_sets [trale, abcd] (default := true)
+
+namespace TraleTest.Lemmas
 
 -- axiom nnR : Type
 -- axiom zero_nnR : nnR
 -- axiom one_nnR : nnR
 
-def nnR := Nat deriving Repr
+#check NNReal
+#check ENNReal
+def nnR := NNRat deriving Repr
 
 instance : OfNat nnR n where
-  ofNat := n
+  ofNat := (n : NNRat)
 instance : Zero nnR where
   zero := 0
+instance : AddCommMagma nnR := inferInstanceAs (AddCommMagma NNRat)
+instance : AddSemigroup nnR := inferInstanceAs (AddSemigroup NNRat)
+instance : AddCommSemigroup nnR := inferInstanceAs (AddCommSemigroup NNRat)
+
 def zero_nnR : nnR := 0
 
 instance : Add nnR where
-  add := Nat.add
+  -- add := Nat.add
+  add (a : NNRat) (b : NNRat) := a + b
 
 inductive xnnR where
   | fin : nnR -> xnnR
@@ -44,9 +60,12 @@ theorem add_xnnR_homeo
   unfold add_xnnR
   dsimp only
 
+@[aesop 70%]
 theorem nnR_comm (a b : nnR) : a + b = b + a := by
   unfold nnR at *
-  exact Nat.add_comm a b
+  -- exact Nat.add_comm a b
+  exact AddCommMagma.add_comm a b
+
 
 theorem xnnR_comm (a b : xnnR) : a + b = b + a := by
   show add_xnnR a b = add_xnnR b a
@@ -162,19 +181,52 @@ theorem summationHomeo (a : summable) : Σ seq_extend a.seq = .fin (Σ a) := by
 
 
 instance paramNNR : Param42b nnR xnnR
-  := SplitInj.toParam truncate_extend
+  := by tr_from_map truncate_extend
 instance : TrTranslateRight nnR xnnR := by constructor
 instance : TrTranslateLeft nnR xnnR := by constructor
 
-def param_NNR_seq : Param40 seq_nnR seq_xnnR
-  := Param_from_map seq_extend
+instance param_NNR_seq : Param40 seq_nnR seq_xnnR
+  := by tr_from_map seq_extend
 
+instance param_summable_NNR_seq : Param40 summable seq_nnR
+  := by tr_from_map summable.seq
 
-def param_summable_NNR_seq : Param40 summable seq_nnR
-  := Param_from_map summable.seq
+-- def summableSeqK (a : summable)
+--   :  (summable.seq a)
+
+-- instance param_summable_NNR_seq' : Param40 summable seq_nnR := by
+--     tr_from_map
+
 
 instance param_summable_seq : Param40 summable seq_xnnR
-  := Param_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.forget.right)
+  :=
+  by tr_from_map (tr.map (α := seq_nnR) $ tr.map .)
+  -- := by tr_from_map (param_NNR_seq.right ∘ param_summable_NNR_seq.right)
+
+theorem param_summable_seq_injective
+  (a b : summable)
+  (h : param_summable_seq.right a = param_summable_seq.right b)
+  : a = b := by
+  change seq_extend (summable.seq _) = seq_extend (summable.seq _) at h
+
+  -- match a with
+  -- | ⟨a_seq, a_sum⟩ =>
+  obtain ⟨a_seq, a_sum⟩ := a
+  obtain ⟨b_seq, b_sum⟩ := b
+
+  dsimp [seq_extend, extend] at h
+
+  have : a_seq = b_seq := by
+    funext x
+    apply congrFun at h
+    specialize h x
+    exact (xnnR.fin.injEq _ _).mp h
+
+  subst this
+
+  rfl
+
+
 instance : TrTranslateRight summable seq_xnnR := by constructor
 instance : TrTranslateLeft summable seq_xnnR := by constructor
 -- For propParam, see Trale/Theories/Sorts.lean
@@ -184,15 +236,21 @@ theorem R_sum_xnnR
   (u : summable) (u' : seq_xnnR) (uR : tr.R u u')
   : tr.R (Σ u) (Σ u') := by
 
-  simp [paramNNR, param_summable_seq, SplitInj.toParam] at ⊢ uR
+  tr_whnf at uR
+  tr_whnf
+  rw [←uR]
 
-  unfold extend
-  subst uR
-  dsimp [param_NNR_seq, Param_from_map, seq_nnR, param_summable_NNR_seq]
-
+  dsimp [extend, param_NNR_seq, seq_nnR, param_summable_NNR_seq]
   exact (summationHomeo u).symm
 
+-- TODO Add trale attribute
+-- @[trale]
 
+-- @[aesop 90% apply (rule_sets := [trale])]
+
+
+
+@[aesop safe]
 theorem R_add_xnnR
   (a : nnR) (a' : xnnR) (aR : tr.R a a')
   (b : nnR) (b' : xnnR) (bR : tr.R b b')
@@ -208,14 +266,39 @@ theorem R_add_xnnR
 
 
 theorem seq_nnR_add
-  (a : summable) (a' : seq_xnnR) (aR : tr.R a a')
-  (b : summable) (b' : seq_xnnR) (bR : tr.R b b')
-  : tr.R (a + b) (a' + b') := by
+  -- (a : summable) (a' : seq_xnnR) (aR : tr.R a a')
+  -- (b : summable) (b' : seq_xnnR) (bR : tr.R b b')
+  (a : seq_xnnR) (a' : summable) (aR : tr.R a a')
+  (b : seq_xnnR) (b' : summable) (bR : tr.R b b')
+  : tr.R (a' + b') (a + b) := by
 
-  tr_whnf
-  simp
+  tr_whnf; simp
 
-  tr_subst a a' aR
-  tr_subst b b' bR
+  tr_subst a' a aR
+  tr_subst b' b bR
 
   congr
+
+theorem R_eq_seq_xnnR_summable'
+  -- [Param2b0 α α']
+  (a : seq_xnnR) (a' : summable) (aR : tr.R a a')
+  (b : seq_xnnR) (b' : summable) (bR : tr.R b b')
+  -- : propParam.R (a = b) (a' = b') := by
+  : (a = b) -> (a' = b') := by
+
+  -- tr_whnf
+  -- show a = b → a' = b'
+
+  intro h
+
+  -- tr_whnf at aR bR
+  -- dsimp at aR bR
+
+  have h2 := Eq.trans (.trans aR h) bR.symm
+  exact param_summable_seq_injective _ _ h2
+
+theorem R_eq_seq_xnnR_summable
+  (a : seq_xnnR) (a' : summable) (aR : tr.R a a')
+  (b : seq_xnnR) (b' : summable) (bR : tr.R b b')
+  : (a = b) -> (a' = b') :=
+  fun h => param_summable_seq_injective _ _ (Eq.trans (.trans aR h) bR.symm)

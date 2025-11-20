@@ -2,6 +2,8 @@ import Mathlib
 import Trale.Utils.Constructor
 import Trale.Utils.Split
 
+namespace TraleTest.Lemmas
+
 lemma fin5_mod5 (a : Fin 5) : a.val % 5 = a.val := by
   simp
 
@@ -9,11 +11,18 @@ lemma mod5_le5 : n % 5 < 5 := by
   apply Nat.mod_lt
   simp
 
-structure Zmod5 where
-  repr : Fin 5
+-- structure Zmod5 where
+--   repr : Fin 5
 
-def mod5 (n : Nat) : Zmod5 := ⟨⟨n % 5, mod5_le5⟩⟩
-def repr5 (a : Zmod5) : Nat := a.repr
+abbrev Zmod5 := Fin 5
+
+def mod5 (n : Nat) : Zmod5 := ⟨n % 5, mod5_le5⟩
+def repr5 (a : Zmod5) : Nat := a
+
+def addMod5 (a b : Zmod5) : Zmod5 := a + b
+
+instance : Add Zmod5 where
+  add := addMod5
 
 lemma lt_mod_eq
   (h : a < 5)
@@ -21,7 +30,8 @@ lemma lt_mod_eq
   simp
   assumption
 
-lemma repr5K : mod5 (repr5 a') = a' := by
+lemma repr5K : ∀ (a' : Zmod5), mod5 (repr5 a') = a' := by
+  intro a
   dsimp [repr5, mod5]
   congr
   apply lt_mod_eq
@@ -141,7 +151,7 @@ def ModParam : Param42a Nat Zmod5 := by
     rw [← h]
 
     apply lt_mod_eq
-    exact a.repr.isLt
+    exact a.isLt
 
   -- case R_in_map =>
   --   simp

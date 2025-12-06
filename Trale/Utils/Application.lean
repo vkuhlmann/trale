@@ -661,7 +661,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       --     -- (simprocs := #[←Simp.Simprocs.add {} ``forallApplication false])
 
       -- -- trace[tr.utils] s!"Complete is {repr complete}"
-      -- -- trace[tr.utils] s!"Complete is {← ppTerm <| ← PrettyPrinter.delab complete}"
+      -- trace[tr.utils] s!"Complete is {← ppTerm <| ← PrettyPrinter.delab complete}"
       -- let complete ← instantiateMVars complete
 
       let complete := ← instantiateMVars p2

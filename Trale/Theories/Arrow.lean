@@ -109,7 +109,7 @@ instance Map0_arrow
   -- exact fun f f' =>
   --   forall a a', p1.R a a' -> p2.R (f a) (f' a')
 
-
+@[tr_add_flipped Param_arrow.arrowR_rel]
 instance Map1_arrow
   [p1 : Param01 α α']
   [p2 : Param10 β β']

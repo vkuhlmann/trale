@@ -4,8 +4,10 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.ParamFromFunction
+import Trale.Theories.Ident
 
 open Trale.Utils
+namespace Trale
 
 instance (priority := low) sortParam.{w} : Param00 (Sort u) (Sort u) := by
   tr_constructor
@@ -20,6 +22,47 @@ instance (priority := low) sortParam.{w} : Param00 (Sort u) (Sort u) := by
     but the inferInstance doesn't work for arbitrary types.
     -/
     exact x → y → Sort w
+
+
+/-
+Not possible because it relies on univalence:
+
+example : Param44 (Sort u) (Sort u) := by
+  tr_constructor
+
+  -- R
+  · exact Param44
+
+  -- 4
+  · exact id
+  · intro _ _; exact Param44_ident''
+  · intro a a' aR
+    dsimp
+    show a = a'
+    sorry
+
+  all_goals sorry
+-/
+
+def sortParam' (cov con : MapType) : Param2a2a (Sort u) (Sort u) := by
+  tr_constructor
+
+  -- R
+  · exact Param.{0,u,u} cov con
+
+  -- 2a
+  · exact id
+  · intro a a' aF
+    subst aF
+    exact Param44_ident.forget (h1 := map4top) (h2 := map4top)
+
+  -- 2a
+  · exact id
+  · intro a' a aF
+    subst aF
+    exact Param44_ident.forget (h1 := map4top) (h2 := map4top)
+
+
 
 
 -- prop1 and prop2 are related if prop1 implies prop2.
@@ -46,8 +89,18 @@ instance (priority := high) propParam : Param2a2a Prop Prop := by
 def instantiatePropR
   {a b : Prop}
   (r : propParam.R a b)
-  : Param40 a b := by
+  : Param40 a b :=
+  by
   tr_from_map r
+
+def instantiatePropR'
+  {a b : Prop}
+  (r : (sortParam' cov con).R a b)
+  : Param cov con a b := r
+
+def instantiateSortDuality
+  : (sortParam' cov con).R a b = Param.{0} cov con a b := by rfl
+
 
 def instantiatePropR_r
   {a b : Prop}
@@ -62,6 +115,22 @@ theorem R_eq
   : propParam.R (a = b) (a' = b') := by
 
   tr_whnf
+  show a = b → a' = b'
+
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  exact congrArg _
+
+
+def R_eq'
+  [Param2b0 α α']
+  (a : α) (a' : α') (aR : tr.R a a')
+  (b : α) (b' : α') (bR : tr.R b b')
+  : (sortParam' .Map1 .Map0).R (a = b) (a' = b') := by
+
+  tr_from_map
+
   show a = b → a' = b'
 
   tr_subst a a' aR

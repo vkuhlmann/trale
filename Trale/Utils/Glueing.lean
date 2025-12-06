@@ -24,7 +24,7 @@ def glued
     -- constructor
 
     have a := p2.contravariant
-    rw [R_eq_normalize_R] at a
+    -- rw [R_eq_normalize_R] at a
     suffices p1.toBottom.R = p2.toBottom.R by
       rw [this]
       exact a

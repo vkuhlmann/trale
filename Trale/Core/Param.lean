@@ -206,15 +206,17 @@ abbrev right_implies_R (p : Param2a0 α β)
 
 @[simp]
 abbrev left_implies_R {β : Sort v} (p : Param02a α β)
-  : forall (a : α) (b : β), p.left b = a -> p.R a b := by
-    let h := p.contravariant.map_in_R
-    simp
-    simp [flipRel] at h
-    intros a b h'
-    let h2 := h b
-    rw [h'] at h2
-    apply h2
-    trivial
+  : ∀ (a : α) (b : β), p.left b = a → p.R a b :=
+    fun a b h => p.contravariant.map_in_R b a h
+
+    -- let h := p.contravariant.map_in_R
+    -- simp
+    -- simp [flipRel] at h
+    -- intros a b h'
+    -- let h2 := h b
+    -- rw [h'] at h2
+    -- apply h2
+    -- trivial
 
 -- We need to give an explicit level name to β, else it will get inferred as a
 -- Type for some reason.

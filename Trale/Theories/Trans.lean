@@ -5,7 +5,14 @@ import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Whnf
-import Qq open Qq Lean
+import Trale.Utils.Basic
+import Trale.Utils.Normalize
+import Trale.Utils.AddFlipped
+import Qq
+
+open Qq Lean Trale.Utils
+
+namespace Trale
 
 /-
 In Trocq plugin:
@@ -16,14 +23,64 @@ Definition R_trans {A B C : Type} (R1 : A -> B -> Type) (R2 : B -> C -> Type) : 
 ```
 -/
 
+def transR
+  {β : Sort u}
+  {α : Sort v}
+  {γ : Sort w}
+  (p1 : Param00 α β)
+  (p2 : Param00 β γ)
+  : α → γ → Sort _
+  :=
+  fun a c => Σ' b, p1.R a b ×' p2.R b c
+
+def flipTransR
+  {p1 : Param00 α β}
+  {p2 : Param00 β γ}
+  (r : transR p1 p2 a c)
+  : transR p2.flip p1.flip c a
+  := match r with
+    | ⟨b, abR, bcR⟩ =>
+      ⟨b, flipR bcR, flipR abR⟩
+
+theorem flipTransR_involution
+  : flipTransR (flipTransR r) = r := by rfl
+
+instance R_flip_trans
+  {β α γ}
+  [p1 : Param00 α β]
+  [p2 : Param00 β γ]
+  {a c}
+  : Param44 (transR p2.flip p1.flip c a) (transR p1 p2 a c) := by
+  tr_constructor
+
+  -- R
+  exact (flipTransR · = ·)
+
+  -- 4
+  exact flipTransR
+  simp
+  simp
+  simp
+
+  -- 4
+  exact flipTransR
+  simp
+  apply flipTransR_involution
+  · intro x x' xR
+    subst xR
+    exact flipTransR_involution
+  simp
+
 def Map0_trans
   (p1 : Param00 α β)
   (p2 : Param00 β γ)
   : Param00 α γ := by
   tr_constructor
 
-  intro a c
-  exact Σ' b, p1.R a b ×' p2.R b c
+  exact transR p1 p2
+
+  -- intro a c
+  -- exact Σ' b, p1.R a b ×' p2.R b c
 
 def Map1_trans
   (p1 : Param10 α β)
@@ -32,6 +89,20 @@ def Map1_trans
   tr_extend Map0_trans p1 p2.forget
 
   exact p2.right ∘ p1.right
+
+def Param01_trans
+  (p1 : Param01 α β)
+  (p2 : Param01 β γ)
+  : Param01 α γ := by
+
+  apply flip1 (Map1_trans p2.flip p1.flip)
+
+  intro a c
+  exact
+    (
+      R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
+    ).forget
+
 
 def Map2a_trans
   (p1 : Param2a0 α β)
@@ -58,6 +129,19 @@ def Map2a_trans
   -/
 
   exact ⟨b, abR, bcR⟩
+
+def Param02a_trans
+  (p1 : Param02a α β)
+  (p2 : Param02a β γ)
+  : Param02a α γ := by
+
+  apply flip2a (Map2a_trans p2.flip p1.flip)
+
+  intro a c
+  exact
+    (
+      R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
+    ).forget
 
 def Map2b_trans
   (p1 : Param2b0 α β)
@@ -103,85 +187,70 @@ theorem Map2b_prop2
   subst ab1F ab2F
   rfl
 
+-- set_option diagnostics true
 
-
+-- @[tr_add_flipped Trale.R_flip_trans]
 def Map4_trans
-  (p1 : Param40 α β)
-  (p2 : Param40 β γ)
+  [p1 : Param40 α β]
+  [p2 : Param40 β γ]
   : Param40 α γ := by
+
   tr_extend Map3_trans p1 p2.forget
 
-  dsimp
-  intro a c acR
+  intro a c ⟨b, abR, bcR⟩
 
-  -- This errors:
-  -- show tr.map_implies_R _ _ (tr.R_implies_map _ _ acR) = (acR : @Param.R _ _ _ _ ?paramBase a c)
+  tr_subst a b abR
+  apply PSigma.eta rfl
+  apply PProd.ext <;> dsimp
 
-  -- This works:
-  -- show tr.map_implies_R _ _ (tr.R_implies_map _ _ acR) = (acR : Param.R _ _ a c)
-
-  -- This fails:
-  -- have lhs : Param.R _ _ a c := tr.map_implies_R _ _ (tr.R_implies_map _ _ acR)
-  -- show lhs = acR
-
-  show ?lhs = acR
-  let lhs := ?lhs
-  show lhs = acR
-
-  have ⟨b, abR, bcR⟩ := (acR : (b : β) ×' p1.R a b ×' p2.R b c)
-  replace abR : p1.R a b := abR
-  have ⟨b', abR', bcR'⟩ := lhs
-
-  sorry
-
-  -- have bEq : b = b' := by
-  --   exact Map2b_prop2 _ abR' abR
-
-  --   sorry
+  exact p1.forget.R_implies_rightK _ _ abR
+  exact p2.forget.R_implies_rightK _ _ bcR
 
 
+def Param04_trans
+  [p1 : Param04 α β]
+  [p2 : Param04 β γ]
+  : Param04 α γ := by
 
-  -- -- suffices ((abR = abR') ∧ (bcR = bcR')) by
-  -- -- · congr
+  apply flip4 (Map4_trans (β := β))
+
+  intro a c
+  exact
+    (
+      R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
+    ).forget
 
 
+  -- apply PSigma.ext; dsimp
 
 
+  -- simp?
 
 
+  -- constructor
 
+  -- change ?lhs = ?rhs
+  -- let h := ?lhs
+  -- tr_whnf at h
 
-  -- have ⟨b, abR, bcR⟩ := acR
-
-  -- have abK := tr.R_implies_mapK _ _ abR
-  -- have bcK := tr.R_implies_mapK _ _ bcR
+  -- exact p1.forget.R_implies_rightK _ _ abR
+  -- exact p2.forget.R_implies_rightK _ _ bcR
 
 
 
-  -- -- unfold tr.map_implies_R
-  -- -- unfold Map2a.map_in_R
-  -- -- unfold instParamMap2aOfMap3
-  -- apply Eq.trans
-  -- case b =>
-  --   tr_whnf
-  --   simp
-  --   exact ⟨b, ⟨abR, bcR⟩⟩
+  --  _ _ abR
+
+
+  -- let b : β := tr.map a
+  -- tr_subst b c bcR
 
 
 
 
 
-
-
-
-  -- simp
-
-  -- -- match ⊢ with
-  -- -- | ⟨b', ⟨abR', bcR'⟩⟩ = ⟨b, ⟨abR, bcR⟩⟩ =>
-  -- --   sorry
+  -- congr
 
 
 
 
-  -- -- show (⟨_, _⟩ : Param.R _ _ a c) = ⟨_, _⟩
-  -- show (_ : Param.R _ _ a c) = ⟨_, _⟩
+  -- sorry

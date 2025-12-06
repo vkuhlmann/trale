@@ -22,26 +22,35 @@ namespace TraleTest.Lemmas
 
 #check NNReal
 #check ENNReal
-def nnR := NNRat deriving Repr
+def nnR := NNRat deriving Repr, AddCommMagma, AddSemigroup, AddCommSemigroup,
+  Zero, AddZeroClass, Add
+-- def nnR := NNReal deriving Repr
+
+#eval 4.8 + 4.2
+
+-- #eval ((7 : NNReal) + (2 : NNReal)).toReal
 
 instance : OfNat nnR n where
   ofNat := (n : NNRat)
-instance : Zero nnR where
-  zero := 0
-instance : AddCommMagma nnR := inferInstanceAs (AddCommMagma NNRat)
-instance : AddSemigroup nnR := inferInstanceAs (AddSemigroup NNRat)
-instance : AddCommSemigroup nnR := inferInstanceAs (AddCommSemigroup NNRat)
+-- instance : Zero nnR where
+--   zero := 0
+-- instance : AddCommMagma nnR := inferInstanceAs (AddCommMagma NNReal)
+-- instance : AddSemigroup nnR := inferInstanceAs (AddSemigroup NNReal)
+-- instance : AddCommSemigroup nnR := inferInstanceAs (AddCommSemigroup NNReal)
+-- instance : Zero nnR := inferInstanceAs (Zero NNReal)
+-- instance : AddZeroClass nnR := inferInstanceAs (AddZeroClass NNReal)
+
 
 def zero_nnR : nnR := 0
 
-instance : Add nnR where
-  -- add := Nat.add
-  add (a : NNRat) (b : NNRat) := a + b
+-- instance : Add nnR where
+--   -- add := Nat.add
+--   add (a : NNRat) (b : NNReal) := a + b
 
 inductive xnnR where
   | fin : nnR -> xnnR
   | inf : xnnR
-deriving Repr
+-- deriving Repr
 
 def add_xnnR (a b : xnnR) : xnnR :=
   match a, b with
@@ -81,13 +90,34 @@ theorem xnnR_comm (a b : xnnR) : a + b = b + a := by
   | .fin a, .inf
   | .inf, .fin b => dsimp
 
+instance : AddCommMagma xnnR where
+  add_comm := xnnR_comm
+instance : AddSemigroup xnnR where
+  add_assoc a b := sorry
+instance : AddCommSemigroup xnnR := {}
+instance : AddCommMonoid xnnR where
+  zero := .fin 0
+  zero_add := by intro a; match a with
+    |.fin x =>
+      change xnnR.fin (0 + x) = xnnR.fin x; congr;
+
+      -- change @OfNat.ofNat nnR 0 Zero.toOfNat0 + x = x with x
+      -- exact AddZeroClass.zero_add x
+      sorry
+    |.inf => rfl
+  add_zero := sorry
+  nsmul := sorry
+  nsmul_zero := sorry
+  nsmul_succ := sorry
 
 def seq_nnR := Nat → nnR
-def seq_xnnR := Nat → xnnR
+def seq_xnnR := Nat → xnnR --ENNReal
 
+noncomputable
 def add_seq_xnnR (f g : seq_xnnR) : seq_xnnR :=
   fun n => (f n) + (g n)
 
+noncomputable
 instance : Add (seq_xnnR) where
   add := add_seq_xnnR
 
@@ -274,6 +304,14 @@ theorem seq_nnR_add
   tr_whnf; simp
 
   tr_subst a' a aR
+
+  -- let bR : tr.R (α := seq_xnnR) (β := summable) (p := param_summable_seq.flip) _ _ := bR
+  -- unfold tr.R at bR
+  -- let bR : (_ : Param _ _ seq_xnnR summable).R _ _ := bR
+  -- have aF := tr.R_implies_map _ _ bR;
+  -- simp at aF;
+  -- subst aF
+
   tr_subst b' b bR
 
   congr

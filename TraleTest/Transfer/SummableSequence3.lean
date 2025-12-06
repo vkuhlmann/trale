@@ -5,51 +5,54 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
+import Trale.Utils.Attr
 
 import TraleTest.Lemmas.TrAdvance
-import TraleTest.Lemmas.SummableSequence
+import TraleTest.Lemmas.SummableSequence2
 
 set_option trace.tr.utils true
 
-namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Lemmas
+namespace TraleTest.Transfer.SummableSequence2
+open TraleTest.Lemmas ENNReal NNReal
 
-theorem sum_eq_reverse_sum_seq_xnnR
-  (a b c : seq_xnnR)
+#eval
+  let p : ℕ := 4
+  (p : ℝ)
+
+
+theorem sum_eq_reverse_sum_seq
+  (a b c : ℕ → ℝ≥0)
   : a + b + c = c + b + a := by
   funext i
-
   change a i + b i + c i = c i + b i + a i
-  dsimp [HAdd.hAdd, Add.add, add_seq_xnnR, add_xnnR]
 
-  match a i with
-  | .inf => cases b i; cases c i; rfl; rfl; simp
-  | .fin a' =>
-
-  match b i with
-  | .inf => cases c i; rfl; rfl
-  | .fin b' =>
-
-  match c i with
-  | .inf => rfl
-  | .fin c' =>
-
-  show xnnR.fin (a' + b' + c') = xnnR.fin (c' + b' + a')
-
-  rw [AddCommMagma.add_comm _ c']
-  rw [AddCommMagma.add_comm a' b']
+  rw [AddCommMagma.add_comm _ (c _)]
+  rw [AddCommMagma.add_comm (a _) (b _)]
   simp [AddSemigroup.add_assoc]
 
+#tr_add_translations_from_instances
+#tr_translate ∀ (a b c : summable), (a + b + c = c + b + a)
 
+#check summable
+#check ℕ → ℝ≥0
+
+set_option pp.all true in
 theorem sum_eq_reverse_sum_summable
-(a b c : summable)
+  (a b c : summable)
   : a + b + c = c + b + a := by
 
   revert a b c
-  tr_by sum_eq_reverse_sum_seq_xnnR
+  -- trale
+
+  -- tr_sorry sorry
+  -- sorry
+
+
+
+  tr_by sum_eq_reverse_sum_seq
 
   let _ : Param00 Prop Prop := propParam.forget
   repeat first
-    | apply R_eq_seq_xnnR_summable
-    | apply seq_nnR_add
+    | apply R_eq_seq_summable
+    | apply R_add_summable
     | tr_advance

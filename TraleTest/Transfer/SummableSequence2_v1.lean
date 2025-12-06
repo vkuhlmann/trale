@@ -16,7 +16,7 @@ import TraleTest.Lemmas.TrAdvance
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Lemmas NNReal ENNReal
+open TraleTest.Lemmas NNReal ENNReal Trale
 
 #check Summable
 
@@ -188,7 +188,7 @@ theorem sum_nnR_add
   tr_advance
 
   change paramNNR.R _ _
-  apply Trale.Utils.denormalizeR
+  -- apply Trale.Utils.denormalizeR
 
   apply R_add_xnnR
   apply summable_rel

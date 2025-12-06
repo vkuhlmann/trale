@@ -42,44 +42,14 @@ theorem sum_eq_reverse_sum_seq_xnnR
 
 
 theorem sum_eq_reverse_sum_summable
-  (a b c : summable)
+(a b c : summable)
   : a + b + c = c + b + a := by
 
   revert a b c
   tr_by sum_eq_reverse_sum_seq_xnnR
 
   let _ : Param00 Prop Prop := propParam.forget
-
-  tr_intro a a' aR
-  tr_intro b b' bR
-  tr_intro c c' cR
-
-  tr_advance
-
-  show tr.R (c + b + a) (c' + b' + a')
-  · apply seq_nnR_add
-    apply seq_nnR_add
-    all_goals assumption
-
-  tr_advance
-  show tr.R (_ + b' + c') (_ + b + c)
-  · apply seq_nnR_add
-    apply seq_nnR_add
-    all_goals assumption
-
-  tr_advance
-  · tr_advance; dsimp
-    tr_advance; dsimp
-    apply R_eq_seq_xnnR_summable
-    tr_advance
-    tr_advance
-
-  tr_advance
-  tr_advance
-
-  -- let _ := param_summable_seq_injective
-  -- (refine (instantiatePropR ?_).forget)
-
-  -- apply R_eq_seq_xnnR_summable
-  -- assumption
-  -- assumption
+  repeat first
+    | apply R_eq_seq_xnnR_summable
+    | apply seq_nnR_add
+    | tr_advance

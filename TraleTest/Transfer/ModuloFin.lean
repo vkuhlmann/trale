@@ -126,7 +126,7 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
 
 
-  -- refine (Param_ident.instantiatePropR_bi ?_).forget
+  -- refine (Trale.instantiatePropR_bi ?_).forget
 
 
   -- tr_advance

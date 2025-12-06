@@ -14,7 +14,7 @@ import TraleTest.Lemmas.Modulo
 
 namespace TraleTest.Lemmas
 
-open Trale.Utils
+open Trale.Utils Trale
 
 def refoldMap10
   : Param10 α β → Param MapType.Map1 MapType.Map0 α β := id
@@ -23,14 +23,14 @@ theorem refoldMap10Eq
   : Param10.{w} α β = Param.{w} MapType.Map1 MapType.Map0 α β := rfl
 
 -- theorem paramToEq {a b : γ}
---   (x : Param_ident.instParam44 γ) : α = β := by
+--   (x : Trale.instParam44 γ) : α = β := by
 --     exact x.R
 
 
 
 macro "tr_step_rel" : tactic => do
   let o1 ← `(tactic|apply flipR')
-  let o2 ← `(tactic|rw [←Param_ident.param44_ident_symm])
+  let o2 ← `(tactic|rw [←Trale.param44_ident_symm])
   --
   let main ← `(tactic|
     (apply denormalizeR;
@@ -117,14 +117,15 @@ macro "tr_advance" : tactic => `(tactic|
           case' p1 => skip -- Fix the ordering
       )
 
-    | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+    | (refine (Trale.instantiatePropR_bi ?_).forget;
        tr_step_rel)
     | (refine (instantiatePropR ?_).forget; tr_step_rel)
+    | (tr_flip; refine (instantiatePropR ?_).forget; tr_step_rel)
     | fail "No step available"
     )
   )
 
-#check Param_ident.instantiatePropR_bi
+#check Trale.instantiatePropR_bi
 #check instantiatePropR
 #check flipR'
-#check Param_ident.param44_ident_symm
+#check Trale.param44_ident_symm

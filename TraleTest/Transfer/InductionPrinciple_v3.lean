@@ -83,7 +83,7 @@ macro "close_PR_nR" : tactic => `(tactic|
 
 macro "tr_step_rel" : tactic => do
   let o1 ← `(tactic|apply flipR')
-  let o2 ← `(tactic|rw [←Param_ident.param44_ident_symm])
+  let o2 ← `(tactic|rw [←Trale.param44_ident_symm])
   --
   let main ←  `(tactic|
     (apply denormalizeR;
@@ -134,7 +134,7 @@ macro "tr_advance" : tactic => `(tactic|
   | (tr_flip; tr_split_application; try (
         (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
 
-  | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+  | (refine (Trale.instantiatePropR_bi ?_).forget;
      tr_step_rel
     --  repeat apply_assumption
     )
@@ -186,7 +186,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     -- tr_advance
 
 
-    -- refine (Param_ident.instantiatePropR_bi ?_).forget
+    -- refine (Trale.instantiatePropR_bi ?_).forget
     -- tr_step_rel
     assumption
 
@@ -202,7 +202,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
       -- tr_step_rel
       tr_advance
 
-    -- refine (Param_ident.instantiatePropR_bi ?_).forget
+    -- refine (Trale.instantiatePropR_bi ?_).forget
     tr_advance
     tr_advance
     tr_advance

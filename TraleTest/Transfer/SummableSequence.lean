@@ -5,6 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
+import Trale.Utils.Attr
 
 import TraleTest.Lemmas.TrAdvance
 import TraleTest.Lemmas.SummableSequence
@@ -12,7 +13,7 @@ import TraleTest.Lemmas.SummableSequence
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 /-
 
@@ -146,6 +147,16 @@ example (a : nnR) (a' : xnnR)
 
 --      sorry
 
+-- #check instParam
+#printTraleInstances
+#printTraleImpliedTranslations
+#check Param_arrow.arrowR_rel
+
+#tr_add_translations_from_instances
+
+set_option trace.debug true in
+#tr_translate (∀ u : Nat, (Fin u) × summable)
+#tr_translate ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v)
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add

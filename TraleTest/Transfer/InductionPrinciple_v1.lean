@@ -9,6 +9,8 @@ import Trale.Theories.Sorts
 
 set_option trace.tr.utils true
 
+open Trale
+
 variable (I : Type _) (I0 : I) (IS : I -> I)
 variable (to_nat : I -> Nat) (of_nat : Nat -> I)
 

@@ -119,9 +119,9 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     tr_advance
     tr_advance
 
-    refine (Param_ident.instantiatePropR_bi ?_).forget
+    refine (Trale.instantiatePropR_bi ?_).forget
     apply flipR'
-    rw [←Param_ident.param44_ident_symm]
+    rw [←Trale.param44_ident_symm]
     refine PR _ _ ?_
     assumption
 
@@ -305,7 +305,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
       -- apply Eq.symm
       -- exact PR _ _ (by assumption)
 
-      refine (Param_ident.instantiatePropR_bi ?_).forget
+      refine (Trale.instantiatePropR_bi ?_).forget
       refine PR _ _ ?_
       assumption
 
@@ -316,18 +316,18 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
 
     -- have := RNS _ _ (by assumption)
 
-    -- refine (Param_ident.instantiatePropR_bi ?_).forget
+    -- refine (Trale.instantiatePropR_bi ?_).forget
     -- exact PR _ _ (by assumption)
 
-    refine (Param_ident.instantiatePropR_bi ?_).forget
+    refine (Trale.instantiatePropR_bi ?_).forget
     refine PR _ _ ?_
     refine RNS _ _ ?_
     assumption
 
   tr_intro n n' nR
 
-  refine (Param_ident.instantiatePropR_bi ?_).forget
+  refine (Trale.instantiatePropR_bi ?_).forget
   apply flipR'
-  rw [←Param_ident.param44_ident_symm]
+  rw [←Trale.param44_ident_symm]
   refine PR _ _ ?_
   assumption

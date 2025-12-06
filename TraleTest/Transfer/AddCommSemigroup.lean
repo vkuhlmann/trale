@@ -10,7 +10,7 @@ import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.Zmod5
 import TraleTest.Lemmas.TrAdvance
 
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 -- set_option trace.tr.utils true
 
 -------------------------------------------------------
@@ -117,8 +117,8 @@ namespace Approach3
 
 open Trale.Utils
 
-instance p : Param42a Nat Zmod5 :=
-  by tr_from_map repr5K
+instance p : Param2b2a Nat Zmod5 :=
+  (by tr_from_map repr5K : Param42a Nat Zmod5).forget
 
 theorem sum_eq_reverse_sum_Nat (a b c : Nat)
     : (a + b) + c = (c + b) + a := by
@@ -209,7 +209,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
 
 
   refine (instantiatePropR ?_).forget
-  apply denormalizeR
+  -- apply denormalizeR
   tr_whnf
   tr_whnf at aR
   apply_assumption
@@ -245,8 +245,9 @@ theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
 
   tr_advance
   exact R_eq
-  tr_advance
-  assumption
+
+  refine (instantiatePropR ?_).forget
+  exact aR _ _ (by assumption) _ _ (by assumption)
 
 end Approach3
 

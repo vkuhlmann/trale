@@ -51,7 +51,7 @@ theorem sum_eq_reverse_sum_summable
 
   tr_by sum_eq_reverse_sum_seq
 
-  let _ : Param00 Prop Prop := propParam.forget
+  let _ : Param00 Prop Prop := Trale.propParam.forget
   repeat first
     | apply R_eq_seq_summable
     | apply R_add_summable

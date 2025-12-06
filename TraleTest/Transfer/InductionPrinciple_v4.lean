@@ -35,7 +35,7 @@ def arrow_02a_rel
 
 macro "tr_step_rel" : tactic => do
   let o1 ← `(tactic|apply flipR')
-  let o2 ← `(tactic|rw [←Param_ident.param44_ident_symm])
+  let o2 ← `(tactic|rw [←Trale.param44_ident_symm])
   --
   let main ←  `(tactic|
     (apply denormalizeR;
@@ -74,7 +74,7 @@ macro "tr_advance" : tactic => `(tactic|
   | (tr_flip; tr_split_application; try (
         (case' p2 => intro _ _ _);rotate_left 1); tr_whnf)
 
-  | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+  | (refine (Trale.instantiatePropR_bi ?_).forget;
      tr_step_rel)
   | fail "No step available"
   )
@@ -91,31 +91,73 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   have RN0 : tr.R I0 0 := by sorry
   have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
+  -- let _ : Param00 Prop Prop := propParam.forget
+
   let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
     tr_advance
 
   tr_advance
-  tr_advance
-  ·
-    tr_advance
-    tr_advance
-    tr_advance
-    tr_advance
-
+  rename_last P P' PR
   tr_advance
   ·
     tr_advance
     tr_advance
 
+    -- tr_flip
+    tr_whnf at PR
+    -- apply denormalizeR
+
+    tr_flip
+    -- (refine (instantiatePropR ?_).forget; apply aR)
+    refine (Trale.instantiatePropR_bi ?_).forget
+    apply PR
+    exact aR
+
+
+    -- (refine (Trale.instantiatePropR_bi ?_).forget;
+    --  tr_step_rel)
+
+
+    -- apply PR
+
+    -- tr_flip
+    -- tr_split_application
+
+    -- tr_advance
+    -- tr_advance
+
+  tr_advance
+  ·
     tr_advance
+    rename_last i' i iR
+    tr_advance
+    -- tr_flip
+    refine (Trale.instantiatePropR_bi ?_).forget
+    exact PR _ _ iR
+
+    tr_flip
     tr_advance
 
-    tr_advance
-    tr_advance
-    tr_advance
+    exact RNS iR
+    -- apply_assumption
+    rename_last j j' jR
 
-    tr_advance
-    tr_advance
+    -- apply flipR'
+    refine (Trale.instantiatePropR_bi ?_).forget
+    apply flipR'
+    rw [←Trale.param44_ident_symm]
+    -- apply denormalizeR
+
+    -- apply_assumption
+    exact PR _ _ jR
+
+    -- apply arrow_02a_rel
+
+    -- assumption
+
+    -- tr_step_rel
+
+    -- tr_advance
 
   tr_advance
   tr_advance

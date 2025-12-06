@@ -12,7 +12,7 @@ import TraleTest.Lemmas.SummableSequence
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 theorem sum_eq_reverse_sum_seq_xnnR
   (a b c : seq_xnnR)

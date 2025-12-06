@@ -39,7 +39,7 @@ def arrow_02a_rel
 
 macro "tr_step_rel" : tactic => do
   let o1 ← `(tactic|apply flipR')
-  let o2 ← `(tactic|rw [←Param_ident.param44_ident_symm])
+  let o2 ← `(tactic|rw [←Trale.param44_ident_symm])
   --
   let main ←  `(tactic|
     (apply denormalizeR;
@@ -99,7 +99,7 @@ macro "tr_advance" : tactic => `(tactic|
           case' p1 => skip -- Fix the ordering
       )
 
-    | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+    | (refine (Trale.instantiatePropR_bi ?_).forget;
        tr_step_rel)
     | fail "No step available"
     )
@@ -183,7 +183,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   -- --   --       case' p1 => skip -- Fix the ordering
   -- --   --   )
 
-  -- --   -- | (refine (Param_ident.instantiatePropR_bi ?_).forget;
+  -- --   -- | (refine (Trale.instantiatePropR_bi ?_).forget;
   -- --   --    tr_step_rel)
   -- --   -- | fail "No step available"
   -- --   )

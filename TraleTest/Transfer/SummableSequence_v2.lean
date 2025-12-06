@@ -6,7 +6,7 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 
 import TraleTest.Lemmas.SummableSequence
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 set_option trace.tr.utils false
 

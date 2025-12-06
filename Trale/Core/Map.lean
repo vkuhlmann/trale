@@ -118,18 +118,21 @@ theorem mapTypeTrans {a b c : MapType} (h1 : a ≤ b) (h2 : b ≤ c) : a ≤ c :
 theorem mapTypeTrans' {a b c : MapType} (h1 : a ≥ b) (h2 : b ≥ c) : a ≥ c := by
   apply mapTypeTrans h2 h1
 
-instance : @Trans MapType MapType MapType LE.le LE.le LE.le where
-  trans := mapTypeTrans
+instance : Std.IsPreorder MapType where
+  le_refl a := by cases a <;> rfl
+  le_trans := @mapTypeTrans
+
+instance : Std.IsPartialOrder MapType where
+  le_antisymm a b h1 h2 := by
+    cases a <;> cases b <;> first|rfl |contradiction
+
 
 instance : Union MapType where
   union
     | .Map2a, .Map2b => .Map3
     | .Map2b, .Map2a => .Map3
     | a, b =>
-      if a ≤ b then
-        b
-      else
-        a
+      if a ≤ b then b else a
 
 theorem maptype_U_maptype_symm
   (a b : MapType)

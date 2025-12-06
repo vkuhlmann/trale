@@ -12,44 +12,19 @@ import Trale.Theories.Sigma
 import Trale.Theories.Exists
 import Trale.Utils.ParamFromFunction
 import Trale.Utils.Application
+import Trale.Utils.Basic
 import Qq open Qq Lean Meta Elab Tactic
 
 open Trale.Utils
 
-macro "tr_by" a:term:10 : tactic => `(tactic|
-  apply fun x => Param.right' x $a
-)
 
-macro "tr_from_map" ppSpace colGt a:term:10 : tactic => `(tactic|
-  first
-  | refine (paramFromMap $a).forget
-  | apply Trale.Utils.paramFromInjection $a
-  | apply Trale.Utils.paramFromSurjection $a
-  | refine (paramFromMap $a).forget.flip
-  | apply (Trale.Utils.paramFromInjection $a).flip
-  | apply (Trale.Utils.paramFromSurjection $a).flip
-  | fail "No suitable constructing function found"
-)
-
-
-macro "tr_from_map" : tactic => `(tactic|
-  tr_from_map ?_
-  -- first
-  -- | refine (Param_from_map ?_).forget
-  -- | apply Trale.Utils.createInjection
-)
-
-macro "tr_ident" : tactic => `(tactic|
-  (refine (Param44_ident'' ?_).forget; try first |dsimp |decide)
-)
-
-macro "tr_subst" ppSpace colGt a:ident a':ident aR:term:10 : tactic => `(tactic|
-  (
-    have aF := tr.R_implies_map $a $a' $aR;
-    simp at aF;
-    subst aF
-  )
-)
+-- macro "tr_subst" ppSpace aR:term:10 !colGe : tactic => `(tactic|
+--   (
+--     have aF := tr.R_implies_map _ _ $aR;
+--     simp at aF;
+--     subst aF
+--   )
+-- )
 
 macro "tr_split_forall" : tactic => `(tactic|
   first
@@ -188,7 +163,3 @@ elab_rules : tactic
   -- | `(tactic| intro $pat:term)         => evalTactic (← `(tactic| intro h; match @h with | $pat:term => ?_; try clear h))
   -- | `(tactic| intro $h:term $hs:term*) => evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
   -- | _ => throwUnsupportedSyntax
-
-macro "tr_sorry" a:term:10 : tactic => `(tactic|
-  (show Param.{0} _ _ _ _; sorry)
-  )

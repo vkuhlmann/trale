@@ -88,22 +88,57 @@ example : 5 ≥ 3 := by
   sorry
 
 #check Nat.le
+#check Eq.refl
+#check rfl
 -- #check le_add_lef
 
 theorem le_add (p q : Nat)
   : p ≤ p + q := by simp
 
+inductive isGe (x n : Nat)
+  | ge_add (m : Nat) (h : x = m + n)
+
+-- structure isGe (x n : Nat) where
+--   (m : Nat)
+--   (h : x = m + n)
+
+#check Or.inl
+
 theorem ge_add {p : Nat} (q : Nat)
   : p + q ≥ p := by simp
+
+#check ge_add
 
 def is_ge (p q : Nat) := ∃ x, p = q + x
 
 example : ∀ (p : Nat), is_ge p 20 → is_ge p 2 :=
   fun p ⟨m, hm⟩ => ⟨m+18, by omega⟩
 
+-- Error: code generator does not support recursor 'isGe.rec' yet, consider using 'match ... with' and/or structural recursion
+-- example : ∀ (x : Nat), isGe x 30 → isGe x 2 :=
+--   fun x h => isGe.rec (fun m h2 => isGe.ge_add (m+28) h2) h
 
+example : ∀ (x : Nat), isGe x 30 → isGe x 2 :=
+  fun x h => match h with
+    | isGe.ge_add m h2 => isGe.ge_add (m+28) h2
 
+-- Error: code generator does not support recursor 'isGe.rec' yet, consider using 'match ... with' and/or structural recursion
+-- example (x : Nat) (h :isGe x 30) : Nat :=
+--   (isGe.rec (fun m h2 => m) h)
+
+-- example (x : Nat) (h :isGe x 30) : Nat :=
+--   (isGe.mk.elim (fun m h2 => m) h)
+
+example : (4 = 3) ∨ (6 = 6) := Or.inr (refl 6)
+example : (4 = 3) ∨ (6 = 6) := Or.inr rfl
+example : (4 = 3) ∨ (6 = 6) := .inr rfl
+
+#eval ((7 : Nat).add 3)
 #eval 6 + 3
+
+#eval (7,2).fst
+#eval Prod.fst (7,2)
+#eval Prod.fst (Prod.mk 7 2)
 
 #reduce delta% zeta% beta%
   by

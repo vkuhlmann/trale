@@ -1,5 +1,5 @@
 import Lean
-import Mathlib
+-- import Mathlib
 
 theorem sum_eq_reverse_sum_Nat (a b c : Nat)
     : (a + b) + c = (c + b) + a := by
@@ -76,9 +76,22 @@ def R_eq
   {a a'} (aR : R a a')
   {b b'} (bR : R b b')
   : (a = b) → (a' = b') := by
-  intro h; subst aR bR; rw [h]
+  intro h; subst aR bR; exact congrArg _ h
 
-theorem sum_eq_reverse_sum_Modulo (a b c : Zmod5)
+theorem sum_eq_reverse_sum_Modulo :
+    ∀ (a b c : Zmod5), (a + b) + c = (c + b) + a :=
+    (
+    intro_mod5 fun _ _ aR =>
+    intro_mod5 fun _ _ bR =>
+    intro_mod5 fun _ _ cR =>
+
+    R_eq
+      (R_add (R_add aR bR) cR)
+      (R_add (R_add cR bR) aR)
+    ) sum_eq_reverse_sum_Nat
+
+
+theorem sum_eq_reverse_sum_Modulo' (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by
 
   revert a b c
@@ -90,13 +103,9 @@ theorem sum_eq_reverse_sum_Modulo (a b c : Zmod5)
   apply intro_mod5; intro c c' cR
 
   let lhsR : R (a + b + c) (a' + b' + c') :=
-    R_add
-      (R_add (by assumption) (by assumption))
-      (by assumption)
+    R_add (R_add aR bR) cR
 
   let rhsR : R (c + b + a) (c' + b' + a') :=
-    R_add
-      (R_add (by assumption) (by assumption))
-      (by assumption)
+    R_add (R_add cR bR) aR
 
-  apply R_eq lhsR rhsR
+  exact R_eq lhsR rhsR

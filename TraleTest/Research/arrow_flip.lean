@@ -33,6 +33,41 @@ example
   -- show ((tr.R a a') × (tr.R b b')) = ((tr.R b b') × (tr.R a a'))
 
 
+-- example
+--   [p1 : Param2a1 α α']
+--   [p2 : Param2a1 β β']
+--   : Param2a1 (α × β) (α' × β')
+
+-- def Param11_prod'
+--   [Param11 α α']
+--   [Param11 β β']
+--   : Param11 (α × β) (α' × β') := by
+
+--   tr_extend_multiple [
+--     Map1_prod
+--   ]
+
+
+def Param2a1_arrow_prop'
+  [p1 : Param12b α α']
+  [p2 : Param2a1.{0} β β']
+  : Param2a1 (α → β) (α' → β') := by
+
+  tr_extend_multiple [
+    Map2a_arrow,
+    Map1_arrow_flipped
+  ]
+
+def Param2a1_prod
+  [p1 : Param2a1 α α']
+  [p2 : Param2a1 β β']
+  : Param2a1 (α × β) (α' × β') := by
+
+  tr_extend_multiple [
+    Map2a_prod,
+    Map1_prod_flipped
+  ]
+
 
 def Param02a_arrow
   [p1 : Param2b0 α α']

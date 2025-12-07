@@ -139,7 +139,7 @@ theorem sum_eq_reverse_sum_Nat (a b c : Nat)
 --   simp
 
 
-def sum_preserves_Zmod5
+def R_add_Zmod5
   (aR : p.R a a')
   (bR : p.R b b')
   : (p.R (a + b) (a' + b')) := by
@@ -164,7 +164,7 @@ theorem sum_eq_reverse_sum_Zmod5 (a b c : Zmod5)
 
   repeat first
     | assumption
-    | apply sum_preserves_Zmod5
+    | apply R_add_Zmod5
     | tr_advance
 
 #check Eq
@@ -182,13 +182,13 @@ theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
   tr_intro c c' cR
 
   tr_advance
-  apply sum_preserves_Zmod5
-  apply sum_preserves_Zmod5
+  apply R_add_Zmod5
+  apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
 
   tr_advance
-  apply sum_preserves_Zmod5
-  apply sum_preserves_Zmod5
+  apply R_add_Zmod5
+  apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
 
 
@@ -229,16 +229,16 @@ theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
   tr_advance
   tr_advance
   tr_advance
-  apply sum_preserves_Zmod5
-  apply sum_preserves_Zmod5
+  apply R_add_Zmod5
+  apply R_add_Zmod5
   tr_advance
   tr_advance
   tr_advance
 
 
   tr_advance
-  apply sum_preserves_Zmod5
-  apply sum_preserves_Zmod5
+  apply R_add_Zmod5
+  apply R_add_Zmod5
   tr_advance
   tr_advance
   tr_advance
@@ -248,6 +248,35 @@ theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
 
   refine (instantiatePropR ?_).forget
   exact aR _ _ (by assumption) _ _ (by assumption)
+
+theorem sum_eq_reverse_sum_Zmod5_manual3 (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  refine Param.right' ?_ sum_eq_reverse_sum_Nat
+
+  apply Trale.Map1_forall; intro a a' aR
+  case p1 => exact ModParam.forget
+
+  apply Trale.Map1_forall; intro b b' bR
+  case p1 => exact ModParam.forget
+
+  apply Trale.Map1_forall; intro c c' cR
+  case p1 => exact ModParam.forget
+
+  apply R_eq'
+
+  · apply R_add_Zmod5
+    · apply R_add_Zmod5
+      · exact aR
+      · exact bR
+    · exact cR
+
+  · apply R_add_Zmod5
+    · apply R_add_Zmod5
+      · exact cR
+      · exact bR
+    · exact aR
 
 end Approach3
 

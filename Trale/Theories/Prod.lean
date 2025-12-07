@@ -4,6 +4,7 @@ import Lean.Expr
 import Lean.Elab.Command
 
 import Trale.Core.Param
+import Trale.Utils.Basic
 import Trale.Utils.Extend
 import Trale.Utils.Glueing
 import Trale.Utils.AddFlipped
@@ -20,8 +21,6 @@ variable {αR : α -> α' -> Sort w1}
 variable {βR : β -> β' -> Sort w2}
 
 def prodR
-  {α' α : Type u}
-  {β' β : Type v}
   (p1 : Param00 α α')
   (p2 : Param00 β β')
   : (α × β) → (α' × β') → Sort _
@@ -29,42 +28,22 @@ def prodR
   fun (a, b) (a', b') => (p1.R a a') ×' (p2.R b b')
 
 def flipProdR
-  {p1 : Param00 α α'}
-  {p2 : Param00 β β'}
   (r : prodR p1 p2 x y)
   : prodR p1.flip p2.flip y x
   := match r with
     | ⟨aR, bR⟩ => ⟨flipR aR, flipR bR⟩
 
-theorem flipProdR_involution
-  : flipProdR (flipProdR r) = r := by rfl
-
 instance R_flip_prod
+  -- The order of α', α, β', β needs to be specified for
+  -- tr_add_flipped to produce the correct flipped definition.
   {α' α : Type u}
   {β' β : Type v}
   [p1 : Param00 α α']
   [p2 : Param00 β β']
   {x x'}
   : Param44 (prodR p1.flip p2.flip x' x) (prodR p1 p2 x x') := by
-  tr_constructor
 
-  -- R
-  exact (flipProdR · = ·)
-
-  -- 4
-  exact flipProdR
-  simp
-  simp
-  simp
-
-  -- 4
-  exact flipProdR
-  simp
-  apply flipProdR_involution
-  · intro x x' xR
-    subst xR
-    exact flipProdR_involution
-  simp
+  tr_from_involution flipProdR
 
 
 @[tr_add_flipped Param_prod.R_flip_prod]

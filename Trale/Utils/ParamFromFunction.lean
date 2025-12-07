@@ -95,6 +95,39 @@ theorem injectiveFunctionInvert
   show p.contravariant.map x' = x
   exact p.contravariant.R_in_map x' x xR
 
+-- from involution
+
+def paramFromInvolution
+  {flipR : α → β}
+  {flipR' : β → α}
+  -- {flipT : Sort _ → Sort _}
+  -- (flipT_involution : flipT (flipT α) = α)
+  (h : ∀ a, flipR' (flipR a) = a)
+  (h' : ∀ b, flipR (flipR' b) = b := by exact h)
+
+  : Param44 α β := by
+
+  tr_constructor
+
+   -- R
+  exact (flipR · = ·)
+
+  -- 4
+  exact flipR
+  simp
+  simp
+  simp
+
+  -- 4
+  exact flipR'
+  simp
+
+  apply h'
+  · intro x x' xR
+    subst xR
+    apply  h
+  simp
+
 
 -- def paramFromSectionK
 --   {sect : α → β} {retract : β → α}

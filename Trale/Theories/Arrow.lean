@@ -5,6 +5,7 @@ import Lean.Elab.Command
 import Trale.Core.Param
 import Trale.Utils.Extend
 import Trale.Utils.Whnf
+import Trale.Utils.Basic
 import Trale.Utils.AddFlipped
 import Qq
 import Trale.Theories.Flip
@@ -21,8 +22,6 @@ namespace Param_arrow
 variable {α : Sort u} {α' : Sort u} {β : Sort v} {β' : Sort v}
 
 def arrowR
-  {α' α : Sort u}
-  {β' β : Sort v}
   (p1 : Param00 α α')
   (p2 : Param00 β β')
   : (α → β) -> (α' → β') -> Sort _
@@ -30,73 +29,22 @@ def arrowR
     forall a a', p1.R a a' -> p2.R (f a) (f' a')
 
 def flipArrowR
-  {p1 : Param00 α α'}
-  {p2 : Param00 β β'}
   (r : arrowR p1 p2 f f')
   : arrowR p1.flip p2.flip f' f
   := fun a' a aR' => r a a' (flipR aR')
 
-theorem flipArrowR_involution
-  : flipArrowR (flipArrowR r) = r := by rfl
-
--- def paramFromInvolution
---   -- {α : Type u}
---   {σ : Type v}
---   {f : σ → Type (w+1)}
---   {invertS : σ → σ}
---   {t : σ}
---   {hS : ∀ {s}, invertS (invertS s) = s}
---   {invert : ∀ {s}, f s → f (invertS s)}
---   -- (h : ∀ r, invert (invert r) = r)
---   {x : f t}
---   : Param44 x (invert x) := by
-
---   tr_constructor
-
---   -- R
---   exact (invert · = ·)
-
---   -- 4
---   exact invert
---   simp
---   simp
---   simp
-
---   -- 4
---   exact flipArrowR
---   simp
---   apply flipArrowR_involution
---   · intro x x' xR
---     subst xR
---     exact flipArrowR_involution
---   simp
-
 instance arrowR_rel
+  -- The order of α', α, β', β needs to be specified for
+  -- tr_add_flipped to produce the correct flipped definition.
   {α' α : Sort u}
   {β' β : Sort v}
   [p1 : Param00 α α']
   [p2 : Param00 β β']
   {f f'}
   : Param44 (arrowR p1.flip p2.flip f' f) (arrowR p1 p2 f f') := by
-  tr_constructor
 
-  -- R
-  exact (flipArrowR · = ·)
+  tr_from_involution flipArrowR
 
-  -- 4
-  exact flipArrowR
-  simp
-  simp
-  simp
-
-  -- 4
-  exact flipArrowR
-  simp
-  apply flipArrowR_involution
-  · intro x x' xR
-    subst xR
-    exact flipArrowR_involution
-  simp
 
 
 instance Map0_arrow

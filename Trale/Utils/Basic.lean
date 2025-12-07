@@ -25,6 +25,20 @@ macro "tr_from_map" ppSpace colGt a:term:10 : tactic => `(tactic|
   | fail "No suitable constructing function found"
 )
 
+macro "tr_from_involution" ppSpace colGt a:term:10 : tactic => `(tactic|
+    (first
+     | (apply Trale.Utils.paramFromInvolution;
+        apply $a;
+        apply $a; done)
+      | (apply Trale.Utils.paramFromInvolution;
+         case flipR => exact $a
+         case flipR' => exact $a
+         case _ => intro _; rfl
+         case _ => intro _; rfl
+        )
+    )
+  )
+
 #check paramFromMap
 #check Trale.Utils.paramFromInjection
 #check Trale.Utils.paramFromSurjection

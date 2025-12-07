@@ -42,34 +42,15 @@ def flipTransR
     | ⟨b, abR, bcR⟩ =>
       ⟨b, flipR bcR, flipR abR⟩
 
-theorem flipTransR_involution
-  : flipTransR (flipTransR r) = r := by rfl
-
 instance R_flip_trans
   {β α γ}
   [p1 : Param00 α β]
   [p2 : Param00 β γ]
   {a c}
   : Param44 (transR p2.flip p1.flip c a) (transR p1 p2 a c) := by
-  tr_constructor
 
-  -- R
-  exact (flipTransR · = ·)
+  tr_from_involution flipTransR
 
-  -- 4
-  exact flipTransR
-  simp
-  simp
-  simp
-
-  -- 4
-  exact flipTransR
-  simp
-  apply flipTransR_involution
-  · intro x x' xR
-    subst xR
-    exact flipTransR_involution
-  simp
 
 def Map0_trans
   (p1 : Param00 α β)

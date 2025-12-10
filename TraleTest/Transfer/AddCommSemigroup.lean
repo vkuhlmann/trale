@@ -5,6 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
+import Trale.Utils.Attr
 import Trale.Theories.Sorts
 import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.Zmod5
@@ -138,10 +139,10 @@ theorem sum_eq_reverse_sum_Nat (a b c : Nat)
 --   unfold Fin.add
 --   simp
 
-
+@[aesop 90% apply (rule_sets := [trale])]
 def R_add_Zmod5
-  (aR : p.R a a')
-  (bR : p.R b b')
+  (aR : tr.R a a')
+  (bR : tr.R b b')
   : (p.R (a + b) (a' + b')) := by
 
   tr_whnf
@@ -153,19 +154,33 @@ def R_add_Zmod5
 
 #check Nat.add
 
+add_aesop_rules 90% (by assumption) (rule_sets := [trale])
+-- add_aesop_rules 90% apply Trale.R_eq' (rule_sets := [trale])
+add_aesop_rules 90% (by apply Trale.R_eq') (rule_sets := [trale])
+add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])
+-- add_aesop_rules 50% (by tr_advance) (rule_sets := [trale])
 
 theorem sum_eq_reverse_sum_Zmod5 (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by
 
   revert a b c
   tr_by sum_eq_reverse_sum_Nat
+  change Param10.{0} _ _
 
-  let _ : Param00 Prop Prop := propParam.forget
+  aesop (rule_sets := [trale])
+
+
+theorem sum_eq_reverse_sum_Zmod5' (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  tr_by sum_eq_reverse_sum_Nat
 
   repeat first
     | assumption
     | apply R_add_Zmod5
-    | tr_advance
+    | tr_intro _ _ _
+    | apply R_eq'
 
 #check Eq
 
@@ -277,6 +292,51 @@ theorem sum_eq_reverse_sum_Zmod5_manual3 (a b c : Zmod5)
       · exact cR
       · exact bR
     · exact aR
+
+
+theorem sum_eq_reverse_sum_Zmod5_manual4 (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  refine Param.right' ?_ sum_eq_reverse_sum_Nat
+
+  apply Trale.Map1_forall; intro _ _ _
+  case p1 => infer_instance
+
+  apply Trale.Map1_forall; intro _ _ _
+  case p1 => infer_instance
+
+  apply Trale.Map1_forall; intro _ _ _
+  case p1 => infer_instance
+
+  apply R_eq'
+
+  · apply R_add_Zmod5
+    · apply R_add_Zmod5
+      · assumption
+      · assumption
+    · assumption
+
+  · apply R_add_Zmod5
+    · apply R_add_Zmod5
+      · assumption
+      · assumption
+    · assumption
+
+
+theorem sum_eq_reverse_sum_Zmod5_manual5 (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  refine Param.right' ?_ sum_eq_reverse_sum_Nat
+
+  repeat first
+    | apply Trale.Map1_forall
+      case' p2 => intro _ _ _
+      case p1 => infer_instance
+    | apply R_eq'
+    | apply R_add_Zmod5
+    | assumption
 
 end Approach3
 

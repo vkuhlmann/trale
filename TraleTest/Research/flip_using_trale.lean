@@ -14,6 +14,7 @@ def prop2a_R
   : Param10 (prop2a base.forget) (prop2a (flip1 base.forget conv).flip) := by
 
   repeat tr_advance
+  -- tr_solve
 
 def flip2a'
   {α : Type u} {β : Type v}

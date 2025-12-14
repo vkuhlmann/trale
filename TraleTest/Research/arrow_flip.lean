@@ -4,7 +4,7 @@ import Trale.Utils.Glueing
 import Trale.Theories.Flip
 import Lean
 
-open Param_arrow
+open Trale
 open Trale.Utils
 
 namespace TraleTest.Research
@@ -34,6 +34,9 @@ example
 
 
 -- example
+--   : Param32a (α → β) (α' → β')
+
+-- example
 --   [p1 : Param2a1 α α']
 --   [p2 : Param2a1 β β']
 --   : Param2a1 (α × β) (α' × β')
@@ -48,11 +51,17 @@ example
 --   ]
 
 
-def Param2a1_arrow_prop'
+def Param2a1_arrow
+  [p1 : Param12b α α']
+  [p2 : Param2a1 β β']
+  : Param2a1 (α → β) (α' → β') := inferGlued
+
+
+
+def Param2a1_arrow_prop''
   [p1 : Param12b α α']
   [p2 : Param2a1.{0} β β']
   : Param2a1 (α → β) (α' → β') := by
-
   tr_extend_multiple [
     Map2a_arrow,
     Map1_arrow_flipped
@@ -132,7 +141,7 @@ def Param02b_arrow'
   [p2 : Param02b β β']
   : Param02b (α → β) (α' → β') := by
 
-  apply flip2b Map2b_arrow (arrowR p1 p2)
+  apply flip2b Map2b_arrow
 
   intro f f'
   let h := arrowR_rel (f := f) (f' := f') (p1 := p1.forget) (p2 := p2.forget)
@@ -220,6 +229,19 @@ def Param2a1_arrow_any_sort
   apply glued base1 base2
 
   funext f f'
+  show arrowR _ _ _ _ = arrowR _ _ _ _
+  unfold arrowR
+  dsimp
+
+  show (∀ (a : _) (a' : _), _ → _) = (∀ (a' : _) (a : _), _ → _)
+
+
+  -- rw[R_eq_normalize_R]
+  -- unfold base2
+  -- change @Param.R .Map0 .Map0 _ _ base1.forget _ _ = @Param.R .Map0 .Map0 _ _ base2.forget _ _
+  -- unfold base2
+
+
   -- apply propext -- This fails
   sorry
 
@@ -306,7 +328,7 @@ theorem Param2a_flip_R_eq
 
 
 #check Map2a_arrow_flipped
-#print axioms Map2a_arrow_flipped -- 'Param_arrow.Map2a_arrow_flipped' does not depend on any axioms
+#print axioms Map2a_arrow_flipped -- 'Trale.Map2a_arrow_flipped' does not depend on any axioms
 #print Map2a_arrow_flipped
 
 #reduce
@@ -325,7 +347,7 @@ example [Param2a1 String Nat]
 --   {α α' : Sort u} {β β' : Sort v}
 --   [p1 : Param MapType.Map2a MapType.Map0 α' α] [p2 : Param MapType.Map0 MapType.Map2b β' β] :
 --   Param MapType.Map0 MapType.Map2b (α' → β') (α → β)
---   := flip2b Map2b_arrow _ Param_arrow.arrowR_rel
+--   := flip2b Map2b_arrow _ Trale.arrowR_rel
 
 example [Param2b1 String Nat]
   : Param12b (Nat -> Nat) (Nat -> String)

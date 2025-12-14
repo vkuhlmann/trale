@@ -20,7 +20,13 @@ open TraleTest.Lemmas
 -- But this works
 #check
   let p : Param10 ?a ?b := ?p
-  p.right
+  p.right'
+
+#check
+  let p : Param40 ?a ?b := ?p
+  let x : ?a := ?x
+  (p.right : ?a → ?b) x
+
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add

@@ -7,7 +7,7 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-open Param_arrow Trale.Utils
+open Trale Trale.Utils
 
 def glued
   (p1 : Param cov .Map0 α β)

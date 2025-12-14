@@ -7,7 +7,7 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
-open Param_arrow
+open Trale
 
 def A : Type := sorry
 def A' : Type := sorry

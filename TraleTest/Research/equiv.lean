@@ -1,4 +1,4 @@
-import Trale.Utils.ParamFromFunction
+import Trale.Utils.Constructor
 import Mathlib.Logic.Equiv.Defs
 
 def paramFromEquiv (h : Equiv α β)
@@ -10,12 +10,14 @@ def paramFromEquiv (h : Equiv α β)
 
   -- 4
   · exact (h : _ → _)
-  · intro _ _ aR; subst aR; dsimp only
-  · intro _ _ aR; subst aR; dsimp only
-  · intro _ _ aR; subst aR; dsimp only
+  repeat (intro _ _ aF; subst aF; simp)
+  -- · intro _ _ aF; subst aF; dsimp only
+  -- · intro _ _ aR; subst aR; dsimp only
+  -- · intro _ _ aR; subst aR; dsimp only
 
   -- 4
   · exact (h.symm : _ → _)
-  · intro _ _ aR; subst aR; simp only [flipRel, Equiv.apply_symm_apply]
-  · intro _ _ aR; subst aR; simp only [Equiv.symm_apply_apply]
-  · intro _ _ aR; subst aR; dsimp only [flipRel]
+  repeat (intro _ _ aF; subst aF; simp)
+  -- · intro _ _ aF; subst aF; simp only [flipRel, Equiv.apply_symm_apply]
+  -- · intro _ _ aR; subst aR; simp only [Equiv.symm_apply_apply]
+  -- · intro _ _ aR; subst aR; dsimp only [flipRel]

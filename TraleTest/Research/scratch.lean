@@ -67,7 +67,7 @@ structure Map3' (R : α -> β -> Sort w) where
 -- instance (priority := 80) [p : Param α β cov con] : Param β α con cov :=
 --   { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant }
 
-#check @Param_arrow.Map0_arrow (p1 := ?_) (p2 := ?_)
+#check @Trale.Map0_arrow (p1 := ?_) (p2 := ?_)
 -- have test1 : Param01 α α' := by infer_instance -- This fails
 
 
@@ -86,11 +86,11 @@ example : ∀ a : α, @default _ (Inhabited.mk a) = a := by
   sorry
 
 
--- #check Param_arrow.Map0_arrow (ParamModFin)
+-- #check Trale.Map0_arrow (ParamModFin)
 #check
   let p1 : Param03.{5} Nat String := ?p1
   let p2 : Param40.{1} Nat String := ?p2
-  (Param_arrow.Map4_arrow (p1 := p1) (p2 := p2)).R
+  (Trale.Map4_arrow (p1 := p1) (p2 := p2)).R
 
 #check cast_heq
 

@@ -27,6 +27,11 @@ def lemma1 : (n : Square_num) → n.1 ≠ 1 → n.2.1 ≠ 1 :=
 def square_to_divisable : (n : Square_num) → (n.1 ≠ 1) → (a : Divis_num) ×' (a.1 = n.1) :=
   fun n h1 => ⟨⟨n.1, ⟨n.2.1, n.2.1, lemma1 n h1, lemma1 n h1, n.2.2⟩⟩, rfl⟩
 
+#check Σ' (a : Nat), a = a
+#check ∃ (a : Nat), a = a
+-- #check ∃ (a : Nat), Nat
+#check ∀ (a : Nat), a = a
+-- #check Π
 
 -- Nat only
 
@@ -187,6 +192,13 @@ example : isNotPrime 167719 := by
     case h3 => exact ge_add 365
     case h4 => exact ge_add 455
 
+namespace simpleProofNotPrime
+
+def isNotPrime (n : Nat) := ((n = 0) ∨ (n = 1)) ∨ (∃ (p : Nat), ∃ (q : Nat), (p * q = n) ∧ (p ≥ 2) ∧ (q ≥ 2))
+
+theorem ge_add {p : Nat} (q : Nat)
+  : p + q ≥ p := by simp
+
 example : isNotPrime 167719 := by
   right
   use 367
@@ -195,6 +207,8 @@ example : isNotPrime 167719 := by
   · rfl
   · exact ge_add 365
   · exact ge_add 455
+
+end simpleProofNotPrime
 
 #check Equiv
 -- #check ≣

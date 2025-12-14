@@ -1,7 +1,8 @@
 import Trale.Core.Param
 import Trale.Utils.Extend
-import Trale.Utils.Split
-import Trale.Utils.Simp
+-- import Trale.Utils.Split
+import Trale.Utils.Basic
+import Trale.Utils.Whnf
 import Trale.Utils.ParamIdent
 import Trale.Utils.ParamFromFunction
 import Trale.Theories.Ident
@@ -9,7 +10,7 @@ import Trale.Theories.Ident
 open Trale.Utils
 namespace Trale
 
-instance (priority := low) sortParam.{w} : Param00 (Sort u) (Sort u) := by
+instance (priority := low) sortParam''.{w} : Param00 (Sort u) (Sort u) := by
   tr_constructor
 
   -- R
@@ -44,7 +45,9 @@ example : Param44 (Sort u) (Sort u) := by
   all_goals sorry
 -/
 
-def sortParam' (cov con : MapType) : Param2a2a (Sort u) (Sort u) := by
+#check Fin
+
+def sortParam (cov con : MapType) : Param2a2a (Sort u) (Sort u) := by
   tr_constructor
 
   -- R
@@ -61,6 +64,14 @@ def sortParam' (cov con : MapType) : Param2a2a (Sort u) (Sort u) := by
   · intro a' a aF
     subst aF
     exact Param44_ident.forget (h1 := map4top) (h2 := map4top)
+
+
+def sortParam'.{w} (cov con : MapType)
+: Param11 (Sort u) (Sort u) := by
+  tr_constructor
+  · exact Param.{w,u,u} cov con
+  · exact id
+  · exact id
 
 
 
@@ -95,12 +106,26 @@ def instantiatePropR
 
 def instantiatePropR'
   {a b : Prop}
-  (r : (sortParam' cov con).R a b)
+  (r : (sortParam cov con).R a b)
   : Param cov con a b := r
 
 def instantiateSortDuality
-  : (sortParam' cov con).R a b = Param.{0} cov con a b := by rfl
+  : (sortParam cov con).R a b = Param.{0} cov con a b := by rfl
 
+def prop_equiv_implies_eq
+  (α β : Prop)
+  : Param11 α β → (α = β) := by
+  intro h
+  apply propext
+
+  exact ⟨h.right, h.left⟩
+
+def prop_eq_implies_equiv
+  (α β : Prop)
+  : (α = β) → Param44 α β := by
+  intro h
+  tr_ident
+  exact h
 
 def instantiatePropR_r
   {a b : Prop}
@@ -127,7 +152,7 @@ def R_eq'
   [Param2b0 α α']
   (a : α) (a' : α') (aR : tr.R a a')
   (b : α) (b' : α') (bR : tr.R b b')
-  : (sortParam' .Map1 .Map0).R (a = b) (a' = b') := by
+  : (sortParam .Map1 .Map0).R (a = b) (a' = b') := by
 
   tr_from_map
 

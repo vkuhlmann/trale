@@ -53,8 +53,8 @@ instance R_flip_trans
 
 
 def Map0_trans
-  (p1 : Param00 α β)
-  (p2 : Param00 β γ)
+  [p1 : Param00 α β]
+  [p2 : Param00 β γ]
   : Param00 α γ := by
   tr_constructor
 
@@ -64,32 +64,38 @@ def Map0_trans
   -- exact Σ' b, p1.R a b ×' p2.R b c
 
 def Map1_trans
-  (p1 : Param10 α β)
-  (p2 : Param10 β γ)
+  [p1 : Param10 α β]
+  [p2 : Param10 β γ]
   : Param10 α γ := by
-  tr_extend Map0_trans p1 p2.forget
+  tr_extend Map0_trans (β := β)
 
   exact p2.right ∘ p1.right
 
-def Param01_trans
-  (p1 : Param01 α β)
-  (p2 : Param01 β γ)
-  : Param01 α γ := by
+def Map1_trans_flipped
+  [Param01 α β] [Param01 β γ]
+  : Param01 α γ
+  := flip1 (Map1_trans (β := β)) (fun {_ _} => R_flip_trans.forget)
 
-  apply flip1 (Map1_trans p2.flip p1.flip)
 
-  intro a c
-  exact
-    (
-      R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
-    ).forget
+-- def Param01_trans
+--   (p1 : Param01 α β)
+--   (p2 : Param01 β γ)
+--   : Param01 α γ := by
+
+--   apply flip1 (Map1_trans p2.flip p1.flip)
+
+--   intro a c
+--   exact
+--     (
+--       R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
+--     ).forget
 
 
 def Map2a_trans
-  (p1 : Param2a0 α β)
-  (p2 : Param2a0 β γ)
+  [p1 : Param2a0 α β]
+  [p2 : Param2a0 β γ]
   : Param2a0 α γ := by
-  tr_extend Map1_trans p1 p2.forget
+  tr_extend Map1_trans (β := β)
 
   dsimp
   intro a c acF
@@ -116,7 +122,7 @@ def Param02a_trans
   (p2 : Param02a β γ)
   : Param02a α γ := by
 
-  apply flip2a (Map2a_trans p2.flip p1.flip)
+  apply flip2a (Map2a_trans (p1 := p2.flip) (p2 := p1.flip))
 
   intro a c
   exact
@@ -125,10 +131,10 @@ def Param02a_trans
     ).forget
 
 def Map2b_trans
-  (p1 : Param2b0 α β)
-  (p2 : Param2b0 β γ)
+  [p1 : Param2b0 α β]
+  [p2 : Param2b0 β γ]
   : Param2b0 α γ := by
-  tr_extend Map1_trans p1 p2.forget
+  tr_extend Map1_trans (β := β)
 
   dsimp
   intro a c acR
@@ -143,11 +149,22 @@ def Map2b_trans
   subst abF
   rfl
 
+def Map2b_trans_flipped
+  [Param02b α β] [Param02b β γ] : Param02b α γ
+  := flip2b (Map2b_trans (β := β)) (fun {_ _} => R_flip_trans.forget)
+
 def Map3_trans
-  (p1 : Param30 α β)
-  (p2 : Param30 β γ)
+  [p1 : Param30 α β]
+  [p2 : Param30 β γ]
   : Param30 α γ := by
-  tr_extend_multiple [Map2a_trans p1 p2.forget, Map2b_trans p1 p2.forget]
+  tr_extend_multiple [
+    Map2a_trans (β := β),
+    Map2b_trans (β := β)
+  ]
+
+def Map3_trans_flipped
+  [Param03 α β] [Param03 β γ] : Param03 α γ
+  := flip3 (Map3_trans (β := β)) (fun {_ _} => R_flip_trans.forget)
 
 theorem Map2b_prop1
   (p1 : Param2b0 α α')
@@ -176,7 +193,7 @@ def Map4_trans
   [p2 : Param40 β γ]
   : Param40 α γ := by
 
-  tr_extend Map3_trans p1 p2.forget
+  tr_extend Map3_trans (β := β)
 
   intro a c ⟨b, abR, bcR⟩
 
@@ -188,18 +205,9 @@ def Map4_trans
   exact p2.forget.R_implies_rightK _ _ bcR
 
 
-def Param04_trans
-  [p1 : Param04 α β]
-  [p2 : Param04 β γ]
-  : Param04 α γ := by
-
-  apply flip4 (Map4_trans (β := β))
-
-  intro a c
-  exact
-    (
-      R_flip_trans (a := a) (c := c) (p1 := p1.forget) (p2 := p2.forget)
-    ).forget
+def Map4_trans_flipped
+  [Param04 α β] [Param04 β γ] : Param04 α γ
+  := flip4 (Map4_trans (β := β)) (fun {_ _} => R_flip_trans.forget)
 
 
   -- apply PSigma.ext; dsimp

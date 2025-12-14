@@ -57,7 +57,7 @@ def flip2a
 def flip2b
   {α : Sort u} {β : Sort v}
   (base : Param2b0.{w} β α)
-  (R : α → β → Sort w)
+  {R : α → β → Sort w}
   (conv : ∀ {a b}, Param11.{x} (base.R b a) (R a b))
   : Param02b.{w} α β := by
 
@@ -68,7 +68,7 @@ def flip2b
 def flip3
   {α : Sort u} {β : Sort v}
   (base : Param30.{w} β α)
-  (R : α → β → Sort w)
+  {R : α → β → Sort w}
   (conv : ∀ {a b}, Param11.{x} (base.R b a) (R a b))
   : Param03.{w} α β := by
 
@@ -83,16 +83,16 @@ def flip3
   -- case left_implies_R =>
   --   exact base1.contravariant.map_in_R
 
-  tr_extend_multiple [flip2a base conv.forget, flip2b base R conv.forget]
+  tr_extend_multiple [flip2a base conv.forget, flip2b base conv.forget]
 
 def flip4
   {α : Sort u} {β : Sort v}
   (base : Param40.{w} β α)
-  (R : α → β → Sort w)
+  {R : α → β → Sort w}
   (conv : ∀ {a b}, Param2b2a.{x} (base.R b a) (R a b))
   : Param04.{w} α β := by
 
-  tr_extend flip3 base R conv.forget
+  tr_extend flip3 base conv.forget
 
   intro a a' aR
   let aR' := conv.left aR

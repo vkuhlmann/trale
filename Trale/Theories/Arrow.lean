@@ -17,16 +17,16 @@ open Qq Lean Trale.Utils
 -- set_option trace.profiler.threshold 10
 -- set_option trace.profiler.output.pp true
 
-namespace Param_arrow
+namespace Trale
 
 variable {α : Sort u} {α' : Sort u} {β : Sort v} {β' : Sort v}
 
 def arrowR
   (p1 : Param00 α α')
   (p2 : Param00 β β')
-  : (α → β) -> (α' → β') -> Sort _
+  : (α → β) → (α' → β') → Sort _
   := fun f f' =>
-    forall a a', p1.R a a' -> p2.R (f a) (f' a')
+    forall a a', p1.R a a' → p2.R (f a) (f' a')
 
 def flipArrowR
   (r : arrowR p1 p2 f f')
@@ -45,7 +45,10 @@ instance arrowR_rel
 
   tr_from_involution flipArrowR
 
-
+#eval (0-6:Nat)
+#eval (0-6:Nat)+0
+#check Nat.add_eq_zero
+#check Nat.add_assoc
 
 instance Map0_arrow
   [p1 : Param00 α α']
@@ -57,7 +60,7 @@ instance Map0_arrow
   -- exact fun f f' =>
   --   forall a a', p1.R a a' -> p2.R (f a) (f' a')
 
-@[tr_add_flipped Param_arrow.arrowR_rel]
+@[tr_add_flipped Trale.arrowR_rel]
 instance Map1_arrow
   [p1 : Param01 α α']
   [p2 : Param10 β β']
@@ -77,13 +80,13 @@ instance Map1_arrow
 --     case map =>
 --       exact MapFun p1 p2
 
-@[tr_add_flipped Param_arrow.arrowR_rel]
+@[tr_add_flipped Trale.arrowR_rel]
 instance Map2a_arrow
   [p1 : Param02b α α']
   [p2 : Param2a0 β β']
 : Param2a0 (α → β) (α' → β') := by
   -- We cannot use instance inference, because the types (α, α', ..) are
-  -- metavariables at this piont.
+  -- metavariables at this point.
   tr_extend Map1_arrow (p1 := p1) (p2 := p2)
 
   intro f f' mapF -- f maps to f'
@@ -109,7 +112,7 @@ instance Map2a_arrow
   -- rw [mapAtoA']
 
 -- (* (02a, 2b0) + funext -> 2b0 *)
-@[tr_add_flipped Param_arrow.arrowR_rel]
+@[tr_add_flipped Trale.arrowR_rel]
 instance Map2b_arrow
   [p1 : Param02a α α']
   [p2 : Param2b0 β β']
@@ -139,7 +142,7 @@ instance Map3_arrow'
 
 
 -- (* (03, 30) + funext -> 30 *)
-@[tr_add_flipped Param_arrow.arrowR_rel]
+@[tr_add_flipped Trale.arrowR_rel]
 instance Map3_arrow
   [p1 : Param03 α α']
   [p2 : Param30 β β']
@@ -151,7 +154,7 @@ instance Map3_arrow
   ]
 
 -- (* (04(????), 40) + funext -> 40 *)
-@[tr_add_flipped Param_arrow.arrowR_rel]
+@[tr_add_flipped Trale.arrowR_rel]
 instance Map4_arrow
   [p1 : Param03 α α']
   [p2 : Param40 β β']

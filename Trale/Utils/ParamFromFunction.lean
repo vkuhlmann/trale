@@ -12,18 +12,19 @@ def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
 
 @[simp]
 def paramFromMap
-  (f : α -> α')
+  (f : α → α')
 : Param40 α α' := by
   tr_constructor
 
+  -- R
   exact (f . = .) -- R
-  exact f         -- right
-  simp
-  simp
-  simp
+
+  -- 4
+  exact f
+  repeat simp
 
 -- Split surjection.
-def paramFromSurjection
+def paramFromSurjection'
   {retract : α → β} {sect : β → α}
   (sectK : forall (b : β), retract (sect b) = b)
   : Param42a α β :=
@@ -51,8 +52,34 @@ def paramFromSurjection
       )
      } }
 
--- Split injection.
+
+-- Split surjection.
+def paramFromSurjection
+  {sect : α → α'} {retract : α' → α}
+  (sectK : ∀ a, retract (sect a) = a)
+  : Param42a α' α := by
+  tr_extend paramFromMap retract
+
+  -- 2a
+  · exact sect
+  · intro _ _  aF; subst aF
+    exact sectK _
+
+-- Split surjection.
 def paramFromInjection
+  {sect : α → α'} {retract : α' → α}
+  (sectK : ∀ a, retract (sect a) = a)
+  : Param42b α α' := by
+  tr_extend paramFromMap sect
+
+  -- 2a
+  · exact retract
+  · intro _ _  aF; subst aF
+    exact sectK _
+
+
+-- Split injection.
+def paramFromInjection'
   {sect : α → β} {retract : β → α}
   (sectK : forall a, retract (sect a) = a)
   : Param42b α β := by

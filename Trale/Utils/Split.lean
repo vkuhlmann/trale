@@ -28,12 +28,12 @@ open Trale.Utils
 
 macro "tr_split_forall" : tactic => `(tactic|
   first
-  | apply Param_forall.Map0_forall; rotate_left 1
-  | apply Param_forall.Map1_forall; rotate_left 1
-  | apply Param_forall.Map2a_forall; rotate_left 1
-  | apply Param_forall.Map2b_forall; rotate_left 1
-  | apply Param_forall.Map3_forall; rotate_left 1
-  | apply Param_forall.Map4_forall; rotate_left 1
+  | apply Trale.Map0_forall; rotate_left 1
+  | apply Trale.Map1_forall; rotate_left 1
+  | apply Trale.Map2a_forall; rotate_left 1
+  | apply Trale.Map2b_forall; rotate_left 1
+  | apply Trale.Map3_forall; rotate_left 1
+  | apply Trale.Map4_forall; rotate_left 1
   )
 
 /-
@@ -59,12 +59,12 @@ There are three special things happening in the following code:
 macro "tr_split_arrow" : tactic => `(tactic|
   focus
   ((first
-  | apply (fun p1 p2 => Param_arrow.Map0_arrow (p1 := p1) (p2 := p2))
-  | apply (fun p1 p2 => Param_arrow.Map1_arrow (p1 := p1) (p2 := p2))
-  | apply (fun p1 p2 => Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2))
-  | apply (fun p1 p2 => Param_arrow.Map2b_arrow (p1 := p1) (p2 := p2))
-  | apply (fun p1 p2 => Param_arrow.Map3_arrow (p1 := p1) (p2 := p2))
-  | apply (fun p1 p2 => Param_arrow.Map4_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map0_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map1_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map2a_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map2b_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map3_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map4_arrow (p1 := p1) (p2 := p2))
   ); case' p1 => skip -- Fix goal ordering
   )
   )
@@ -118,13 +118,13 @@ macro "tr_step" ppSpace colGt a:ident a':ident aR:ident : tactic => `(
 -- elab "tr_intro" notFollowedBy("|") (ppSpace colGt term:max)* : tactic =>
 elab_rules : tactic
   -- | `(tactic| tr_intro) notFollowedBy("|") (ppSpace colGt term:max)* : tactic =>
-  | `(tactic| tr_intro)                     =>  do
+  | `(tactic| tr_intro)                     => do
         evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro)))
 
   | `(tactic| tr_intro $h:ident)            => do
         evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro $h:ident)))
 
-  | `(tactic| tr_intro $h:term $hs:term*)   =>  do
+  | `(tactic| tr_intro $h:term $hs:term*)   => do
         evalTactic (← `(tactic| tr_split <;> try (case' p2 => intro $h:term $hs:term*)))
 
   -- evalTactic (← `(tactic| intro $h:term; intro $hs:term*))

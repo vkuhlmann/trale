@@ -31,7 +31,7 @@ def arrow_02a_rel
   {p1 p2}
   {f : α → β}
   {f' : α' → β'}
-  (r2 : (Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
+  (r2 : (Trale.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
   (r1 : p1.R a' a)
   :  (p2.flip.toBottom.R (f a) (f' a')) := by
 
@@ -108,7 +108,7 @@ macro "tr_advance" : tactic => `(tactic|
 
 
 set_option trace.debug true in
-def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
+def I_Srec : ∀ P : I → Prop, P I0 → (∀ i, P i → P (IS i)) → ∀ i, P i := by
   tr_by nat_rect2
 
   -- refine ?hello
@@ -139,14 +139,14 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   -- -- tr_advance
   -- -- tr_split'
 
-  -- -- apply (fun p1 p2 => Param_arrow.Map4_arrow (p1 := p1) (p2 := p2))
+  -- -- apply (fun p1 p2 => Trale.Map4_arrow (p1 := p1) (p2 := p2))
 
 
 
 
-  -- -- apply (fun p1 p2 => Param_arrow.Map1_arrow (p1 := p1) (p2 := p2))
-  -- -- apply (fun [p1 : Param01 _ _] p2 => Param_arrow.Map1_arrow (p1 := p1) (p2 := p2))
-  -- -- apply @Param_arrow.Map1_arrow
+  -- -- apply (fun p1 p2 => Trale.Map1_arrow (p1 := p1) (p2 := p2))
+  -- -- apply (fun [p1 : Param01 _ _] p2 => Trale.Map1_arrow (p1 := p1) (p2 := p2))
+  -- -- apply @Trale.Map1_arrow
 
   -- -- tr_split_application
 

@@ -1,6 +1,8 @@
 import Mathlib
 import Trale.Utils.Constructor
 import Trale.Utils.Split
+import Trale.Utils.Attr
+import TraleTest.Lemmas.TrAdvance
 
 namespace TraleTest.Lemmas
 
@@ -120,6 +122,7 @@ lemma repr5K : ∀ (a' : Zmod5), mod5 (repr5 a') = a' := by
 --     case _ h4 =>
 --       exact h2.symm
 
+/-
 @[simp]
 def ModParam : Param42a Nat Zmod5 := by
   tr_constructor
@@ -161,3 +164,36 @@ def ModParam : Param42a Nat Zmod5 := by
 
 
   --   sorry
+-/
+
+
+instance ModParam : Param42a Nat Zmod5 := by tr_from_map repr5K
+
+-- @[aesop 90% apply (rule_sets := [trale])]
+@[trale]
+def R_add_Zmod5
+  (aR : tr.R a a')
+  (bR : tr.R b b')
+  : (ModParam.R (a + b) (a' + b')) := by
+
+  tr_whnf
+  subst aR bR
+
+  change (⟨(a + b) % 5, _⟩ : Zmod5) = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  -- change _ = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  unfold Fin.add
+  simp
+
+@[trale]
+def R_mul_Zmod5
+  (aR : tr.R a a')
+  (bR : tr.R b b')
+  : (ModParam.R (a * b) (a' * b')) := by
+
+  tr_whnf
+  subst aR bR
+
+  change (⟨(a * b) % 5, _⟩ : Zmod5) = Fin.mul (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  -- change _ = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  unfold Fin.mul
+  simp

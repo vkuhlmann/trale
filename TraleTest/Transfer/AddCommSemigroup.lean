@@ -119,7 +119,8 @@ namespace Approach3
 open Trale.Utils
 
 instance p : Param2b2a Nat Zmod5 :=
-  (by tr_from_map repr5K : Param42a Nat Zmod5).forget
+  ModParam
+  -- (by tr_from_map repr5K : Param42a Nat Zmod5).forget
 
 theorem sum_eq_reverse_sum_Nat (a b c : Nat)
     : (a + b) + c = (c + b) + a := by
@@ -139,35 +140,19 @@ theorem sum_eq_reverse_sum_Nat (a b c : Nat)
 --   unfold Fin.add
 --   simp
 
-@[aesop 90% apply (rule_sets := [trale])]
-def R_add_Zmod5
-  (aR : tr.R a a')
-  (bR : tr.R b b')
-  : (p.R (a + b) (a' + b')) := by
-
-  tr_whnf
-  subst aR bR
-
-  show (⟨(a + b) % 5, _⟩ : Zmod5) = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
-  unfold Fin.add
-  simp
 
 #check Nat.add
-
-add_aesop_rules 90% (by assumption) (rule_sets := [trale])
--- add_aesop_rules 90% apply Trale.R_eq' (rule_sets := [trale])
-add_aesop_rules 90% (by apply Trale.R_eq') (rule_sets := [trale])
-add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])
--- add_aesop_rules 50% (by tr_advance) (rule_sets := [trale])
 
 theorem sum_eq_reverse_sum_Zmod5 (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by
 
   revert a b c
   tr_by sum_eq_reverse_sum_Nat
+
   change Param10.{0} _ _
 
-  aesop (rule_sets := [trale])
+  -- aesop (rule_sets := [trale])
+  tr_solve
 
 
 theorem sum_eq_reverse_sum_Zmod5' (a b c : Zmod5)

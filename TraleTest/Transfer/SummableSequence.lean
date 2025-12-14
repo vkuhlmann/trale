@@ -150,7 +150,7 @@ example (a : nnR) (a' : xnnR)
 -- #check instParam
 #printTraleInstances
 #printTraleImpliedTranslations
-#check Param_arrow.arrowR_rel
+#check Trale.arrowR_rel
 
 #tr_add_translations_from_instances
 

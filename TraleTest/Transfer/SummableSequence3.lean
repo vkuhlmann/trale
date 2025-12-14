@@ -13,11 +13,52 @@ import TraleTest.Lemmas.SummableSequence2
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence2
-open TraleTest.Lemmas ENNReal NNReal
+open TraleTest.Lemmas ENNReal NNReal Trale.Attr
 
 #eval
   let p : ℕ := 4
   (p : ℝ)
+
+
+example : Param2a0 (ℝ≥0∞ → ℝ≥0∞ → Prop) (ℝ≥0 → ℝ≥0 → Prop) := by
+  -- refine ?subgoals
+
+
+  focus
+  ((first
+  | apply (fun p1 p2 => Trale.Map0_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map1_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map2a_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map2b_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map3_arrow (p1 := p1) (p2 := p2))
+  | apply (fun p1 p2 => Trale.Map4_arrow (p1 := p1) (p2 := p2))
+  ); case' p1 => skip -- Fix goal ordering
+  )
+
+  -- tr_split_arrow
+  infer_instance
+
+  -- focus
+  -- ((first
+  -- | apply (fun p1 p2 => Trale.Map0_arrow (p1 := p1) (p2 := p2))
+  -- | apply (fun p1 p2 => Trale.Map1_arrow (p1 := p1) (p2 := p2))
+  -- | apply (fun p1 p2 => Trale.Map2a_arrow (p1 := p1) (p2 := p2))
+  -- | apply (fun p1 p2 => Trale.Map2b_arrow (p1 := p1) (p2 := p2))
+  -- | apply (fun p1 p2 => Trale.Map3_arrow (p1 := p1) (p2 := p2))
+  -- | apply (fun p1 p2 => Trale.Map4_arrow (p1 := p1) (p2 := p2))
+  -- ); case' p1 => skip -- Fix goal ordering
+  -- )
+  tr_split_arrow
+
+  -- infer_instance
+
+  -- tr_split_arrow
+  -- infer_instance
+
+  -- tr_split_arrow
+  infer_instance
+
+  exact (Trale.sortParam' .Map1 .Map0).forget
 
 
 theorem sum_eq_reverse_sum_seq

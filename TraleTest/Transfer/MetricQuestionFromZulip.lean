@@ -181,7 +181,7 @@ instance
   : Param44 V (ℝ×ℝ) :=
     Trale.Utils.glued
       (Map4_trans (β := Fin 2 → ℝ))
-      (Param04_trans)
+      (Map4_trans_flipped)
       rfl
 
 

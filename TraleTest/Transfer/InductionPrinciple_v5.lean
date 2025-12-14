@@ -79,11 +79,6 @@ macro "tr_advance" : tactic => `(tactic|
   | fail "No step available"
   )
 
-  #check
-    let tsepArray : Lean.Syntax.TSepArray `term "," := ?td
-    let els := tsepArray.getElems
-    sorry
-
 def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> forall i, P i := by
   tr_by nat_rect2
 
@@ -91,74 +86,41 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   have RN0 : tr.R I0 0 := by sorry
   have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
-  -- let _ : Param00 Prop Prop := propParam.forget
-
   let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
-    tr_advance
+    apply Trale.Map2a_arrow_flipped (p2 := Trale.sortParam' .Map4 .Map4)
+    -- tr_advance
 
   tr_advance
   rename_last P P' PR
+  tr_whnf at PR
+  dsimp [inferInstance, instParam] at PR
+
   tr_advance
   ·
     tr_advance
     tr_advance
 
-    -- tr_flip
-    tr_whnf at PR
-    -- apply denormalizeR
-
-    tr_flip
-    -- (refine (instantiatePropR ?_).forget; apply aR)
-    refine (Trale.instantiatePropR_bi ?_).forget
-    apply PR
+    apply (PR _ _ _).forget
     exact aR
-
-
-    -- (refine (Trale.instantiatePropR_bi ?_).forget;
-    --  tr_step_rel)
-
-
-    -- apply PR
-
-    -- tr_flip
-    -- tr_split_application
-
-    -- tr_advance
-    -- tr_advance
 
   tr_advance
   ·
     tr_advance
     rename_last i' i iR
     tr_advance
-    -- tr_flip
-    refine (Trale.instantiatePropR_bi ?_).forget
-    exact PR _ _ iR
+    tr_flip
+
+    apply (PR _ _ _).forget
+    exact iR
 
     tr_flip
     tr_advance
 
     exact RNS iR
-    -- apply_assumption
     rename_last j j' jR
 
-    -- apply flipR'
-    refine (Trale.instantiatePropR_bi ?_).forget
-    apply flipR'
-    rw [←Trale.param44_ident_symm]
-    -- apply denormalizeR
-
-    -- apply_assumption
-    exact PR _ _ jR
-
-    -- apply arrow_02a_rel
-
-    -- assumption
-
-    -- tr_step_rel
-
-    -- tr_advance
+    exact (PR _ _ jR).forget
 
   tr_advance
-  tr_advance
-  tr_advance
+  rename_last j j' jR
+  exact (PR _ _ jR).forget

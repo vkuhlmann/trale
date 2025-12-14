@@ -22,7 +22,7 @@ variable (to_nat : I -> Nat) (of_nat : Nat -> I)
 -- #check
 --   let p1 : Param03.{5} Nat String := ?p1
 --   let p2 : Param40.{1} Nat String := ?p2
---   (Param_arrow.Map4_arrow p1 p2).R
+--   (Trale.Map4_arrow p1 p2).R
 
 
 def nat_rect2 : forall P : Nat -> Sort u, P 0 -> (forall n, P n -> P (n + 1)) -> forall n, P n := by
@@ -220,7 +220,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     --   unfold Param.flip
     --   unfold flipRel
     --   unfold Param.toBottom
-    --   unfold Param_arrow.Map0_arrow
+    --   unfold Trale.Map0_arrow
     --   unfold Param.forget
     --   dsimp [coeMap]
 
@@ -232,7 +232,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     --       covariant := { }, contravariant := { } }
     --   -/
 
-    --   dsimp [Param_arrow.Map2a_arrow]
+    --   dsimp [Trale.Map2a_arrow]
     --   /-
 
     --   ⊢ { R := fun a b => ∀ (a_1 : I) (a' : Nat), Param.R MapType.Map2a MapType.Map3 a_1 a' → propParam2a0.1 (a a_1) (b a'),

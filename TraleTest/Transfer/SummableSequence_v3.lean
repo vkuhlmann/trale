@@ -72,7 +72,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   --                        ___
   --
   tr_split_application e e' eR by
-    dsimp [inferInstance, Param_arrow.Map0_arrow, propParam]
+    dsimp [inferInstance, Trale.Map0_arrow, propParam]
 
     intro x x' xR
     intro y y' yR
@@ -87,7 +87,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  dsimp [inferInstance, Param_arrow.Map0_arrow, propParam] at eR
+  dsimp [inferInstance, Trale.Map0_arrow, propParam] at eR
 
   tr_from_map
   show e d c → e' d' c'

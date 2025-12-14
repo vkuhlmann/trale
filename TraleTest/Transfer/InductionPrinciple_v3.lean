@@ -24,7 +24,7 @@ variable (to_nat : I -> Nat) (of_nat : Nat -> I)
 -- #check
 --   let p1 : Param03.{5} Nat String := ?p1
 --   let p2 : Param40.{1} Nat String := ?p2
---   (Param_arrow.Map4_arrow p1 p2).R
+--   (Trale.Map4_arrow p1 p2).R
 
 
 def nat_rect2 : forall P : Nat -> Sort u, P 0 -> (forall n, P n -> P (n + 1)) -> forall n, P n := by
@@ -57,7 +57,7 @@ def arrow_02a_rel
   {p1 p2}
   {f : α → β}
   {f' : α' → β'}
-  (r2 : (Param_arrow.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
+  (r2 : (Trale.Map2a_arrow (p1 := p1) (p2 := p2)).flip.R f f')
   (r1 : p1.R a' a)
   :  (p2.flip.toBottom.R (f a) (f' a')) := by
 

@@ -13,6 +13,9 @@ import TraleTest.Lemmas.TrAdvance
 -- Based on `trocq_gen_rewrite.v` from Trocq plugin in Rocq
 -- (https://github.com/rocq-community/trocq)
 
+set_option pp.universes true
+
+-- @[trale]
 theorem add_morph
   {m m' : Nat} (mR : m ≤ m')
   {n n' : Nat} (nR : n ≤ n')
@@ -26,10 +29,11 @@ theorem le_morph
   fun h =>
     Nat.le_trans (Nat.le_trans mR h) nR
 
+-- @[trale]
 def le01
   {m m' : Nat} (mR : m ≤ m')
   {n n' : Nat} (nR : n' ≤ n)
-  : Param01 (m ≤ n) (m' ≤ n')
+  : Param01.{0} (m ≤ n) (m' ≤ n')
   := by
 
   tr_from_map le_morph mR nR
@@ -57,7 +61,7 @@ theorem ipi_manual (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
       · exact iiR
     · exact iiR
 
-theorem ipi (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
+theorem ipi_manual_2 (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
   : j + i + j ≤ i + i + i := by
 
   tr_by (ipi_i i)
@@ -67,3 +71,30 @@ theorem ipi (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
     | apply le01
     | apply add_morph
     | assumption
+
+macro "tr_test_1" : tactic => `(tactic|
+  first
+    | apply le01
+    | apply add_morph
+  )
+
+add_aesop_rules 90% (by tr_test_1) (rule_sets := [trale])
+
+theorem ipi (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
+  : j + i + j ≤ i + i + i := by
+
+  tr_by (ipi_i i)
+
+  tr_flip
+
+  change Param01.{0} ((?m : ℕ) ≤ ?n) ((?m' : ℕ) ≤ ?n')
+  set m := ?m
+  set n := ?n
+  set m' := ?m'
+  set n' := ?n'
+
+  -- tr_test_1
+  -- apply le01
+  -- tr_solve
+  tr_solve
+  tr_solve

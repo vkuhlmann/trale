@@ -4,6 +4,12 @@ import Trale.Utils.Constructor
 import Trale.Utils.Split
 -- import Mathlib.Data.Finset.Sum
 
+-- example : (4 : Nat) = (4 : Int) := by simp
+-- example : (4.3 : ℚ) = (4.3 : ℝ) := by simp
+
+#eval (5 : ℕ) - 7
+#eval (5 : ℤ) - 7
+
 namespace TraleTest.Lemmas
 
 structure Modulo (n : Nat) where

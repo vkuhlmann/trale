@@ -215,7 +215,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
     -/
 
   -- Why can't we simplify the value of a hypothesis? (Only the type)
-  -- simp [inferInstance, eqParam, Param_arrow.Map4_arrow] at eqParam
+  -- simp [inferInstance, eqParam, Trale.Map4_arrow] at eqParam
 
   show Param10 (H1 C1) (H2 C2)
   apply forallApplication
@@ -297,7 +297,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   -- Part 5: Use relations to make the relation trivial
   --
   show Param10 (e d c) (e' d' c')
-  dsimp [inferInstance, eqParam, Param_arrow.Map0_arrow, propParam] at eR
+  dsimp [inferInstance, eqParam, Trale.Map0_arrow, propParam] at eR
 
   tr_from_map
   show e d c → e' d' c'

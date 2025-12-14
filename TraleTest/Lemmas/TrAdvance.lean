@@ -6,6 +6,7 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Normalize
+import Trale.Utils.Attr
 
 import Trale.Theories.Forall
 import Trale.Theories.Sorts
@@ -66,16 +67,8 @@ set_option trace.tr.utils true
 --   )
 --   )
 
-
-
-macro "tr_advance" : tactic => `(tactic|
-  (
-  --   (run_tac
-  --   -- This will produce the 'No goals to be solved' error if we are done.
-  --   Lean.Elab.Tactic.getMainGoal
-  -- );
-  focus
-    first
+macro "tr_advance_1" : tactic => `(tactic|
+  focus first
     | assumption
     | infer_instance
     | (first
@@ -91,7 +84,26 @@ macro "tr_advance" : tactic => `(tactic|
         let : Param.R _ _ _ _ := by assumption;
         rw [this]
       )
-    | apply_assumption
+    | apply_assumption)
+
+macro "tr_advance_2" : tactic => `(tactic|
+  focus first
+    | (refine (Trale.instantiatePropR_bi ?_).forget;
+       tr_step_rel)
+    | (refine (instantiatePropR ?_).forget; tr_step_rel)
+    | (tr_flip; refine (instantiatePropR ?_).forget; tr_step_rel)
+  )
+
+
+macro "tr_advance" : tactic => `(tactic|
+  (
+  --   (run_tac
+  --   -- This will produce the 'No goals to be solved' error if we are done.
+  --   Lean.Elab.Tactic.getMainGoal
+  -- );
+  focus
+    first
+    | tr_advance_1
     | (
         tr_split_application';
         -- case' p2 => intro _ _ _
@@ -116,11 +128,7 @@ macro "tr_advance" : tactic => `(tactic|
         | case' aR => tr_whnf
           case' p1 => skip -- Fix the ordering
       )
-
-    | (refine (Trale.instantiatePropR_bi ?_).forget;
-       tr_step_rel)
-    | (refine (instantiatePropR ?_).forget; tr_step_rel)
-    | (tr_flip; refine (instantiatePropR ?_).forget; tr_step_rel)
+    | tr_advance_2
     | fail "No step available"
     )
   )
@@ -129,3 +137,16 @@ macro "tr_advance" : tactic => `(tactic|
 #check instantiatePropR
 #check flipR'
 #check Trale.param44_ident_symm
+
+
+add_aesop_rules 90% (by assumption) (rule_sets := [trale])
+-- add_aesop_rules 90% apply Trale.R_eq' (rule_sets := [trale])
+add_aesop_rules 90% (by apply Trale.R_eq') (rule_sets := [trale])
+add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])
+-- add_aesop_rules 50% (by (
+--         let : Param.R _ _ _ _ := by assumption;
+--         rw [this]
+--       )) (rule_sets := [trale])
+-- -- add_aesop_rules 40% (by tr_advance) (rule_sets := [trale])
+-- add_aesop_rules 40% (by tr_advance_1) (rule_sets := [trale])
+add_aesop_rules 30% (by tr_advance_2) (rule_sets := [trale])

@@ -7,6 +7,7 @@ import Lean.Elab
 import Trale.Core.Param
 import Trale.Utils.ParamFromFunction
 import Qq
+import Aesop
 
 open Qq Lean Meta Elab Tactic Trale Trale.Utils
 
@@ -65,4 +66,16 @@ macro "tr_subst" ppSpace colGt a:ident a':ident aR:term:10 : tactic => `(tactic|
 
 macro "tr_sorry" a:term:10 : tactic => `(tactic|
   (show Param.{0} _ _ _ _; sorry)
+  )
+
+macro "tr_solve" : tactic => `(tactic|
+     aesop (rule_sets := [trale])
+  )
+
+macro "tr_exact" a:term:10 : tactic => `(tactic|
+     (
+      tr_by $a
+      change Param.{0} _ _ _ _
+      tr_solve
+     )
   )

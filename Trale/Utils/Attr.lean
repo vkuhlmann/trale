@@ -195,10 +195,10 @@ elab "#tr_add_translations_from_instances" : command => do
               let keys ← mkTrTranslationKey parts.fromType
               let val := parts.fromType
 
-              trTranslationExtension.add { keys,
-                                           val,
-                                           target := parts.toType,
-                                           priority := 100 }
+              trExt.add { keys,
+                          val,
+                          target := parts.toType,
+                          priority := 100 }
 
           | .error err => IO.println s!"Expression {i} (error: {err})"
 
@@ -367,7 +367,7 @@ initialize tr_test1 : NameMapExtension Name ← Lean.registerNameMapExtension _
 
 syntax attrTraleRest := ppSpace (str)?
   -- toAdditiveNameHint (ppSpace toAdditiveOption)* (ppSpace ident)? (ppSpace (str <|> docComment))?
-syntax (name := attr_trale) "trale" "?"? attrTraleRest : attr
+syntax (name := attr_trale) "trale" "?"? : attr
 
 -- @[inherit_doc to_additive]
 -- macro "to_additive?" rest:toAdditiveRest : attr => `(attr| to_additive ? $rest)
@@ -466,7 +466,8 @@ open Tactic.TryThis in
 -- open private addSuggestionCore in addSuggestion in
 /-- Elaboration of the configuration options for `to_additive`. -/
 def elabAttrTrale : Syntax → CoreM Config
-  | `(attr| trale%$tk $[?%$trace]? $existing?)
+  | `(attr| trale%$tk $[?%$trace]?)
+  -- | `(attr| trale%$tk $[?%$trace]? $existing?)
       -- $[$opts:toAdditiveOption]* $[$tgt]? $[$doc]?)
       => do
     -- let mut attrs := #[]
@@ -546,19 +547,51 @@ def elabAttrTrale : Syntax → CoreM Config
 --See the attribute implementation for more details.
 --It returns an array with names of additive declarations (usually 1, but more if there are nested
 --`to_additive` calls. -/
--- partial def addToAdditiveAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :
---     AttrM (Array Name) := do
---   if (kind != AttributeKind.global) then
---     throwError "`to_additive` can only be used as a global attribute"
---   withOptions (· |>.updateBool `trace.to_additive (cfg.trace || ·)) <| do
---     sorry
+partial def addToAdditiveAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :
+    AttrM Unit := do
+  if (kind != AttributeKind.global) then
+    throwError "`trale` can only be used as a global attribute"
+  IO.println s!"trale running on {src}"
 
--- initialize registerBuiltinAttribute {
---     name := `trale
---     descr := "Register a theorem to be used by trale"
---     add := fun src stx kind ↦ do _ ← addToAdditiveAttr src (← elabAttrTrale stx) kind
---     -- we (presumably) need to run after compilation to properly add the `simp` attribute
---     applicationTime := .afterCompilation
---   }
+  let trExt := trTranslationExtension
 
+  liftCommandElabM do
+    let srcName : TSyntax `ident := ⟨.ident SourceInfo.none src.toString.toSubstring src []⟩
+    elabCommand (←`(command| attribute [aesop 90% apply (rule_sets := [trale])] $srcName))
+    elabCommand (←`(command| add_aesop_rules 10% (by apply $srcName) (rule_sets := [trale])))
+
+  -- withOptions (· |>.updateBool `trace.tr.utils (cfg.trace || ·)) <| do
+  --   IO.println s!"Registering {src}"
+
+
+
+  --   -- let keys ← mkTrTranslationKey parts.fromType
+  --   -- let constantInfo ← getConstInfo src
+
+  --   -- let ((type, value), _) ← MetaM.run do
+  --   --   let (args, argsBi, tail) ← forallMetaTelescope constantInfo.type
+
+  --   --   let parts ← getParamParts! tail
+
+
+  --   -- let val := constantInfo.value!
+
+  --   -- trExt.add { keys,
+  --   --       val,
+  --   --       target := parts.toType,
+  --   --       priority := 100 }
+
+
+  --   return
+
+initialize registerBuiltinAttribute {
+    name := `attr_trale
+    descr := "Register a theorem to be used by trale"
+    add :=
+      --fun src stx kind ↦ do
+      -- return
+    fun src stx kind ↦ do _ ← addToAdditiveAttr src (← elabAttrTrale stx) kind
+    -- we (presumably) need to run after compilation to properly add the `simp` attribute
+    -- applicationTime := .afterCompilation
+  }
 end Trale.Attr

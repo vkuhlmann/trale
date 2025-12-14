@@ -58,7 +58,7 @@ example : Param2a0 (ℝ≥0∞ → ℝ≥0∞ → Prop) (ℝ≥0 → ℝ≥0 →
   -- tr_split_arrow
   infer_instance
 
-  exact (Trale.sortParam' .Map1 .Map0).forget
+  exact (Trale.sortParam .Map1 .Map0).forget
 
 
 theorem sum_eq_reverse_sum_seq

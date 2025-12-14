@@ -87,7 +87,7 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
   have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
   let pAux1 : Param02a (Nat → Prop) (I → Prop) := by
-    apply Trale.Map2a_arrow_flipped (p2 := Trale.sortParam' .Map4 .Map4)
+    apply Trale.Map2a_arrow_flipped (p2 := Trale.sortParam .Map4 .Map4)
     -- tr_advance
 
   tr_advance

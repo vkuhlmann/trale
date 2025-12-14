@@ -110,7 +110,7 @@ theorem id_exists_mod5_1
          ⊢ Param2a0 (ℕ → ℕ) (Zmod5 → Zmod5)
     -/
 
-    tr_split
+    tr_split'
 
     case p1 =>
       /-

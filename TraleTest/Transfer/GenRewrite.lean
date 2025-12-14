@@ -80,6 +80,8 @@ macro "tr_test_1" : tactic => `(tactic|
 
 add_aesop_rules 90% (by tr_test_1) (rule_sets := [trale])
 
+
+-- FIXME: Why is tr_solve not working?
 theorem ipi (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
   : j + i + j ≤ i + i + i := by
 
@@ -96,5 +98,6 @@ theorem ipi (i j : Nat) (jiR : j ≤ i) (iiR : i ≤ i)
   -- tr_test_1
   -- apply le01
   -- tr_solve
-  tr_solve
-  tr_solve
+  -- tr_solve
+  -- tr_solve
+  sorry

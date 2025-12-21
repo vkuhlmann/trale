@@ -85,7 +85,7 @@ def Map0_forall
 def Map1_forall
   (p1 : Param02a α α')
   (p2 : ∀ (a : α) (a' : α'), p1.R a a' → Param10 (β a) (β' a'))
-  : P3 Param10 β β' := by
+  : Param10 (∀ a, β a) (∀ a', β' a') := by
 
   tr_extend Map0_forall p1 (p2 . . .)
 
@@ -203,7 +203,7 @@ def Map2b_forall
 def Map3_forall
   (p1 : Param04 α α')
   (p2 : forall (a : α) (a' : α'), p1.R a a' -> Param30 (β a) (β' a'))
-  : P3 Param30 β β'
+  : Param30 (∀ a, β a) (∀ a', β' a')
   := by
   tr_extend_multiple [Map2a_forall p1 (p2 . . .), Map2b_forall p1 (p2 . . .)]
 

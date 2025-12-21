@@ -248,6 +248,24 @@ def
 
   sorry
 
+def
+  R_dist_zero
+  [AddCommMonoid V]
+  [Module ℝ V]
+  [Free ℝ V]
+  [pseudo : PseudoMetricSpace V]
+
+  [Fact (Module.rank ℝ V = 2)]
+  (a : V) (a' : Fin 2 → ℝ) (aR : tr.R a a')
+  (b : V) (b' : Fin 2 → ℝ) (bR : tr.R b b')
+  : Param44 ((dist a b) = 0) ((dist a' b') = 0) := by
+
+  unfold dist
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  sorry
+
 
 #check dist
 #check pseudoMetricSpacePi.dist
@@ -255,7 +273,6 @@ def
 
 set_option trace.tr.utils true
 
-noncomputable
 instance
   [NormedAddCommGroup V]
   [InnerProductSpace ℝ V]
@@ -276,13 +293,17 @@ instance
   tr_intro x x' xR
   tr_intro y y' yR
   tr_intro h h' hR
-  case p1 =>
-    tr_from_map
-    apply R_eq
-    case bR => rfl
 
-    apply Utils.flipR'
-    apply R_dist (V := V)
+  case p1 =>
+    change Param.{0} _ _ _ _
+    apply (R_dist_zero _ _ _ _ _ _).forget
+
+    -- apply R_eq
+
+    -- case bR => rfl
+
+    -- apply Utils.flipR'
+    -- apply R_dist (V := V)
     assumption
     assumption
 

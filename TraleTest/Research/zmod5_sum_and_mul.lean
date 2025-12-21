@@ -7,6 +7,16 @@ theorem sum_eq_reverse_sum_Nat (a b c d e : ℕ)
       mul_assoc c d e, mul_comm e d]
   omega
 
+#print sum_eq_reverse_sum_Nat
+
 theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c d e : Zmod5),
   a + (b + c * e) * d = d * b + c * d * e + a * 1 := by
   tr_exact sum_eq_reverse_sum_Nat
+
+structure MyTest where
+  test : Nat
+
+instance : One MyTest where
+  one := ⟨1⟩
+
+#check (1 : MyTest)

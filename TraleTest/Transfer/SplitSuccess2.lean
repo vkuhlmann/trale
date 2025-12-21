@@ -50,8 +50,7 @@ instance ParamModFin2 : Param40 (Modulo (n + 1)) (Fin (n + 1)) := by
 theorem P1 : ∀ f : (a : Nat) → Fin (a+1),
              ∑ b ∈ {1, 2, 3}, (f b).val ≤ 6
   := by
-  simp
-  omega
+  simp; omega
 
 theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
               ∑ b ∈ {1, 2, 3}, (f b).repr ≤ 6

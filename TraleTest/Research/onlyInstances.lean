@@ -8,26 +8,9 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Utils.ParamFromFunction
+import TraleTest.Lemmas.StringNat
 
-open Trale.Utils
-
-def repeatChar (c : Char) : Nat -> String
-  | 0 => ""
-  | n + 1 => ⟨c :: (repeatChar c n).data⟩
-
-def repeatCharHasLength : (repeatChar a n).length = n := by
-  induction n
-  case zero => rfl
-  case succ m h =>
-    simp [repeatChar, String.length]
-    exact h
-
--- Prove that we can roundtrip Nat -> String -> Nat
-def defaultStringK (n : Nat) : (repeatChar 'a' n).length = n :=
-  repeatCharHasLength
-
-instance p : Param42a String Nat := by
-  tr_from_map defaultStringK
+open Trale.Utils TraleTest.Lemmas
 
   -- exact paramFromInjection
 
@@ -86,7 +69,7 @@ example : Param10
 
 -- (∀ P: String -> Prop, )
 
-
+def p := inferInstanceAs (Param42a String Nat)
 #eval p.left 6
 #eval p.right "test"
 

@@ -5,6 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
+import TraleTest.Lemmas.TrAdvance
 import Trale.Theories.Sorts
 
 open Trale.Utils
@@ -117,6 +118,7 @@ def I_Srec : ∀ P : I → Prop, P I0 → (∀ i, P i → P (IS i)) → ∀ i, P
   have RN0 : tr.R I0 0 := by sorry
   have RNS {m n} : tr.R m n → tr.R (IS m) (Nat.succ n) := by sorry
 
+  -- tr_solve
   repeat tr_advance
 
 

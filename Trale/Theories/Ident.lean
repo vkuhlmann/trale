@@ -103,6 +103,14 @@ def _root_.Param44_ident
 
 
 @[simp]
+def Param44_ident_compressed
+  : Param44 α α := by
+    tr_constructor
+    exact Eq -- R
+    exact id; repeat simp -- 4
+    exact id; repeat simp -- 4
+
+@[simp]
 def _root_.Param44_ident''
   (h : α = β) : Param44 α β
   := by

@@ -138,7 +138,9 @@ elab_rules : tactic
   -- | `(tactic| intro $pat:term)         => evalTactic (← `(tactic| intro h; match @h with | $pat:term => ?_; try clear h))
   -- | `(tactic| intro $h:term $hs:term*) => evalTactic (← `(tactic| intro $h:term; intro $hs:term*))
 
-
+#check List.cons
+#check Prod.mk
+#check ∀ x : Type, x → (x × x)
 
 
 #eval show MetaM Unit from do

@@ -64,8 +64,7 @@ instance Map1_prod
   : Param10 (α × β) (α' × β') := by
   tr_extend Map0_prod
 
-  intro (a, b)
-  exact (tr.map a, tr.map b)
+  exact fun (a, b) => (tr.map a, tr.map b)
 
 @[tr_add_flipped Param_prod.R_flip_prod]
 instance Map2a_prod

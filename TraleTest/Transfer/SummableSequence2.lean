@@ -56,13 +56,17 @@ theorem sum_xnnR_add (u v : ℕ → ℝ≥0) :
 theorem sum_nnR_add
 : ∀ (u v : summable),
   ∑' i, (u + v) i = (∑' i, u i) + (∑' i, v i) := by
-  tr_by sum_xnnR_add
+  tr_exact sum_xnnR_add
 
-  let := propParam.toBottom
+  -- tr_by sum_xnnR_add
 
-  repeat first
-    | apply R_add_ENNReal
-    | apply R_summable
-    | apply R_add_summable
-    | apply R_eq
-    | tr_advance
+  -- -- let := propParam.toBottom
+
+  -- tr_solve
+
+  -- repeat first
+  --   | apply R_add_ENNReal
+  --   | apply R_summable
+  --   | apply R_add_summable
+  --   -- | apply R_eq
+  --   | tr_advance

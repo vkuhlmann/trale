@@ -76,6 +76,7 @@ macro "tr_advance_1" : tactic => `(tactic|
       | tr_flip; tr_intro _ _ _
       | tr_split
       | tr_flip; tr_split); try subst_last
+    | apply Trale.R_eq'
     | exact (Param44_ident'' rfl).forget
     | (intro x x' xR; rw [xR])
     | (intro x x' xR; rw [←xR])
@@ -140,6 +141,7 @@ macro "tr_advance" : tactic => `(tactic|
 
 
 add_aesop_rules 90% (by assumption) (rule_sets := [trale])
+add_aesop_rules 90% (by apply_assumption) (rule_sets := [trale])
 -- add_aesop_rules 90% apply Trale.R_eq' (rule_sets := [trale])
 add_aesop_rules 90% (by apply Trale.R_eq') (rule_sets := [trale])
 add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])

@@ -167,6 +167,26 @@ theorem sum_eq_reverse_sum_Zmod5' (a b c : Zmod5)
     | tr_intro _ _ _
     | apply R_eq'
 
+
+theorem sum_eq_reverse_sum_Zmod5'' (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  tr_by sum_eq_reverse_sum_Nat
+
+  repeat first
+    | apply R_add_Zmod5
+    | tr_advance
+
+
+
+theorem sum_eq_reverse_sum_Zmod5''' (a b c : Zmod5)
+    : (a + b) + c = (c + b) + a := by
+
+  revert a b c
+  tr_exact sum_eq_reverse_sum_Nat
+
+
 #check Eq
 
 theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
@@ -186,35 +206,35 @@ theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
   apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
 
-  tr_advance
+  -- tr_advance
   apply R_add_Zmod5
   apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
 
 
 
-  tr_advance
+  -- tr_advance
 
-  intro lhs lhs' lhsR
-  intro rhs rhs' rhsR
+  -- intro lhs lhs' lhsR
+  -- intro rhs rhs' rhsR
 
-  subst lhsR
-  subst rhsR
+  -- subst lhsR
+  -- subst rhsR
 
-  tr_whnf
-  intro this
-  subst this
-  rfl
-  -- exact congrArg _
+  -- tr_whnf
+  -- intro this
+  -- subst this
+  -- rfl
+  -- -- exact congrArg _
 
 
-  refine (instantiatePropR ?_).forget
-  -- apply denormalizeR
-  tr_whnf
-  tr_whnf at aR
-  apply_assumption
-  assumption
-  assumption
+  -- refine (instantiatePropR ?_).forget
+  -- -- apply denormalizeR
+  -- tr_whnf
+  -- tr_whnf at aR
+  -- apply_assumption
+  -- assumption
+  -- assumption
 
 
 theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
@@ -236,18 +256,18 @@ theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
   tr_advance
 
 
-  tr_advance
+  -- tr_advance
   apply R_add_Zmod5
   apply R_add_Zmod5
   tr_advance
   tr_advance
   tr_advance
 
-  tr_advance
-  exact R_eq
+  -- tr_advance
+  -- exact R_eq
 
-  refine (instantiatePropR ?_).forget
-  exact aR _ _ (by assumption) _ _ (by assumption)
+  -- refine (instantiatePropR ?_).forget
+  -- exact aR _ _ (by assumption) _ _ (by assumption)
 
 theorem sum_eq_reverse_sum_Zmod5_manual3 (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by

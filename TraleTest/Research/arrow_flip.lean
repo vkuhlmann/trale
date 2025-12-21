@@ -9,27 +9,30 @@ open Trale.Utils
 
 namespace TraleTest.Research
 
-open Param_prod
+open Param_prod Trale.Utils
 
 example
   [p1 : Param2a1 α α']
   [p2 : Param2a1 β β']
-  : Param2a1 (α × β) (α' × β') := by
-  apply Trale.Utils.glued Map2a_prod Map1_prod.flip
+  : Param2a1 (α × β) (α' × β') :=
+  glued Map2a_prod Map1_prod.flip rfl
+  -- inferGlued
+  -- by
+  -- exact Trale.Utils.glued Map2a_prod Map1_prod.flip rfl
 
-  funext (a, b) (a', b')
-  simp [Map2a_prod]
+  -- funext (a, b) (a', b')
+  -- simp [Map2a_prod]
 
 
-  show ((p1.R a a') ×' (p2.R b b'))
-        =
-       ((p1.flip.R a' a) ×' (p2.flip.R b' b))
+  -- show ((p1.R a a') ×' (p2.R b b'))
+  --       =
+  --      ((p1.flip.R a' a) ×' (p2.flip.R b' b))
 
-  show ((p1.R a a') ×' (p2.R b b'))
-        =
-       ((p1.R a a') ×' (p2.R b b'))
+  -- show ((p1.R a a') ×' (p2.R b b'))
+  --       =
+  --      ((p1.R a a') ×' (p2.R b b'))
 
-  rfl
+  -- rfl
   -- show ((tr.R a a') × (tr.R b b')) = ((tr.R b b') × (tr.R a a'))
 
 
@@ -404,6 +407,7 @@ instance Map1_arrow'
   let base := Map1_arrow (p1 := p1.flip) (p2 := p2.flip)
 
   constructor
+
   case R => exact arrowR p1 p2
 
   case covariant => constructor

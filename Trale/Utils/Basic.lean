@@ -17,10 +17,10 @@ macro "tr_by" a:term:10 : tactic => `(tactic|
 
 macro "tr_from_map" ppSpace colGt a:term:10 : tactic => `(tactic|
   first
-  | refine (paramFromMap $a).forget
+  | refine (Trale.Utils.paramFromMap $a).forget
   | apply Trale.Utils.paramFromInjection $a
   | apply Trale.Utils.paramFromSurjection $a
-  | refine (paramFromMap $a).forget.flip
+  | refine (Trale.Utils.paramFromMap $a).forget.flip
   | apply (Trale.Utils.paramFromInjection $a).flip
   | apply (Trale.Utils.paramFromSurjection $a).flip
   | fail "No suitable constructing function found"

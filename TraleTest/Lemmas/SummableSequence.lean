@@ -3,6 +3,7 @@ import Trale.Utils.Extend
 import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
+import Trale.Utils.Attr
 import Trale.Theories.Sorts
 import Aesop
 
@@ -261,6 +262,7 @@ instance : TrTranslateLeft summable seq_xnnR := by constructor
 -- For propParam, see Trale/Theories/Sorts.lean
 
 
+@[trale]
 theorem R_sum_xnnR
   (u : summable) (u' : seq_xnnR) (uR : tr.R u u')
   : tr.R (Σ u) (Σ u') := by
@@ -279,7 +281,7 @@ theorem R_sum_xnnR
 
 
 
-@[aesop safe]
+@[aesop safe,trale]
 theorem R_add_xnnR
   (a : nnR) (a' : xnnR) (aR : tr.R a a')
   (b : nnR) (b' : xnnR) (bR : tr.R b b')
@@ -294,6 +296,7 @@ theorem R_add_xnnR
   exact add_xnnR_homeo a b
 
 
+@[trale]
 theorem seq_nnR_add
   -- (a : summable) (a' : seq_xnnR) (aR : tr.R a a')
   -- (b : summable) (b' : seq_xnnR) (bR : tr.R b b')

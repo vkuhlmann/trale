@@ -152,7 +152,7 @@ def R_eq'
   [Param2b0 α α']
   (a : α) (a' : α') (aR : tr.R a a')
   (b : α) (b' : α') (bR : tr.R b b')
-  : (sortParam .Map1 .Map0).R (a = b) (a' = b') := by
+  : Param10 (a = b) (a' = b') := by
 
   tr_from_map
 
@@ -161,6 +161,7 @@ def R_eq'
   tr_subst a a' aR
   tr_subst b b' bR
 
+  show a = b → (tr.map a) = (tr.map b)
   exact congrArg _
 
 /-

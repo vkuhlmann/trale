@@ -87,6 +87,8 @@ end NatOnly
 def isNotPrime (n : Nat) := ((n = 0) ∨ (n = 1)) ∨ (∃ (p : Nat), ∃ (q : Nat), (p * q = n) ∧ (p ≥ 2) ∧ (q ≥ 2))
 
 #check 2-8
+#check ℤ
+#check mul_zero
 
 example : 5 ≥ 3 := by
   constructor

@@ -159,20 +159,22 @@ set_option trace.debug true in
 #tr_translate ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v)
 
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
-  tr_by sum_xnnR_add
+  tr_exact sum_xnnR_add
 
-  let _ : Param00 Prop Prop := propParam.forget
+--   tr_solve
 
---   let _ := R_add_xnnR
---   let _ := R_sum_xnnR
---   let _ := R_eq
+-- --   let _ : Param00 Prop Prop := propParam.forget
 
-  repeat first
-     | apply R_add_xnnR
-     | refine R_sum_xnnR _ _ ?_
-     | exact R_eq
-     | apply seq_nnR_add -- This one is optional
-     | tr_advance
+-- --   let _ := R_add_xnnR
+-- --   let _ := R_sum_xnnR
+-- --   let _ := R_eq
+
+--   repeat first
+--      | apply R_add_xnnR
+--      | refine R_sum_xnnR _ _ ?_
+--      | exact R_eq
+--      | apply seq_nnR_add -- This one is optional
+--      | tr_advance
 
 
 --   tr_advance

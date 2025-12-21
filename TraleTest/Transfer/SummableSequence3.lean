@@ -88,12 +88,14 @@ theorem sum_eq_reverse_sum_summable
   -- tr_sorry sorry
   -- sorry
 
+  tr_exact sum_eq_reverse_sum_seq
 
 
-  tr_by sum_eq_reverse_sum_seq
 
-  let _ : Param00 Prop Prop := Trale.propParam.forget
-  repeat first
-    | apply R_eq_seq_summable
-    | apply R_add_summable
-    | tr_advance
+  -- tr_by sum_eq_reverse_sum_seq
+
+  -- let _ : Param00 Prop Prop := Trale.propParam.forget
+  -- repeat first
+  --   | apply R_eq_seq_summable
+  --   | apply R_add_summable
+  --   | tr_advance

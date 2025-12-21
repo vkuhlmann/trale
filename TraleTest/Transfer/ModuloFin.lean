@@ -35,6 +35,14 @@ theorem P1 : ∀ f : (a : Nat) → Fin (a+1),
   simp
   omega
 
+
+-- theorem P1'_auto : ∀ f : (a : Nat) → Modulo (a+1),
+--               ∑ b ∈ {1, 2, 3}, (f b).repr ≤ 6 := by
+--   tr_by P1
+--   repeat tr_advance
+--   funext b
+--   specialize
+
 theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
               ∑ b ∈ {1, 2, 3}, (f b).repr ≤ 6
   := by
@@ -67,6 +75,11 @@ theorem P1' : ∀ f : (a : Nat) → Modulo (a+1),
 
 
   tr_advance
+  -- rw [aR]
+  tr_whnf at bR
+
+  -- apply bR
+
   tr_advance
 
   tr_advance

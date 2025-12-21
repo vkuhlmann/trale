@@ -146,8 +146,7 @@ instance Map3_arrow'
 instance Map3_arrow
   [p1 : Param03 α α']
   [p2 : Param30 β β']
-  : Param30 (α -> β) (α' -> β') :=
-  by
+  : Param30 (α → β) (α' → β') := by
   tr_extend_multiple [
     Map2a_arrow (p1 := p1) (p2 := p2),
     Map2b_arrow (p1 := p1) (p2 := p2)
@@ -160,6 +159,8 @@ instance Map4_arrow
   [p2 : Param40 β β']
   : Param40 (α → β) (α' → β') := by
   tr_extend Map3_arrow (p1 := p1) (p2 := p2)
+  intros; funext _ _ _; apply p2.R_implies_rightK
+
 
   /- Alternatively:
 
@@ -172,9 +173,9 @@ instance Map4_arrow
   -/
 
   -- case R_implies_rightK =>
-  intro f f' fR
-  funext a a' aR
-  simp
-  -- FIXME: Want to do this, but getting type mismatch:
-  -- show p1.right_implies_R _ _ (p1.R_implies_right _ _ _) = fR a a' aR
-  apply p2.R_implies_rightK
+  -- intro f f' fR
+  -- funext a a' aR
+  -- -- simp
+  -- -- FIXME: Want to do this, but getting type mismatch:
+  -- -- show p1.right_implies_R _ _ (p1.R_implies_right _ _ _) = fR a a' aR
+  -- apply p2.R_implies_rightK

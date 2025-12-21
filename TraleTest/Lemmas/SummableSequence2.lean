@@ -7,6 +7,7 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Utils.Attr
 import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.ParamFromFunction
 
 import Mathlib
 import Mathlib.Topology.Algebra.InfiniteSum.Defs
@@ -95,7 +96,7 @@ instance param_summable_seqExtended : Param40 summable (ℕ → ℝ≥0∞)
 instance param_summable_seq : Param40 summable (ℕ → ℝ≥0)
   := by tr_from_map fun x => x.seq
 
-
+@[trale]
 theorem R_summable (u : summable) (u' : ℕ → ℝ≥0)
   (uR : tr.R u u')
   : tr.R (∑' i, u i) (∑'' i, u' i) :=
@@ -114,6 +115,7 @@ theorem R_summable (u : summable) (u' : ℕ → ℝ≥0)
 
 -- #check (⊔ a : _, _)
 
+@[trale]
 theorem R_add_ENNReal
   (a : ℝ≥0) (a' : ℝ≥0∞) (aR : tr.R a a')
   (b : ℝ≥0) (b' : ℝ≥0∞) (bR : tr.R b b')
@@ -128,6 +130,7 @@ theorem R_add_ENNReal
   rfl
 #check ∑ _, _
 
+@[trale]
 theorem R_add_summable
   (a : summable) (a' : ℕ → ℝ≥0) (aR : tr.R a a')
   (b : summable) (b' : ℕ → ℝ≥0) (bR : tr.R b b')
@@ -163,5 +166,15 @@ theorem R_eq_seq_summable
   (b :  ℕ → ℝ≥0) (b' : summable) (bR : tr.R b b')
   : (a = b) → (a' = b') :=
   fun h => param_summable_seq_injective (Eq.trans (.trans aR h) bR.symm)
+
+
+@[trale]
+def R_eq_seq_summable'
+  (a :  ℕ → ℝ≥0) (a' : summable) (aR : tr.R a a')
+  (b :  ℕ → ℝ≥0) (b' : summable) (bR : tr.R b b')
+  : Param10 (a = b) (a' = b') := by
+  tr_from_map
+    fun h => param_summable_seq_injective (Eq.trans (.trans aR h) bR.symm)
+
 
 end R_summable

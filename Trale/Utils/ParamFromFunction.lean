@@ -65,7 +65,7 @@ def paramFromSurjection
   · intro _ _  aF; subst aF
     exact sectK _
 
--- Split surjection.
+-- Split injection.
 def paramFromInjection
   {sect : α → α'} {retract : α' → α}
   (sectK : ∀ a, retract (sect a) = a)

@@ -1,8 +1,9 @@
 import Trale.Utils.Basic
+open Trale
 
 namespace TraleTest.Lemmas
 
-def repeatChar (c : Char) : Nat -> String
+def repeatChar (c : Char) : Nat → String
   | 0 => ""
   | n + 1 => ⟨c :: (repeatChar c n).data⟩
 

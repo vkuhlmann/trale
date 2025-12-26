@@ -7,6 +7,8 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 
+open Trale
+
 def repeatChar (c : Char) : Nat -> String
   | 0 => ""
   | n + 1 => ⟨c :: (repeatChar c n).data⟩

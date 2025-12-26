@@ -8,7 +8,7 @@ import Trale.Utils.Converter
 import TraleTest.Lemmas.TrAdvance
 import Trale.Theories.Sorts
 
-open Trale.Utils
+open Trale.Utils Trale
 
 set_option trace.tr.utils true
 

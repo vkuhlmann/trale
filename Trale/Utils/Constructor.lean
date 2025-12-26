@@ -6,7 +6,7 @@ import Trale.Core.Param
 import Qq open Qq Lean
 open Lean Elab Command Tactic Term Expr Meta
 
-set_option trace.debug true
+namespace Trale.Utils
 
 elab "tr_constructor'" : tactic =>
   Lean.Elab.Tactic.withMainContext do

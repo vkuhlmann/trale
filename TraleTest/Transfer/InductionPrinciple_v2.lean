@@ -7,7 +7,7 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
 
-open Trale.Utils
+open Trale.Utils Trale
 
 set_option trace.tr.utils true
 

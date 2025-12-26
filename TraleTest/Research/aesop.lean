@@ -11,7 +11,7 @@ import TraleTest.Lemmas.SummableSequence
 set_option trace.tr.utils true
 
 namespace TraleTest.Research.Aesop
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 
 

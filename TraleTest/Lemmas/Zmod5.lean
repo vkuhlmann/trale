@@ -5,6 +5,7 @@ import Trale.Utils.Attr
 import TraleTest.Lemmas.TrAdvance
 
 namespace TraleTest.Lemmas
+open Trale
 
 lemma fin5_mod5 (a : Fin 5) : a.val % 5 = a.val := by
   simp

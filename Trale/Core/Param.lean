@@ -6,6 +6,8 @@ import Trale.Core.Map
 
 import Qq open Qq Lean
 
+namespace Trale
+
 section Params
 universe w u v
 

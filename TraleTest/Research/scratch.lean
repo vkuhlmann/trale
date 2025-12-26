@@ -6,6 +6,8 @@ import Trale.Core.Map
 import Trale.Core.Param
 import Trale.Theories.Arrow
 
+open Trale
+
 variable {α: Sort u} {β : Sort v}
 variable (R : α -> β -> Sort w)
 

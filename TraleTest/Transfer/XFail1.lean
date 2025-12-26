@@ -2,6 +2,8 @@ import Mathlib
 import Trale.Utils.Constructor
 import Trale.Utils.Split
 
+open Trale
+
 structure Bogus where
   val : Nat
 deriving Repr

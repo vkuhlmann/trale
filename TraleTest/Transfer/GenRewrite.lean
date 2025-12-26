@@ -11,6 +11,8 @@ import TraleTest.Lemmas.Zmod5
 import TraleTest.Lemmas.TrAdvance
 import Mathlib
 
+open Trale
+
 -- Based on `trocq_gen_rewrite.v` from Trocq plugin in Rocq
 -- (https://github.com/rocq-community/trocq)
 

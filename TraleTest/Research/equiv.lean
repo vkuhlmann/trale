@@ -1,6 +1,8 @@
 import Trale.Utils.Constructor
 import Mathlib.Logic.Equiv.Defs
 
+open Trale
+
 def paramFromEquiv (h : Equiv α β)
   : Param44 α β := by
   tr_constructor

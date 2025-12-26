@@ -8,6 +8,8 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Theories.Sorts
 
+open Trale
+
 theorem map_compose (as : List α) (f : α → β) (g : β → γ) :
   (as.map f).map g = as.map (fun x => g (f x)) := by
   sorry

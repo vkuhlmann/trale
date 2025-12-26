@@ -1,4 +1,5 @@
 import Trale.Utils.Basic
+open Trale
 
 def flip_prod : α × β → β × α
   | (a, b) => (b, a)

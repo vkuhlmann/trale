@@ -9,7 +9,7 @@ import Trale.Theories.Sorts
 -- import Mathlib
 
 -- #eval Set.empty
-open Trale.Utils
+open Trale.Utils Trale
 
 set_option trace.tr.utils true
 

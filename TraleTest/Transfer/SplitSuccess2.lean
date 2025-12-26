@@ -9,7 +9,7 @@ import Trale.Utils.ParamIdent
 import Trale.Theories.Forall
 
 import TraleTest.Lemmas.Modulo
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 def forallApplicationOrig
   {α α' : Sort _}

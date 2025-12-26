@@ -13,7 +13,7 @@ import TraleTest.Lemmas.SummableSequence2
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence2
-open TraleTest.Lemmas ENNReal NNReal Trale.Attr
+open TraleTest.Lemmas ENNReal NNReal Trale.Attr Trale
 
 #eval
   let p : ℕ := 4

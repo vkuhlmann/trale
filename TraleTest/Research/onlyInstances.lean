@@ -10,7 +10,7 @@ import Trale.Utils.Converter
 import Trale.Utils.ParamFromFunction
 import TraleTest.Lemmas.StringNat
 
-open Trale.Utils TraleTest.Lemmas
+open Trale.Utils TraleTest.Lemmas Trale
 
   -- exact paramFromInjection
 

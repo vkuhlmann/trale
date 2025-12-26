@@ -8,6 +8,8 @@ import Trale.Utils.Converter
 
 import TraleTest.Lemmas.SummableSequence
 
+open Trale
+
 open TraleTest.Lemmas
 
 -- set_option trace.tr.utils true

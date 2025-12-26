@@ -2,11 +2,13 @@ import Trale.Core.Param
 import Trale.Utils.Whnf
 import Lean
 
+namespace Trale
+
 def Param.toBottom (p : Param cov con α β) : Param00 α β :=
   p.forget (h1 := map0bottom) (h2 := map0bottom)
 
 
-namespace Trale.Utils
+namespace Utils
 
 def flipR [p : Param cov con α β] (r : p.R a b)
   : (p.flip.R b a) := by

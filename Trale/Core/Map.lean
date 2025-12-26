@@ -3,6 +3,8 @@ import Lean.Meta
 import Lean.Expr
 import Lean.Elab.Command
 
+namespace Trale
+
 section Map
 universe w u v
 
@@ -56,12 +58,12 @@ instance : ToString MapType where
   (mapType : MapType)
   (R : α -> β -> Sort w) :=
   match mapType with
-  | .Map0 => _root_.Map0 R
-  | .Map1 => _root_.Map1 R
-  | .Map2a => _root_.Map2a R
-  | .Map2b => _root_.Map2b R
-  | .Map3 => _root_.Map3 R
-  | .Map4 => _root_.Map4 R
+  | .Map0 => Trale.Map0 R
+  | .Map1 => Trale.Map1 R
+  | .Map2a => Trale.Map2a R
+  | .Map2b => Trale.Map2b R
+  | .Map3 => Trale.Map3 R
+  | .Map4 => Trale.Map4 R
 
 def leMapType (a b : MapType) : Bool :=
   match a, b with
@@ -223,12 +225,12 @@ theorem maptype_inter_monotone
 
 @[reducible] def MapType.interp' (mapType : MapType) (R : α -> β -> Sort w) : Type _ :=
   MapType.casesOn (motive := fun _ => Type _) mapType
-  (_root_.Map0 R)
-  (_root_.Map1 R)
-  (_root_.Map2a R)
-  (_root_.Map2b R)
-  (_root_.Map3 R)
-  (_root_.Map4 R)
+  (Trale.Map0 R)
+  (Trale.Map1 R)
+  (Trale.Map2a R)
+  (Trale.Map2b R)
+  (Trale.Map3 R)
+  (Trale.Map4 R)
 
 
   -- MapType.casesOn (motive := fun _ => Type _) mapType

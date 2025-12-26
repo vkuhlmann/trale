@@ -16,6 +16,7 @@ import Mathlib.Data.ENNReal.Basic
 -- declare_aesop_rule_sets [trale, abcd] (default := true)
 
 namespace TraleTest.Lemmas
+open Trale
 
 -- axiom nnR : Type
 -- axiom zero_nnR : nnR

@@ -1,6 +1,6 @@
 import Lean
 import Trale.Core.Param
-open Lean Elab Tactic Expr Meta
+open Lean Elab Tactic Expr Meta Trale
 
 def mkNumUniqLM : Nat -> LMVarId := sorry
 def mkNumUniqF : Nat -> FVarId := sorry

@@ -7,7 +7,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 
 import TraleTest.Lemmas.Modulo
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 theorem P1 : ∀ f : (a : Nat) → Fin (a+1),
              ∑ b ∈ {1, 2, 3}, (f b).val ≤ 6

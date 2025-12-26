@@ -15,7 +15,7 @@ import TraleTest.Lemmas.TrAdvance
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence4
-open TraleTest.Lemmas NNReal ENNReal
+open TraleTest.Lemmas NNReal ENNReal Trale
 
 def extend : ℝ≥0 → ℝ≥0∞ := .some
 

@@ -11,7 +11,7 @@ import Trale.Theories.Forall
 import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.TrAdvance
 
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 instance : Param40 (Modulo (n + 1)) (Fin (n + 1)) := by
   tr_from_map

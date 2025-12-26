@@ -14,9 +14,8 @@ import Trale.Theories.Arrow
 import Trale.Theories.Sorts
 
 import Qq open Qq Lean
-open Trale.Utils
 
-namespace Trale
+namespace Trale open Utils
 
 universe u u' v v' x w1 w2 w3
 

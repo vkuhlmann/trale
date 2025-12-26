@@ -1,4 +1,5 @@
 import Trale.Utils.Extend
+open Trale
 
 def par_ext_1 : Param10 String Nat := by
   tr_constructor

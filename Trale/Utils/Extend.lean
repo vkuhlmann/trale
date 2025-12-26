@@ -9,6 +9,7 @@ import Trale.Utils.Constructor
 
 open Lean Qq Elab Command Tactic Term Expr Meta PrettyPrinter
 
+namespace Trale.Utils
 
 def recoverMapTypeFromExpr? (expr : Q(MapType)) : MetaM (Option MapType) := do
   if (← isExprDefEq expr q(MapType.Map4)) then
@@ -282,11 +283,11 @@ def do_tr_fill_from' (mapper : Name → Option Expr) (unfoldNames : List Name :=
     return
 
 
-def List.whereSome (a : List (Option α)) : List α :=
+def _root_.List.whereSome (a : List (Option α)) : List α :=
   a.filterMap id
 
 def do_tr_fill_from (base : Expr) (baseType : Expr) : TacticM Unit := do
-  let mapper := (<- get_base_tr_fill_from_template base baseType)
+  let mapper ← get_base_tr_fill_from_template base baseType
 
   do_tr_fill_from' mapper (unfoldNames := [getHeadConst base].whereSome)
 
@@ -318,7 +319,7 @@ elab "tr_fill_from" td:term : tactic =>
     -- let base : Q(Param $fromType $toType $covMapType1 $conMapType1
     --              : Type (max levelU levelV levelW))
     --   ← Tactic.elabTermEnsuringType td matcher1
-    let expr <- Tactic.elabTerm td none
+    let expr ← Tactic.elabTerm td none
     do_tr_fill_from expr (← inferType expr)
 
 
@@ -333,11 +334,11 @@ elab "tr_fill_from_hypothesis_using_delab" name:ident : tactic =>
     -- IO.println s!"[tr_fill_from_hypothesis] val: {val}"
 
     -- Lean.PrettyPrinter.Unexpander
-    let term <- PrettyPrinter.delab val
+    let term ← PrettyPrinter.delab val
 
     -- IO.println s!"[tr_fill_from_hypothesis] term: {term}"
 
-    replaceMainGoal (<- evalTacticAt (← `(tactic| tr_fill_from $term)) (← getMainGoal))
+    replaceMainGoal (← evalTacticAt (← `(tactic| tr_fill_from $term)) (← getMainGoal))
 
 
 elab "tr_fill_from_hypothesis" name:ident : tactic =>

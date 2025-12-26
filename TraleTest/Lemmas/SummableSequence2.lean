@@ -14,7 +14,7 @@ import Mathlib.Topology.Algebra.InfiniteSum.Defs
 
 namespace TraleTest.Transfer.SummableSequence2
 
-open TraleTest.Lemmas NNReal ENNReal
+open TraleTest.Lemmas NNReal ENNReal Trale
 
 section R_ENNReal
 

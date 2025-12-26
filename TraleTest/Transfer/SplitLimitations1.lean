@@ -4,7 +4,7 @@ import Trale.Utils.Split
 import Trale.Utils.ParamFromFunction
 
 import TraleTest.Lemmas.Zmod5
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 /-
 

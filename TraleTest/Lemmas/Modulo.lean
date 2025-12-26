@@ -11,6 +11,7 @@ import Trale.Utils.Split
 #eval (5 : ℤ) - 7
 
 namespace TraleTest.Lemmas
+open Trale
 
 structure Modulo (n : Nat) where
   base : Nat

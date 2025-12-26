@@ -12,7 +12,6 @@ def glued
     covariant := p1.covariant,
     contravariant := by
       rw [h]
-      -- rw [←R_eq_normalize_R, h]
       exact p2.contravariant
   }
   -- by

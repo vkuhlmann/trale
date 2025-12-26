@@ -1,6 +1,5 @@
 import Trale.Core.Param
 import Trale.Utils.Extend
--- import Trale.Utils.Split
 import Trale.Utils.Basic
 import Trale.Utils.Whnf
 import Trale.Utils.ParamIdent
@@ -44,8 +43,6 @@ example : Param44 (Sort u) (Sort u) := by
 
   all_goals sorry
 -/
-
-#check Fin
 
 def sortParam (cov con : MapType) : Param2a2a (Sort u) (Sort u) := by
   tr_constructor

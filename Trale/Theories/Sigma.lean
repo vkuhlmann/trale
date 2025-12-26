@@ -7,15 +7,15 @@ import Trale.Utils.Extend
 import Trale.Utils.Glueing
 import Qq open Qq Lean
 
-namespace Param_sigma
+namespace Trale
 
 universe u v x w1 w2 w3
 
 variable {α : Sort u} {α' : Sort u} {β : α -> Sort v} {β' : α' -> Sort v}
 
-def Map0_sigma
+instance Map0_sigma
   (p1 : Param00 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param00 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param00 (β a) (β' a'))
   : Param00 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_constructor
@@ -28,7 +28,7 @@ def Map0_sigma
 
 def Map1_sigma
   (p1 : Param2a0 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param10 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param10 (β a) (β' a'))
   : Param10 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend Map0_sigma p1 (p2 . . .)
@@ -46,7 +46,7 @@ def Map1_sigma
 
 def Map2a_sigma
   (p1 : Param2a0 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param2a0 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param2a0 (β a) (β' a'))
   : Param2a0 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend Map1_sigma p1 (p2 . . .)
@@ -96,7 +96,7 @@ def Map2a_sigma
 
 def Map2b_sigma
   (p1 : Param40 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param2b0 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param2b0 (β a) (β' a'))
   : Param2b0 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend Map1_sigma p1 (p2 . . .)
@@ -132,7 +132,7 @@ def Map2b_sigma
 
 def Map3_sigma
   (p1 : Param40 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param30 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param30 (β a) (β' a'))
   : Param30 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend_multiple [
@@ -144,7 +144,7 @@ def Map3_sigma
 -- FIXME: Proof uses sorry
 def Map4_sigma
   (p1 : Param40 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param40 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param40 (β a) (β' a'))
   : Param40 (Σ' a, β a) (Σ' a', β' a') := by
 
   tr_extend Map3_sigma p1 (p2 . . .)
@@ -170,6 +170,7 @@ def Map4_sigma
   assumption
   simp
   congr
+
 
   sorry
   -- subst h2

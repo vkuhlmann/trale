@@ -9,7 +9,7 @@ open Trale.Utils
 
 namespace TraleTest.Research
 
-open Param_prod Trale.Utils
+open Trale.Utils
 
 example
   [p1 : Param2a1 α α']
@@ -59,6 +59,11 @@ def Param2a1_arrow
   [p2 : Param2a1 β β']
   : Param2a1 (α → β) (α' → β') := inferGlued
 
+def Param2a1_prod'
+  [p1 : Param41 α α']
+  [p2 : Param41 β β']
+  : Param41 (α × β) (α' × β') := inferGlued
+
 
 
 def Param2a1_arrow_prop''
@@ -77,7 +82,7 @@ def Param2a1_prod
 
   tr_extend_multiple [
     Map2a_prod,
-    Map1_prod_flipped
+    Map1_prod.flip
   ]
 
 

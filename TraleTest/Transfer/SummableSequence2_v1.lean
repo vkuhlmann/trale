@@ -186,6 +186,10 @@ theorem sum_nnR_add
   simp
 
   tr_advance
+  apply summable_rel
+  apply seq_nnR_add
+  tr_advance
+  tr_advance
 
   change paramNNR.R _ _
   -- apply Trale.Utils.denormalizeR
@@ -196,29 +200,29 @@ theorem sum_nnR_add
   apply summable_rel
   rfl
 
-  tr_advance
+  -- tr_advance
 
-  apply summable_rel
-  apply seq_nnR_add
-  -- tr_whnf
-  -- tr_whnf at aR
-  rfl
-  rfl
+  -- apply summable_rel
+  -- apply seq_nnR_add
+  -- -- tr_whnf
+  -- -- tr_whnf at aR
+  -- rfl
+  -- rfl
 
-  -- tr_whnf at aR
-  tr_advance
-  tr_advance
-  -- subst_last
-  tr_advance
-  -- subst_last
-  tr_advance
-  apply R_eq
+  -- -- tr_whnf at aR
+  -- tr_advance
+  -- tr_advance
+  -- -- subst_last
+  -- tr_advance
+  -- -- subst_last
+  -- tr_advance
+  -- apply R_eq
 
-  apply_assumption
-  apply_assumption
+  -- apply_assumption
+  -- apply_assumption
 
-  tr_advance
-  tr_advance
+  -- tr_advance
+  -- tr_advance
 
 
   -- rename_last this

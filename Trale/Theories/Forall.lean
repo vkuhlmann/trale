@@ -22,38 +22,18 @@ universe u u' v v' x w1 w2 w3
 
 variable {α : Sort u} {α' : Sort u'} {β : α -> Sort v} {β' : α' -> Sort v'}
 
-@[simp]
-abbrev P1
-  (P1_R_type : Sort u -> Sort u -> Sort w1)
-  (α : Sort u) (α' : Sort u)
-  := P1_R_type α α'
-
-@[simp]
-abbrev P2
-  (P2_R_type : Sort v -> Sort v -> Sort w2)
-  (β : α -> Sort v) (β' : α' -> Sort v)
-  (p1_R : α -> α' -> Sort _)
-  := forall (a : α) (a' : α'), p1_R a a' -> P2_R_type (β a) (β' a')
-
-@[simp]
-abbrev P3
-  (P3_R_type : Sort _ -> Sort _ -> Sort w3)
-  (β : α -> Sort v) (β' : α' -> Sort v')
-  := P3_R_type (forall a, β a) (forall a', β' a')
-
-
 
 def forallR
   (p1 : Param00 α α')
   (p2 : ∀ a a', p1.R a a' → Param00 (β a) (β' a'))
-  : (∀ a, β a) -> (∀ a', β' a') -> Sort _
+  : (∀ a, β a) → (∀ a', β' a') → Sort _
   := fun f f' =>
     forall a a' (aR: p1.R a a'), (p2 a a' aR).R (f a) (f' a')
 
 def flipForallR
   (r : forallR p1 p2 f f')
   : forallR p1.flip (fun a a' aR => (p2 a' a aR).flip) f' f
-  := fun a' a aR' => r a a' (flipR aR')
+  := fun a' a aR' => (r a a' (flipR aR'))
 
 instance forallR_rel
   -- The order of α', α, β', β needs to be specified for
@@ -63,7 +43,7 @@ instance forallR_rel
   (p1 : Param00 α α')
   (p2 : ∀ a a', p1.R a a' → Param00 (β a) (β' a'))
   {f f'}
-  : Param44 (forallR p1.flip (fun a a' aR => (p2 a' a aR).flip) f' f)
+  : Param44.{0} (forallR p1.flip (fun a a' aR => (p2 a' a aR).flip) f' f)
     (forallR p1 p2 f f') := by
 
   tr_from_involution flipForallR
@@ -73,13 +53,11 @@ instance forallR_rel
 def Map0_forall
   (p1 : Param00 α α')
   (p2 : ∀ (a : α) (a' : α'), p1.R a a' → Param00 (β a) (β' a'))
-  : P3 Param00 β β' := by
+  : Param00 (∀ a, β a) (∀ a', β' a') := by
 
   tr_constructor
 
   exact forallR p1 p2
-  -- exact fun f f' =>
-  --   forall a a' (aR: p1.R a a'), (p2 a a' aR).R (f a) (f' a')
 
 
 def Map1_forall
@@ -150,42 +128,37 @@ def Map2a_forall_flipped
   {β : α → Sort v}
   {β' : α' → Sort v'}
   (p1 : Param40 α α')
-  (p2 : forall (a : α) (a' : α'), p1.R a a' -> Param02a (β a) (β' a'))
+  (p2 : forall (a : α) (a' : α'), p1.R a a' → Param02a (β a) (β' a'))
   : Param02a (∀ a, β a) (∀ a', β' a')
-  -- := flip2a (Map2a_forall p1.flip (fun a a' aR => (p2 a' a aR).flip))
+  -- :=
+  -- flip2a (Map2a_forall p1.flip (fun a a' aR => (p2 a' a aR).flip))
+  -- -- flip2a (Map2a_forall p1 p2)
+  -- -- ((forallR_rel p1 p2))
+  -- ((forallR_rel p1 p2).flip.forget (h1 := map4top) (h2 := map4top))
+
   := by
-    apply flip2a
+    let x := forallR p1.toBottom.flip (fun a a' aR => (p2 a' a aR).toBottom.flip)
+    let y := forallR p1.toBottom (fun a a' aR => (p2 a a' aR).toBottom)
+
+    apply flip2a (Map2a_forall p1.flip (fun a a' aR => (p2 a' a aR).flip))
 
     intro f f'
-    tr_sorry sorry
-    sorry
-    sorry
+    dsimp [Map2a_forall]
 
-  -- flip2a (Map2a_forall sorry sorry)
-  --   (R := forallR.{u,u',v,v'} p1 (p2 · · ·))
-  --   sorry
-  -- -- (by
-  -- --       -- fun {f f'} => (forallR_rel sorry sorry).forget
+    change Param10
+      (forallR p1.toBottom.flip (fun a a' aR => (p2 a' a aR).toBottom.flip) f' f)
+      _
 
-  -- --       intro f f'
-  -- --       let h := forallR_rel (f := f) (f' := f') (p1 := p1) (p2 := (p2 · · ·))
-  -- --       dsimp at h
+    let h : Param44 (x f' f) (y f f') := (forallR_rel p1.toBottom (fun a a' aR => (p2 a a' aR).toBottom) (f' := f') (f := f))
+    change Param10.{_,0,_} (x f' f) (y f f')
 
-  -- --       exact (h.forget : Param10 _ _)
-  -- --       -- sorry
-  -- --     )
-
--- #check
---   let a := Map2a_forall ?p1 ?p2
---   by
---   unfold P3 at a
---   exact a
+    exact h.forget
 
 
 def Map2b_forall
   (p1 : Param02a α α')
   (p2 : forall (a : α) (a' : α'), p1.R a a' -> Param2b0 (β a) (β' a'))
-  : P3 Param2b0 β β'
+  : Param2b0 (∀ a, β a) (∀ a', β' a')
   := by
 
   tr_extend Map1_forall p1 (p2 . . .)
@@ -202,7 +175,7 @@ def Map2b_forall
 
 def Map3_forall
   (p1 : Param04 α α')
-  (p2 : forall (a : α) (a' : α'), p1.R a a' -> Param30 (β a) (β' a'))
+  (p2 : forall (a : α) (a' : α'), p1.R a a' → Param30 (β a) (β' a'))
   : Param30 (∀ a, β a) (∀ a', β' a')
   := by
   tr_extend_multiple [Map2a_forall p1 (p2 . . .), Map2b_forall p1 (p2 . . .)]
@@ -210,8 +183,8 @@ def Map3_forall
 
 def Map4_forall
   (p1 : Param04 α α')
-  (p2 : forall (a : α) (a' : α'), p1.R a a' -> Param40 (β a) (β' a'))
-  : P3 Param40 β β'
+  (p2 : forall (a : α) (a' : α'), p1.R a a' → Param40 (β a) (β' a'))
+  : Param40 (∀ a, β a) (∀ a', β' a')
   := by
 
   tr_extend Map3_forall p1 (p2 . . .)

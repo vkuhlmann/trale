@@ -53,7 +53,7 @@ macro "tr_from_map" : tactic => `(tactic|
 )
 
 macro "tr_ident" : tactic => `(tactic|
-  (refine (Param44_ident'' ?_).forget; try first |dsimp |decide)
+  (refine (Param44_ident'' ?_).forget (h1 := map4top) (h2 := map4top); try first |dsimp |decide)
 )
 
 macro "tr_subst" ppSpace colGt a:ident a':ident aR:term:10 : tactic => `(tactic|

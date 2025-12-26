@@ -7,7 +7,7 @@ import Trale.Utils.ParamFromFunction
 import Trale.Utils.Whnf
 import Lean
 
-open Trale.Utils
+open Trale.Utils Trale
 
 macro "tr_simp_R" "at" a:Lean.Parser.Tactic.locationHyp : tactic => `(tactic|
   simp [Trale.Map2a_arrow, paramFromMap, Param.forget, CoeDep.coe,

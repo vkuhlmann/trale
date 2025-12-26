@@ -208,38 +208,3 @@ def Map4_trans
 def Map4_trans_flipped
   [Param04 α β] [Param04 β γ] : Param04 α γ
   := flip4 (Map4_trans (β := β)) (fun {_ _} => R_flip_trans.forget)
-
-
-  -- apply PSigma.ext; dsimp
-
-
-  -- simp?
-
-
-  -- constructor
-
-  -- change ?lhs = ?rhs
-  -- let h := ?lhs
-  -- tr_whnf at h
-
-  -- exact p1.forget.R_implies_rightK _ _ abR
-  -- exact p2.forget.R_implies_rightK _ _ bcR
-
-
-
-  --  _ _ abR
-
-
-  -- let b : β := tr.map a
-  -- tr_subst b c bcR
-
-
-
-
-
-  -- congr
-
-
-
-
-  -- sorry

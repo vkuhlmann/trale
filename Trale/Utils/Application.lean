@@ -7,22 +7,7 @@ import Lean.Util
 import Qq
 open Qq Lean Elab Command Tactic Term Expr Meta
 
--- axiom functionRelationApplication
---   (p1 : Param10 (A -> B) (A' -> B'))
---   (p2 : Param10 A A')
---   (p3 : Param10 B B')
---   :
---   ∀ f f' (_ : p1.R f f'),
---   ∀ a a' (_ : p2.R a a'), p3.R (f a) (f' a')
-
-
--- builtin_initialize Lean.registerTraceClass `tr_split_application
-
--- #eval show IO Unit from do
---   Lean.registerTraceClass `tr_split_application
-
--- elab "tr_sometest" : tactic =>
---   withMainContext do
+namespace Trale
 
 def forallApplication
   {α α' : Sort _}
@@ -53,33 +38,6 @@ elab "tr_inspect_expr" td:term : tactic =>
 structure SplitApplicationConfig where
   allowHead := true
 declare_config_elab elabSplitAppConfigCore    SplitApplicationConfig
-
-#check
-  (let x := 3; Fin x)
-  -- ((let x := 3; Fin x) : ((y : Nat) → Fin y : Type))
-
--- #check
---   ∀ x : Nat,
---   Fin x
-
-#reduce (let x := 3; x + 5)
-
-
-example : (let x := 3; Fin 7) := by
-  let h := make_whnf (let x := 3; x + 5)
-
-
-  tr_whnf
-
-  -- simp at h
-
-
-  sorry
-
-
-#check Simp.SimprocsArray
-
-#eval (fun x y => x + y) 4 3
 
 -- elab "tr_split_application'" a:stx,*,? : tactic =>
 -- elab "tr_split_application'" a:(Lean.Parser.Tactic.config)? : tactic =>
@@ -619,11 +577,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       let p2 : Q(Param.{levelZ} $covMapType $conMapType ($β $a) ($β' $a')) :=
         .mvar p2mvarId
 
-      -- let p2 := p2base
-
       trace[tr.utils] s!"p2 is {format p2}"
-
-      let sometest2 := q(4)
 
       -- -- (a : α)
       -- -- (a' : α')
@@ -664,7 +618,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       -- trace[tr.utils] s!"Complete is {← ppTerm <| ← PrettyPrinter.delab complete}"
       -- let complete ← instantiateMVars complete
 
-      let complete := ← instantiateMVars p2
+      let complete ← instantiateMVars p2
 
       trace[tr.utils] s!"Goal type is {format goalType}"
 
@@ -674,7 +628,6 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
         throwTypeMismatchError
           "Could not unify goal type (1) with assembled type"
           goalType (← inferType complete) complete
-          -- `tr_split_application
 
         throwTacticEx `tr_split_application goal "Could not unify goal type (1) with assembled type"
 
@@ -706,11 +659,6 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       goal.assign p2base
 
       replaceMainGoal [p1.mvarId!, aR.mvarId!, p2.mvarId!]
-
-
-
-      -- let somtest := q(4)
-      -- let complete : Q(Nat) := q(4 : Nat)
 
 
 
@@ -762,8 +710,6 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 macro "tr_split_application'" : tactic => `(tactic|(tr_split_application'))
 
 macro "tr_split_application" : tactic => `(tactic|tr_split_application' <;> try infer_instance)
-
--- #check binderIdent
 
 macro "tr_split_application'" ppSpace colGt a:binderIdent a':binderIdent aR:binderIdent : tactic => `(
   tactic| (

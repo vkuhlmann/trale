@@ -7,6 +7,8 @@ import Trale.Core.Related
 import Trale.Utils.Extend
 import Qq open Qq Lean
 
+namespace Trale
+
 universe u v x w w1 w2 w3
 
 inductive R_option

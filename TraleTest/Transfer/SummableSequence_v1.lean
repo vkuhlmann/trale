@@ -5,7 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 
 import TraleTest.Lemmas.SummableSequence
-open TraleTest.Lemmas
+open TraleTest.Lemmas Trale
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 

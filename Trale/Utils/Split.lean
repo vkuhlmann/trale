@@ -10,6 +10,7 @@ import Trale.Theories.Arrow
 import Trale.Theories.Option
 import Trale.Theories.Sigma
 import Trale.Theories.Exists
+import Trale.Theories.Prod
 import Trale.Utils.ParamFromFunction
 import Trale.Utils.Application
 import Trale.Utils.Basic
@@ -71,7 +72,7 @@ macro "tr_split_arrow" : tactic => `(tactic|
 
 macro "tr_split_exists" : tactic => `(tactic|
   first
-  | apply Param_exists.Map1_exists; rotate_left 1
+  | apply Trale.Map1_exists; rotate_left 1
   )
 
 macro "tr_split'" : tactic => `(tactic|

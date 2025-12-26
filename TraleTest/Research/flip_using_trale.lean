@@ -2,7 +2,7 @@ import Trale.Theories.Flip
 import Trale.Utils.Split
 import TraleTest.Lemmas.TrAdvance
 
-open Trale.Utils
+open Trale.Utils Trale
 
 def prop2a (p : Param10 α β) := ∀ (a : α) (b : β), p.right a = b → p.R a b
 

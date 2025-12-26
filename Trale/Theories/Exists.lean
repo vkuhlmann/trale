@@ -7,9 +7,7 @@ import Trale.Utils.Extend
 import Trale.Theories.Sigma
 import Qq open Qq Lean
 
-namespace Param_exists
-
-open Param_sigma
+namespace Trale
 
 variable {α : Sort u} {α' : Sort u} {β : α -> Prop} {β' : α' -> Prop}
 
@@ -44,7 +42,7 @@ def Map0_exists
 
 def Map1_exists
   (p1 : Param2a0 α α')
-  (p2 : ∀ a a', p1.R a a' -> Param10 (β a) (β' a'))
+  (p2 : ∀ a a', p1.R a a' → Param10 (β a) (β' a'))
   : Param10 (∃ a, β a) (∃ a', β' a') := by
 
   tr_extend Map0_exists p1 (p2 . . .)
@@ -60,8 +58,8 @@ def Map1_exists
   exact (p2 a a' aR).right ba
 
 -- def Map2a_exists
---   (p1 : Param2a0 α α')
---   (p2 : ∀ a a', p1.R a a' -> Param2a0 (β a) (β' a'))
+--   (p1 : Param40 α α')
+--   (p2 : ∀ a a', p1.R a a' → Param2a0 (β a) (β' a'))
 --   : Param2a0 (∃ a, β a) (∃ a', β' a') := by
 --   tr_extend Map1_exists p1 (p2 · · ·)
 

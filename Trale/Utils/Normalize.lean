@@ -36,11 +36,6 @@ macro "tr_flip" : tactic => `(tactic|
   first |apply Param.flip |apply flipR |apply flipR'
   )
 
-macro "tr_root_R" : tactic => `(tactic|
-  first |apply Param.flip |apply flipR |apply flipR'
-  )
-
-
 syntax (name := subst_last) "subst_last" : tactic
 
 -- BEGIN Source: Based on `subst` tactic (evalSubst)

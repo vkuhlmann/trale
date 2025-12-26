@@ -19,8 +19,5 @@ def usingSortParam' (f : ∀ (u : Sort _), u → u → (u × u × Nat))
 
   case p1 =>
     tr_flip; tr_intro u u' uR
+    subst uR
     tr_intro a a' aR
-
-    show Param01 u u'
-
-    exact (inferInstanceAs <| Param42a String Nat).forget

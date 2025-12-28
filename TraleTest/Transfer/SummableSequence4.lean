@@ -11,11 +11,11 @@ import Mathlib
 import Mathlib.Topology.Algebra.InfiniteSum.Defs
 
 
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence4
-open TraleTest.Lemmas NNReal ENNReal Trale
+open NNReal ENNReal Trale
 
 def extend : ℝ≥0 → ℝ≥0∞ := .some
 

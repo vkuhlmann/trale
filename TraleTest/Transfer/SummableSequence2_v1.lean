@@ -10,13 +10,13 @@ import Mathlib
 import Mathlib.Topology.Algebra.InfiniteSum.Defs
 
 
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 -- import TraleTest.Lemmas.SummableSequence
 
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence
-open TraleTest.Lemmas NNReal ENNReal Trale
+open NNReal ENNReal Trale
 
 #check Summable
 

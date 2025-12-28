@@ -9,7 +9,7 @@ import Trale.Utils.Attr
 import Trale.Theories.Sorts
 import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.Zmod5
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 
 open TraleTest.Lemmas Trale
 -- set_option trace.tr.utils true

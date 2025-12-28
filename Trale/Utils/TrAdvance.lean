@@ -12,11 +12,7 @@ import Trale.Utils.TrApplyAssumption
 import Trale.Theories.Forall
 import Trale.Theories.Sorts
 
-import TraleTest.Lemmas.Modulo
-
-namespace TraleTest.Lemmas
-
-open Trale.Utils Trale
+namespace Trale.Utils
 
 def refoldMap10
   : Param10 α β → Param MapType.Map1 MapType.Map0 α β := id

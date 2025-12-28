@@ -5,7 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 import Trale.Theories.Sorts
 
 open Trale.Utils Trale

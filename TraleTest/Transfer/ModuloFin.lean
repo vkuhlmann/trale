@@ -9,7 +9,7 @@ import Trale.Utils.ParamIdent
 import Trale.Theories.Forall
 
 import TraleTest.Lemmas.Modulo
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 
 open TraleTest.Lemmas Trale
 

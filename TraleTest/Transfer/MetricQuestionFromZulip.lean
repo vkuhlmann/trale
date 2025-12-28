@@ -9,7 +9,7 @@ import Trale.Theories.Sorts
 import Trale.Theories.Trans
 import Trale.Utils.Glueing
 
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 
 import TraleTest.Research.equiv
 

@@ -2,7 +2,7 @@ import Mathlib
 import Trale.Utils.Constructor
 import Trale.Utils.Split
 import Trale.Utils.Attr
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 
 namespace TraleTest.Lemmas
 open Trale

@@ -6,7 +6,7 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Utils.Attr
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 import Trale.Utils.ParamFromFunction
 
 import Mathlib
@@ -14,7 +14,7 @@ import Mathlib.Topology.Algebra.InfiniteSum.Defs
 
 namespace TraleTest.Transfer.SummableSequence2
 
-open TraleTest.Lemmas NNReal ENNReal Trale
+open NNReal ENNReal Trale
 
 section R_ENNReal
 

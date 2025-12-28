@@ -8,7 +8,7 @@ import Trale.Utils.Converter
 import Trale.Theories.Sorts
 import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.Zmod5
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 import Mathlib
 
 open Trale

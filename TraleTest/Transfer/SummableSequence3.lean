@@ -6,14 +6,14 @@ import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Utils.Attr
+import Trale.Utils.TrAdvance
 
-import TraleTest.Lemmas.TrAdvance
 import TraleTest.Lemmas.SummableSequence2
 
 set_option trace.tr.utils true
 
 namespace TraleTest.Transfer.SummableSequence2
-open TraleTest.Lemmas ENNReal NNReal Trale.Attr Trale
+open ENNReal NNReal Trale.Attr Trale
 
 theorem sum_eq_reverse_sum_seq
   (a b c : ℕ → ℝ≥0)

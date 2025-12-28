@@ -7,7 +7,7 @@ import Trale.Utils.Application
 import Trale.Utils.Converter
 import Trale.Utils.Attr
 
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 import TraleTest.Lemmas.SummableSequence
 
 set_option trace.tr.utils true

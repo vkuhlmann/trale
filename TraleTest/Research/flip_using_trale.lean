@@ -1,6 +1,6 @@
 import Trale.Theories.Flip
 import Trale.Utils.Split
-import TraleTest.Lemmas.TrAdvance
+import Trale.Utils.TrAdvance
 
 open Trale.Utils Trale
 

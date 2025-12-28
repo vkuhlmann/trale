@@ -559,6 +559,14 @@ partial def addToAdditiveAttr (src : Name) (cfg : Config) (kind := AttributeKind
     let srcName : TSyntax `ident := ⟨.ident SourceInfo.none src.toString.toSubstring src []⟩
     elabCommand (←`(command| attribute [aesop 90% apply (rule_sets := [trale])] $srcName))
     elabCommand (←`(command| add_aesop_rules 10% (by apply $srcName) (rule_sets := [trale])))
+    elabCommand (←`(command| add_aesop_rules 5% (by
+      focus
+        apply Param.forget
+        case' p =>
+          apply $srcName
+        case h1 => decide
+        case h2 => decide
+      ) (rule_sets := [trale])))
 
   -- withOptions (· |>.updateBool `trace.tr.utils (cfg.trace || ·)) <| do
   --   IO.println s!"Registering {src}"

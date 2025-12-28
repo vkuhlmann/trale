@@ -48,7 +48,6 @@ theorem sum_eq_reverse_sum_summable
   revert a b c
   tr_by sum_eq_reverse_sum_seq_xnnR
 
-  let _ : Param00 Prop Prop := propParam.forget
 
   tr_intro a a' aR
   tr_intro b b' bR
@@ -63,7 +62,7 @@ theorem sum_eq_reverse_sum_summable
   -- (refine (instantiatePropR ?_).forget;
   -- --tr_step_rel
   -- )
-  tr_advance
+  tr_split_application
 
 
   -- rw [Eq.symm ]
@@ -84,7 +83,7 @@ theorem sum_eq_reverse_sum_summable
 
   -- subst aR
 
-  tr_advance
+  tr_split_application
   show tr.R (_ + b' + c') (_ + b + c)
   · apply seq_nnR_add
     apply seq_nnR_add

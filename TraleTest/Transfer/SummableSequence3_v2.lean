@@ -48,38 +48,28 @@ theorem sum_eq_reverse_sum_summable
   revert a b c
   tr_by sum_eq_reverse_sum_seq_xnnR
 
-  let _ : Param00 Prop Prop := propParam.forget
-
   tr_intro a a' aR
   tr_intro b b' bR
   tr_intro c c' cR
 
-  tr_advance
+  tr_split_application
 
   show tr.R (c + b + a) (c' + b' + a')
   · apply seq_nnR_add
     apply seq_nnR_add
     all_goals assumption
 
-  tr_advance
+  tr_split_application
   show tr.R (_ + b' + c') (_ + b + c)
   · apply seq_nnR_add
     apply seq_nnR_add
     all_goals assumption
 
-  tr_advance
-  · tr_advance; dsimp
-    tr_advance; dsimp
+  apply Param.forget
+  case' p =>
     apply R_eq_seq_xnnR_summable
-    tr_advance
-    tr_advance
+  case h1 => decide
+  case h2 => decide
 
   tr_advance
   tr_advance
-
-  -- let _ := param_summable_seq_injective
-  -- (refine (instantiatePropR ?_).forget)
-
-  -- apply R_eq_seq_xnnR_summable
-  -- assumption
-  -- assumption

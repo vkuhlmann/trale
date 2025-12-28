@@ -338,8 +338,11 @@ theorem R_eq_seq_xnnR_summable'
   have h2 := Eq.trans (.trans aR h) bR.symm
   exact param_summable_seq_injective _ _ h2
 
-theorem R_eq_seq_xnnR_summable
+@[trale]
+def R_eq_seq_xnnR_summable
   (a : seq_xnnR) (a' : summable) (aR : tr.R a a')
   (b : seq_xnnR) (b' : summable) (bR : tr.R b b')
-  : (a = b) -> (a' = b') :=
-  fun h => param_summable_seq_injective _ _ (Eq.trans (.trans aR h) bR.symm)
+  : Param40 (a = b) (a' = b') :=
+  by
+  tr_from_map
+    (fun h => param_summable_seq_injective _ _ (Eq.trans (.trans aR h) bR.symm))

@@ -48,8 +48,14 @@ theorem sum_eq_reverse_sum_summable
   revert a b c
   tr_by sum_eq_reverse_sum_seq_xnnR
 
-  let _ : Param00 Prop Prop := propParam.forget
-  repeat first
-    | apply R_eq_seq_xnnR_summable
-    | apply seq_nnR_add
-    | tr_advance
+  have := seq_nnR_add
+  have := R_eq_seq_xnnR_summable
+
+  repeat tr_advance
+
+theorem sum_eq_reverse_sum_summable'
+(a b c : summable)
+  : a + b + c = c + b + a := by
+
+  revert a b c
+  tr_exact sum_eq_reverse_sum_seq_xnnR

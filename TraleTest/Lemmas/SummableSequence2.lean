@@ -160,19 +160,13 @@ theorem param_summable_seq_injective
   subst this
   rfl
 
-@[trale]
-theorem R_eq_seq_summable
-  (a :  ℕ → ℝ≥0) (a' : summable) (aR : tr.R a a')
-  (b :  ℕ → ℝ≥0) (b' : summable) (bR : tr.R b b')
-  : (a = b) → (a' = b') :=
-  fun h => param_summable_seq_injective (Eq.trans (.trans aR h) bR.symm)
 
 
 @[trale]
 def R_eq_seq_summable'
   (a :  ℕ → ℝ≥0) (a' : summable) (aR : tr.R a a')
   (b :  ℕ → ℝ≥0) (b' : summable) (bR : tr.R b b')
-  : Param10 (a = b) (a' = b') := by
+  : Param40 (a = b) (a' = b') := by
   tr_from_map
     fun h => param_summable_seq_injective (Eq.trans (.trans aR h) bR.symm)
 

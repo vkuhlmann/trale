@@ -5,6 +5,7 @@ import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
 import Trale.Utils.Converter
+import Trale.Utils.TrApplyAssumption
 import Trale.Theories.Sorts
 
 open Trale.Utils Trale
@@ -91,16 +92,32 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     -- tr_advance
 
   tr_advance
-  rename_last P P' PR
-  tr_whnf at PR
-  dsimp [inferInstance, instParam] at PR
+  -- rename_last P P' PR
+  -- tr_whnf at PR
+  -- dsimp [inferInstance, instParam] at PR
 
   tr_advance
   ·
     tr_advance
     tr_advance
 
-    apply (PR _ _ _).forget
+    -- change ∀ _ _ _, Param.R (self := Trale.sortParam .Map4 .Map4) _ _ _ _ at PR
+
+    -- let abc :
+    --   Param.R MapType.Map0 MapType.Map0 (P a) (P' a')
+
+    -- change ∀ _ _ _, Param2a2a _ _ at PR
+    -- change ∀ _ _ _, Param.R (self := Trale.sortParam .Map4 .Map4) _ _ (P a) (P' a') at PR
+    -- change ∀ _ _ _, Param.R (self := Trale.sortParam .Map4 .Map4) (P a) (P' a') at PR
+
+    -- change Param ?cov ?con _ _
+    -- let pForget := fun {α β X Y} h1 h2 (p : Param X Y α β) => Param.forget (X' := .Map0) (Y' := .Map1) h1 h2 p
+
+    -- apply_assumption [Param.forget (X' := ?cov) (Y' := ?con)]
+
+    -- apply_assumption [Param.forget (X' := .Map0) (Y' := .Map1)]
+
+    tr_apply_assumption
     exact aR
 
   tr_advance
@@ -110,17 +127,25 @@ def I_Srec : forall P : I -> Sort 0, P I0 -> (forall i, P i -> P (IS i)) -> fora
     tr_advance
     tr_flip
 
-    apply (PR _ _ _).forget
+    tr_apply_assumption
+    -- apply (PR _ _ _).forget
     exact iR
 
     tr_flip
     tr_advance
 
-    exact RNS iR
-    rename_last j j' jR
+    -- exact RNS iR
+    apply_assumption
+    assumption
 
-    exact (PR _ _ jR).forget
+    -- rename_last j j' jR
+
+    tr_apply_assumption
+    tr_advance
+    -- exact (PR _ _ jR).forget
 
   tr_advance
-  rename_last j j' jR
-  exact (PR _ _ jR).forget
+  -- rename_last j j' jR
+  tr_apply_assumption
+  tr_advance
+  -- exact (PR _ _ jR).forget

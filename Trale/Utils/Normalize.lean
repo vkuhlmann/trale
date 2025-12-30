@@ -7,6 +7,9 @@ namespace Trale
 def Param.toBottom (p : Param cov con α β) : Param00 α β :=
   p.forget (h1 := map0bottom) (h2 := map0bottom)
 
+-- theorem paramToEq {a b : γ}
+--   (x : Trale.instParam44 γ) : α = β := by
+--     exact x.R
 
 namespace Utils
 

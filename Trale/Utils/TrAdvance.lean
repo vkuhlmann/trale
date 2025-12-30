@@ -14,18 +14,6 @@ import Trale.Theories.Sorts
 
 namespace Trale.Utils
 
-def refoldMap10
-  : Param10 α β → Param MapType.Map1 MapType.Map0 α β := id
-
-theorem refoldMap10Eq
-  : Param10.{w} α β = Param.{w} MapType.Map1 MapType.Map0 α β := rfl
-
--- theorem paramToEq {a b : γ}
---   (x : Trale.instParam44 γ) : α = β := by
---     exact x.R
-
-
-
 macro "tr_step_rel" : tactic => do
   let o1 ← `(tactic|apply flipR')
   let o2 ← `(tactic|rw [←Trale.param44_ident_symm])

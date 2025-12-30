@@ -54,6 +54,15 @@ instance : ToString MapType where
     | .Map3 => "Map3"
     | .Map4 => "Map4"
 
+def MapType.getMapTypeIndicator
+  : MapType → String
+  | .Map0 => "0"
+  | .Map1 => "1"
+  | .Map2a => "2a"
+  | .Map2b => "2b"
+  | .Map3 => "3"
+  | .Map4 => "4"
+
 @[reducible, simp] def MapType.interp
   (mapType : MapType)
   (R : α -> β -> Sort w) :=

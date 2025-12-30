@@ -12,6 +12,7 @@ import Lean.PrettyPrinter
 
 import Trale.Core.Param
 import Trale.Utils.AddFlipped
+import Trale.Utils.ExpressionHelpers
 
 -- https://github.com/leanprover-community/aesop
 
@@ -215,69 +216,16 @@ elab "#tr_add_translations_from_instances" : command => do
 
   return ()
 
-partial def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
-  visit e
+def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
+  replaceExprM f e
 
-  where visit (e : Expr) := do
+  where f e := do
     let entries ← transl.discrTree.getMatch e
 
     trace[debug] s!"Got {entries.size} results for {e} of type ({←inferType e})"
     if h : entries.size > 0 then
-      return entries[0].target
-
-    match e with
-    | .forallE n bt body bi =>
-        -- pure <| e.updateForallE! (←visit bt) (←visit body)
-        let bt ← visit bt
-
-        let arg ← mkFreshExprMVar (.some bt) (userName := n)
-        let body := body.instantiateRev #[arg]
-        let body ← visit body
-
-        mkForallFVars #[arg] body (binderInfoForMVars := bi)
-
-        -- let (args, argsBi, body') ← forallMetaTelescope body
-        -- let body'' ←
-        --   (args.zip argsBi).foldrM
-        --     (fun (arg, bi) body =>
-        --       mkForallFVars #[arg] body
-        --       (binderInfoForMVars := bi)
-        --     )
-        --     (←visit body')
-
-        -- pure <| body''
-        -- pure <| .forallE n bt body bi
-        -- pure <| e'
-
-    | .lam n d b bi =>
-        -- pure <| .lam n (←visit d) (←visit b) bi
-        let d ← visit d
-        let (args, argsBi, body) ← lambdaMetaTelescope b
-        let e' ←
-          (args.zip argsBi).foldrM
-            (fun (arg, bi) body =>
-              mkLambdaFVars #[arg] body
-              (binderInfoForMVars := bi)
-            )
-            (←visit body)
-
-        pure <| e'
-
-    | .mdata data b =>
-        pure <| .mdata data (←visit b)
-
-    | .letE n t v b nondep =>
-        pure <| .letE n (←visit t) (←visit v) (←visit b) nondep
-
-    | .app f a =>
-        pure <| .app (←visit f) (←visit a)
-
-    | .proj n idx b =>
-        pure <| .proj n idx (←visit b)
-
-    | _ =>
-      pure e
-
+      return .some entries[0].target
+    return .none
 
 
 

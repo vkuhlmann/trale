@@ -1,4 +1,3 @@
-import Lean
 import Batteries
 import Batteries.Tactic.Trans
 import Batteries.Lean.NameMapAttribute
@@ -13,6 +12,9 @@ import Lean.PrettyPrinter
 import Trale.Core.Param
 import Trale.Utils.AddFlipped
 import Trale.Utils.ExpressionHelpers
+import Trale.Utils.EnvExtension.TrRel
+import Trale.Utils.EnvExtension.TrTranslation
+import Trale.Utils.Basic
 
 -- https://github.com/leanprover-community/aesop
 
@@ -24,57 +26,9 @@ import Trale.Utils.ExpressionHelpers
 -- by Microsoft Corporation, Leonardo de Moura, and Lean prover community.
 -- Some code is verbatim, some is modified.
 
-open Lean Meta Elab Command Std Qq Trale.Utils Term
+open Lean Meta Elab Command Std Qq Trale.Utils Term Trale.Utils
 
 namespace Trale.Attr
-
-#check PRange
-
-
-abbrev TranslationKey := DiscrTree.Key
-
-structure TranslationEntry where
-  keys        : Array TranslationKey
-  val         : Expr
-  target      : Expr
-  priority    : Nat
-  globalName? : Option Name := none
-  deriving Inhabited, Repr
-
-instance : BEq TranslationEntry where
-  beq e₁ e₂ := e₁.val == e₂.val
-
-instance : ToFormat TranslationEntry where
-  format e := match e.globalName? with
-    | some n => format n
-    | _      => "<local>"
-
-abbrev TrTranslationTree := DiscrTree TranslationEntry
-
-structure TrTranslations where
-  discrTree     : TrTranslationTree := DiscrTree.empty
-  instanceNames : PHashMap Name TranslationEntry := {}
-  deriving Inhabited
-
-def addTranslationEntry (d : TrTranslations) (e : TranslationEntry) : TrTranslations :=
-  match e.globalName? with
-  | some n => { d with discrTree := d.discrTree.insertCore e.keys e, instanceNames := d.instanceNames.insert n e }
-  | none   => { d with discrTree := d.discrTree.insertCore e.keys e }
-
-
-initialize trTranslationExtension : SimpleScopedEnvExtension TranslationEntry TrTranslations ←
-  registerSimpleScopedEnvExtension {
-    initial  := {}
-    addEntry := addTranslationEntry
-    exportEntry? := fun level e =>
-      guard (level == .private || e.globalName?.any (!isPrivateName ·)) *> e
-  }
-
-private def mkTrTranslationKey (e : Expr) : MetaM (Array TranslationKey) := do
-  withNewMCtxDepth do
-    let (_, _, type) ← forallMetaTelescopeReducing e
-    DiscrTree.mkPath type
-
 
 elab "#printTraleInstances" : command => do
   let x := instanceExtension
@@ -173,8 +127,7 @@ elab "#tr_add_translations_from_instances" : command => do
       let y ← tree.getUnify expr
       IO.println s!"Found {y.size} instances"
 
-      let mut i := 0
-      while h : i < y.size ∧ i < 35 do
+      for h : i in 0...y.size do
         let result := y[i]
         let name := (result.globalName?.map format).getD "(missing)"
         IO.println s!"Expression {i}: {name}"
@@ -193,17 +146,9 @@ elab "#tr_add_translations_from_instances" : command => do
               IO.println s!"     {parts.fromType} -> {parts.toType}"
               IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
 
-              let keys ← mkTrTranslationKey parts.fromType
-              let val := parts.fromType
-
-              trExt.add { keys,
-                          val,
-                          target := parts.toType,
-                          priority := 100 }
+              addTrTranslation parts.fromType parts.toType result.globalName?
 
           | .error err => IO.println s!"Expression {i} (error: {err})"
-
-        i := i + 1
 
     return ()
 
@@ -269,7 +214,7 @@ elab "#tr_translate" a:term : command => do
   return ()
 
 open Tactic in
-elab "trale" : tactic => do
+elab "trale'" : tactic => do
   liftMetaTactic fun g => do
     let orig ← g.getType'
 
@@ -297,21 +242,21 @@ elab "trale" : tactic => do
 
     return [paramGoal.mvarId!, goalDest.mvarId!]
 
-#check Array
+macro "trale" : tactic => `(tactic|
+  focus
+    trale'
+    change Param.{0} _ _ _ _
+    tr_solve
+  )
+
 #printTraleInstances
 
--- #tr_add_translations_from_instances
-
 declare_aesop_rule_sets [trale]
-
-#check PersistentEnvExtension
-#check SimpleScopedEnvExtension
 
 -- open Lean Meta Elab Command Std in
 initialize tr_test1 : NameMapExtension Name ← Lean.registerNameMapExtension _
 
 
-#check Lean.registerSimplePersistentEnvExtension
 
 syntax attrTraleRest := ppSpace (str)?
   -- toAdditiveNameHint (ppSpace toAdditiveOption)* (ppSpace ident)? (ppSpace (str <|> docComment))?
@@ -364,8 +309,6 @@ builtin_initialize tr_test2 : TraleExtension ← do
   -- simpExtensionMapRef.modify fun map => map.insert attrName ext
   return ext
 
-
--- #check tr_test1.getEntries
 
 /-- `Config` is the type of the arguments that can be provided to `to_additive`. -/
 structure Config : Type where
@@ -490,18 +433,68 @@ def elabAttrTrale : Syntax → CoreM Config
     }
   | _ => throwUnsupportedSyntax
 
+private def etaReduceR
+  : Expr → Expr → (Expr × Expr)
 
---/-- `addToAdditiveAttr src cfg` adds a `@[to_additive]` attribute to `src` with configuration `cfg`.
---See the attribute implementation for more details.
---It returns an array with names of additive declarations (usually 1, but more if there are nested
---`to_additive` calls. -/
-partial def addToAdditiveAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :
+  | .app f (.mvar _), .app g (.mvar _) => etaReduceR f g
+  | e1, e2 => (e1, e2)
+
+
+def addTrTranslationFromConst (src : Name) : MetaM Unit := do
+  let info ← getConstInfo src
+  let srcType := info.type
+
+  let (_, _, srcHeadType) ← forallMetaTelescope srcType
+  let ⟨srcHeadType, _, _⟩ ← unfold srcHeadType ``tr.R
+
+  let parts ← getParamParts? srcHeadType
+
+  let (fromType, toType) ← match parts with
+    | .ok parts =>
+      let headName := getHeadConst parts.fromType
+      if headName.isSome then
+        pure (parts.fromType, parts.toType)
+      else
+        throwError s!"Cannot get head const of {parts.fromType}"
+
+    | _ =>
+      let cov ← mkFreshExprMVarQ q(MapType)
+      let con ← mkFreshExprMVarQ q(MapType)
+      let levelU ← mkFreshLevelMVar
+      let levelV ← mkFreshLevelMVar
+      let levelW ← mkFreshLevelMVar
+
+      let fromType ← mkFreshExprMVarQ q(Sort $levelU)
+      let toType ← mkFreshExprMVarQ q(Sort $levelV)
+
+      let param ← mkFreshExprMVarQ q(Trale.Param.{levelW} $cov $con $fromType $toType)
+
+      let relFrom ← mkFreshExprMVarQ q($fromType)
+      let relTo ← mkFreshExprMVarQ q($toType)
+      let capture := q(@Trale.Param.R _ _ _ _ $param $relFrom $relTo)
+
+      if !(← isDefEq capture srcHeadType) then
+        IO.println s!"The telescoped type of {src} is not a Param.R or Param"
+        return
+
+      let relFrom ← instantiateExprMVars relFrom
+      let relTo ← instantiateExprMVars relTo
+
+      let (relFromHead, relToHead) := etaReduceR relFrom relTo
+      IO.println s!"relFromHead: {relFromHead}"
+      IO.println s!"relToHead: {relToHead}"
+      pure (relFromHead, relToHead)
+
+    addTrTranslation fromType toType (some src)
+
+
+partial def addTraleAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :
     AttrM Unit := do
   if (kind != AttributeKind.global) then
     throwError "`trale` can only be used as a global attribute"
-  IO.println s!"trale running on {src}"
 
-  let trExt := trTranslationExtension
+  discard <| MetaM.run <| addTrRel src
+  discard <| MetaM.run <| addTrTranslationFromConst src
 
   liftCommandElabM do
     let srcName : TSyntax `ident := ⟨.ident SourceInfo.none src.toString.toSubstring src []⟩
@@ -518,36 +511,22 @@ partial def addToAdditiveAttr (src : Name) (cfg : Config) (kind := AttributeKind
 
   -- withOptions (· |>.updateBool `trace.tr.utils (cfg.trace || ·)) <| do
   --   IO.println s!"Registering {src}"
-
-
-
   --   -- let keys ← mkTrTranslationKey parts.fromType
   --   -- let constantInfo ← getConstInfo src
-
   --   -- let ((type, value), _) ← MetaM.run do
   --   --   let (args, argsBi, tail) ← forallMetaTelescope constantInfo.type
-
   --   --   let parts ← getParamParts! tail
-
-
   --   -- let val := constantInfo.value!
-
   --   -- trExt.add { keys,
   --   --       val,
   --   --       target := parts.toType,
   --   --       priority := 100 }
-
-
   --   return
 
 initialize registerBuiltinAttribute {
     name := `attr_trale
     descr := "Register a theorem to be used by trale"
     add :=
-      --fun src stx kind ↦ do
-      -- return
-    fun src stx kind ↦ do _ ← addToAdditiveAttr src (← elabAttrTrale stx) kind
-    -- we (presumably) need to run after compilation to properly add the `simp` attribute
-    -- applicationTime := .afterCompilation
+      fun src stx kind ↦ do _ ← addTraleAttr src (← elabAttrTrale stx) kind
   }
 end Trale.Attr

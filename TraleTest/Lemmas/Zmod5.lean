@@ -173,9 +173,10 @@ instance ModParam : Param2a4 Zmod5 Nat := by tr_from_map repr5K
 -- @[aesop 90% apply (rule_sets := [trale])]
 @[trale]
 def R_add_Zmod5
+  (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (ModParam.R (a + b) (a' + b')) := by
+  : (tr.R (a + b) (a' + b')) := by
 
   tr_whnf
   subst aR bR
@@ -187,9 +188,10 @@ def R_add_Zmod5
 
 @[trale]
 def R_mul_Zmod5
+  (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (ModParam.R (a * b) (a' * b')) := by
+  : (tr.R (a * b) (a' * b')) := by
 
   tr_whnf
   subst aR bR
@@ -198,3 +200,24 @@ def R_mul_Zmod5
   -- change _ = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
   unfold Fin.mul
   simp
+
+instance
+  : Param10 (OfNat Zmod5 x) (OfNat Nat x)
+  := by tr_from_map (fun _ => ⟨x⟩)
+
+instance zmod5OfNat : OfNat Zmod5 x := Fin.instOfNat
+
+
+@[trale]
+def R_ofNat_Fin
+  (n : Nat)
+  : tr.R (zmod5OfNat (x := n)) (instOfNatNat (n := n)) := by rfl
+
+-- @[trale]
+-- def R_ofNat_Zmod5
+--   {n : Nat}
+--   -- (x : Zmod5)
+--   -- (x' : Nat)
+--   -- (xR : tr.R x x')
+--   : tr.R (@OfNat.ofNat Zmod5 n Fin.instOfNat) (@OfNat.ofNat Nat n (instOfNatNat _))
+--   := by rfl

@@ -75,11 +75,11 @@ def f_mod5 : Zmod5 → Zmod5 := by
 
   case p1 =>
     --   ⊢ Param01 ℕ Zmod5
-    exact ModParam.forget
+    exact ModParam.flip.forget
 
   case p2 =>
     --   ⊢ Param10 ℕ Zmod5
-    exact ModParam.forget
+    exact ModParam.flip.forget
 
 theorem id_exists_mod5_2
   : ∃ (f : Zmod5 → Zmod5), ∀ (x : Zmod5), f x = x := by
@@ -127,7 +127,7 @@ theorem id_exists_mod5_1
       -/
       -- exact ModParam
 
-      apply ModParam.forget (h2 := _)
+      apply ModParam.flip.forget (h2 := _)
       /-
       tactic 'decide' proved that the proposition
         MapType.Map2b ≤ MapType.Map2a
@@ -178,7 +178,7 @@ theorem id_exists_mod5_3
 
     case right =>
       intro f a'
-      exact ModParam.right (f (ModParam.left a'))
+      exact ModParam.left (f (ModParam.right a'))
 
     case right_implies_R =>
       intro f f' mapF
@@ -270,7 +270,7 @@ theorem id_exists_mod5_4
     tr_from_map
 
     intro f
-    exact (tr.map <| f <| ModParam.left .)
+    exact (tr.map <| f <| ModParam.right .)
 
   case p2 =>
     -- Note we're not splitting the forall!

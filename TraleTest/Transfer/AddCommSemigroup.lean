@@ -119,7 +119,7 @@ namespace Approach3
 open Trale.Utils
 
 instance p : Param2b2a Nat Zmod5 :=
-  ModParam
+  ModParam.flip
   -- (by tr_from_map repr5K : Param42a Nat Zmod5).forget
 
 theorem sum_eq_reverse_sum_Nat (a b c : Nat)
@@ -276,13 +276,13 @@ theorem sum_eq_reverse_sum_Zmod5_manual3 (a b c : Zmod5)
   refine Param.right' ?_ sum_eq_reverse_sum_Nat
 
   apply Trale.Map1_forall; intro a a' aR
-  case p1 => exact ModParam.forget
+  case p1 => exact ModParam.flip.forget
 
   apply Trale.Map1_forall; intro b b' bR
-  case p1 => exact ModParam.forget
+  case p1 => exact ModParam.flip.forget
 
   apply Trale.Map1_forall; intro c c' cR
-  case p1 => exact ModParam.forget
+  case p1 => exact ModParam.flip.forget
 
   apply R_eq'
 

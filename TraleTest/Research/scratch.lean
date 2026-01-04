@@ -99,3 +99,14 @@ example : ∀ a : α, @default _ (Inhabited.mk a) = a := by
   -- rename' a => c
   -- rename' a' => c'
   -- rename' aR => cR
+
+open Lean Meta Elab Command
+
+#check PersistentEnvExtension
+#check SimpleScopedEnvExtension
+
+#check Lean.registerSimplePersistentEnvExtension
+
+#check Std.PRange
+
+#check instanceExtension

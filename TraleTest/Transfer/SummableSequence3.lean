@@ -28,10 +28,11 @@ theorem sum_eq_reverse_sum_seq
 #tr_add_translations_from_instances
 #tr_translate ∀ (a b c : summable), (a + b + c = c + b + a)
 
-set_option pp.all true in
+-- set_option pp.all true in
 theorem sum_eq_reverse_sum_summable
   (a b c : summable)
   : a + b + c = c + b + a := by
 
   revert a b c
-  tr_exact sum_eq_reverse_sum_seq
+  trale
+  exact sum_eq_reverse_sum_seq

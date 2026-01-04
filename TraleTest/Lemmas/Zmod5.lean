@@ -168,7 +168,7 @@ def ModParam : Param42a Nat Zmod5 := by
 -/
 
 
-instance ModParam : Param42a Nat Zmod5 := by tr_from_map repr5K
+instance ModParam : Param2a4 Zmod5 Nat := by tr_from_map repr5K
 
 -- @[aesop 90% apply (rule_sets := [trale])]
 @[trale]
@@ -180,7 +180,7 @@ def R_add_Zmod5
   tr_whnf
   subst aR bR
 
-  change (⟨(a + b) % 5, _⟩ : Zmod5) = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  change (⟨(a' + b') % 5, _⟩ : Zmod5) = Fin.add (⟨a' % 5, mod5_le5⟩ : Fin 5) (⟨b' % 5, mod5_le5⟩ : Fin 5)
   -- change _ = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
   unfold Fin.add
   simp
@@ -194,7 +194,7 @@ def R_mul_Zmod5
   tr_whnf
   subst aR bR
 
-  change (⟨(a * b) % 5, _⟩ : Zmod5) = Fin.mul (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
+  change (⟨(a' * b') % 5, _⟩ : Zmod5) = Fin.mul (⟨a' % 5, mod5_le5⟩ : Fin 5) (⟨b' % 5, mod5_le5⟩ : Fin 5)
   -- change _ = Fin.add (⟨a % 5, mod5_le5⟩ : Fin 5) (⟨b % 5, mod5_le5⟩ : Fin 5)
   unfold Fin.mul
   simp

@@ -13,6 +13,13 @@ theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c : Zmod5),
 
 
 
+#tr_add_translations_from_instances
+
+set_option pp.all true in
+theorem sum_eq_reverse_sum_Zmod5' : ∀ (a b c : Zmod5),
+  (a + b) + c = (c + b) + a := by
+  trale
+  omega
 
 
 

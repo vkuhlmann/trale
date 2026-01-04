@@ -11,14 +11,15 @@ abbrev TranslationKey := DiscrTree.Key
 
 structure TranslationEntry where
   keys        : Array TranslationKey
-  val         : Expr
-  target      : Expr
+  fromType    : Expr
+  toType      : Expr
+  rel         : Option Expr
   priority    : Nat
   globalName? : Option Name := none
   deriving Inhabited, Repr
 
 instance : BEq TranslationEntry where
-  beq e₁ e₂ := e₁.val == e₂.val
+  beq e₁ e₂ := e₁.fromType == e₂.fromType
 
 instance : ToFormat TranslationEntry where
   format e := match e.globalName? with
@@ -51,8 +52,10 @@ private def mkTrTranslationKey (e : Expr) : MetaM (Array TranslationKey) := do
     let (_, _, type) ← forallMetaTelescopeReducing e
     DiscrTree.mkPath type
 
-def addTrTranslation (fromExpr toExpr : Expr) (src : Option Name := none) : MetaM Unit := do
+def addTrTranslation (fromExpr toExpr : Expr) (rel : Option Expr) (src : Option Name := none) : MetaM Unit := do
   let keys ← mkTrTranslationKey fromExpr
   let entry : TranslationEntry :=
-    { keys, val := fromExpr, target := toExpr, priority := 100, globalName? := src }
+    { keys, fromType := fromExpr, toType := toExpr,
+      rel := rel,
+      priority := 100, globalName? := src }
   trTranslationExtension.add entry

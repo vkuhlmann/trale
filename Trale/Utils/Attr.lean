@@ -146,7 +146,7 @@ elab "#tr_add_translations_from_instances" : command => do
               IO.println s!"     {parts.fromType} -> {parts.toType}"
               IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
 
-              addTrTranslation parts.fromType parts.toType result.globalName?
+              addTrTranslation parts.fromType parts.toType result.val result.globalName?
 
           | .error err => IO.println s!"Expression {i} (error: {err})"
 
@@ -155,11 +155,68 @@ elab "#tr_add_translations_from_instances" : command => do
   let translations := trTranslationExtension.getState (←getEnv)
   let treeSize := translations.discrTree.size
   IO.println s!"Translations is ({treeSize}): "
-  let vals := translations.discrTree.elements.map (fun x => (format x.val).pretty)
+  let vals := translations.discrTree.elements.map (fun x => (format x.fromType).pretty)
   -- let valsString := vals.toList.foldl (· ++ ·) ""
   IO.println s!"  : {vals}"
 
   return ()
+
+def translateTerm (transl : TrTranslations) (e : Expr) : MetaM (Option Expr) := do
+  let eType ← inferType e
+  if !eType.isSort then
+    let entries ← transl.discrTree.getMatch eType
+
+    trace[debug] s!"Got {entries.size} results for type of {e} ({eType})"
+    if h : entries.size > 0 then
+      let entry := entries[0]
+
+      match entry.rel with
+      | .none => return .none
+      | .some rel =>
+
+      let relType ← inferType rel
+
+      trace[debug] s!"[TrTranslateRecursive] relType: {relType}"
+
+      let parts ← getParamParts? relType
+      match parts with
+        | .ok parts =>
+          let levelW := parts.levelW
+          let p ←
+            mkFreshExprMVarQ
+              q(Param.{levelW} $parts.covMapType $parts.conMapType
+                $parts.fromType $parts.toType)
+
+          p.mvarId!.assignIfDefEq rel
+
+          let e' ← mkFreshExprMVarQ q($parts.fromType)
+          e'.mvarId!.assignIfDefEq e
+
+          let h ← mkFreshExprMVarQ q(MapType.Map1 ≤ $parts.covMapType)
+          synthesizeDecidable! h
+          return .some q(Param.right $p (h := $h) $e')
+
+          -- let relFromHead := result.rel
+          -- let relToHead :=
+          --   match parts.conMapType with
+          --   | some conMapType =>
+          --     let conMapTypeApp := conMapType.mkApp e
+          --     trace[debug] s!"Applying contravariant map: {conMapTypeApp}"
+          --     conMapTypeApp
+          --   | none =>
+          --     trace[debug] s!"No contravariant map"
+          --     e
+
+          -- trace[debug] s!"relFromHead: {relFromHead}"
+          -- trace[debug] s!"relToHead: {relToHead}"
+
+          -- return .some relToHead
+
+        | .error err =>
+          trace[debug] s!"Error getting param parts: {err}"
+          throwError err
+  return .none
+
 
 def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
   replaceExprM f e
@@ -169,7 +226,10 @@ def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
 
     trace[debug] s!"Got {entries.size} results for {e} of type ({←inferType e})"
     if h : entries.size > 0 then
-      return .some entries[0].target
+      return .some entries[0].toType
+
+    -- Handle literals in the expression
+    -- return (←translateTerm transl e)
     return .none
 
 
@@ -485,7 +545,7 @@ def addTrTranslationFromConst (src : Name) : MetaM Unit := do
       IO.println s!"relToHead: {relToHead}"
       pure (relFromHead, relToHead)
 
-    addTrTranslation fromType toType (some src)
+    addTrTranslation fromType toType q($src) src
 
 
 partial def addTraleAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :

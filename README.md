@@ -225,7 +225,6 @@ The `TraleTest/` directory contains some examples:
 ### Advanced Examples
 - **`TraleTest/Transfer/InductionPrinciple_*.lean`**: Series showing transfer of induction principles
 - **`TraleTest/Transfer/SummableSequence_*.lean`**: Working with infinite sequences
-- **`TraleTest/Transfer/lst29_MetricQuestionFromZulip.lean`**: Real-world example from community
 - **`TraleTest/Transfer/lst30_GenRewrite.lean`**: Generalized rewriting with Trale
 
 ### Research Examples

@@ -8,8 +8,36 @@ import Qq open Qq Lean
 
 namespace Trale
 
+/-!
+# Parametricity for Option Types
+
+This module defines parametric relations for option types `Option α`.
+Two options are related if they are both `none` or both `some` with related values.
+
+## The Option Relation
+
+We define an inductive relation:
+```
+inductive R_option : Option α → Option α' → Sort _ where
+  | someR : R a a' → R_option (some a) (some a')
+  | noneR : R_option none none
+```
+
+This ensures:
+- `none` relates only to `none`
+- `some a` relates only to `some a'` when `a` relates to `a'`
+
+## Map Instances
+
+The map function is straightforward:
+- `none ↦ none`
+- `some a ↦ some (map a)`
+-/
+
 universe u v x w w1 w2 w3
 
+/-- Inductive relation for option types.
+    Relates none to none, and some to some when values are related. -/
 inductive R_option
   {α : Type u} {α' : Type u}
   (αR : α -> α' -> Sort w1)
@@ -20,6 +48,7 @@ inductive R_option
 
 variable {α : Type u} {α' : Type u}
 
+/-- Base Param instance for options using the inductive relation. -/
 def Map0_option
   (p1 : Param00 α α')
   : Param00 (Option α) (Option α') := by
@@ -27,6 +56,7 @@ def Map0_option
 
     exact R_option p1.R
 
+/-- Map for options: map the value if present, preserve none. -/
 def Map1_option
   (p1 : Param10 α α')
   : Param10 (Option α) (Option α') := by
@@ -45,6 +75,7 @@ def Map1_option
 --   := by
 
 
+/-- Map2a for options: equality of mapped options implies the option relation. -/
 def Map2a_option
   (p1 : Param2a0 α α')
   : Param2a0 (Option α) (Option α') := by

@@ -4,12 +4,36 @@ import Trale.Utils.ParamIdent
 
 namespace Trale.Utils
 
+/-!
+# Constructing Params from Functions
+
+This module provides utilities for constructing Param instances from functions
+and their properties. These are convenient helpers for the most common cases.
+
+## Key Functions
+
+- `Param_id`: Identity Param (full equivalence on same type)
+- `paramFromMap`: Param40 from any function (graph relation)
+- `paramFromSurjection`: Param42a from a split surjection
+- `paramFromInjection`: Param42b from a split injection
+
+These are commonly used as building blocks when setting up parametricity for
+custom types.
+-/
+
+/-- Identity Param: relates a type to itself via equality.
+    This is a Param44 (full equivalence). -/
 def Param_id : Param44 α α := Param44_ident
 
+/-- Identity Param with a type equality proof.
+    Useful when types are definitionally equal but not syntactically the same. -/
 def Param_id' {α α' : Sort u} (h : α = α') : Param44 α α' := by
   rw [h]
   exact Param_id
 
+/-- Construct a Param40 from any function.
+    The relation is the graph: `R a b := f a = b`.
+    This gives full covariant structure with f as the map. -/
 @[simp]
 def paramFromMap
   (f : α → α')
@@ -23,7 +47,15 @@ def paramFromMap
   exact f
   repeat simp
 
--- Split surjection.
+/-- Construct a Param42a from a split surjection.
+    Given `sect : α → α'` and `retract : α' → α` with `retract ∘ sect = id`,
+    we get:
+    - In the covariant direction: Map4 structure using `retract`
+    - In the contravariant direction: Map2a structure using `sect`
+    
+    This corresponds to a split surjection from α' onto α (retract is surjective
+    with section sect), or equivalently, a split injection from α into α' in the
+    contravariant direction. -/
 def paramFromSurjection
   {sect : α → α'} {retract : α' → α}
   (sectK : ∀ a, retract (sect a) = a)
@@ -35,7 +67,15 @@ def paramFromSurjection
   · intro _ _  aF; subst aF
     exact sectK _
 
--- Split injection.
+/-- Construct a Param42b from a split injection.
+    Given `sect : α → α'` and `retract : α' → α` with `retract ∘ sect = id`,
+    we get:
+    - In the covariant direction: Map4 structure using `sect`
+    - In the contravariant direction: Map2b structure using `retract`
+    
+    This corresponds to a split injection from α into α' (sect is injective
+    with retraction retract), or equivalently, a split surjection from α' onto α
+    in the contravariant direction. -/
 def paramFromInjection
   {sect : α → α'} {retract : α' → α}
   (sectK : ∀ a, retract (sect a) = a)

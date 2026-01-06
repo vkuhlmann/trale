@@ -17,11 +17,40 @@ import Qq open Qq Lean
 
 namespace Trale open Utils
 
+/-!
+# Parametricity for Dependent Function Types (Forall)
+
+This module defines parametric relations for dependent function types `∀ a : α, β a`.
+This is similar to Arrow but handles dependent types where the codomain depends
+on the input.
+
+## The Forall Relation
+
+Given:
+- A relation `R₁ : α → α' → Sort _` on the domain
+- A family of relations `R₂ : ∀ a a', R₁ a a' → Param00 (β a) (β' a')` on codomains
+
+We define when two dependent functions are related:
+```
+forallR R₁ R₂ f f' := ∀ a a' (aR : R₁ a a'), R₂ a a' aR (f a) (f' a')
+```
+
+This is the dependent version of the arrow relation.
+
+## Map Instances
+
+We provide Param instances for transferring dependent function types.
+The constructions are similar to Arrow but must carefully handle the dependency.
+-/
+
 universe u u' v v' x w1 w2 w3
 
 variable {α : Sort u} {α' : Sort u'} {β : α -> Sort v} {β' : α' -> Sort v'}
 
 
+/-- The parametricity relation for dependent function types.
+    Two dependent functions are related if they map related inputs to related outputs,
+    where the output relation depends on the proof that the inputs are related. -/
 def forallR
   (p1 : Param00 α α')
   (p2 : ∀ a a', p1.R a a' → Param00 (β a) (β' a'))
@@ -29,11 +58,13 @@ def forallR
   := fun f f' =>
     forall a a' (aR: p1.R a a'), (p2 a a' aR).R (f a) (f' a')
 
+/-- Flipping the forall relation. -/
 def flipForallR
   (r : forallR p1 p2 f f')
   : forallR p1.flip (fun a a' aR => (p2 a' a aR).flip) f' f
   := fun a' a aR' => (r a a' (flipR aR'))
 
+/-- The forall relation respects flipping as a Param44 equivalence. -/
 instance forallR_rel
   -- The order of α', α, β', β needs to be specified for
   -- tr_add_flipped to produce the correct flipped definition.
@@ -49,6 +80,7 @@ instance forallR_rel
 
 
 
+/-- Base Param instance for dependent function types: just the relation. -/
 def Map0_forall
   (p1 : Param00 α α')
   (p2 : ∀ (a : α) (a' : α'), p1.R a a' → Param00 (β a) (β' a'))
@@ -59,6 +91,14 @@ def Map0_forall
   exact forallR p1 p2
 
 
+/-- Dependent function map.
+    Maps `f : ∀ a, β a` to a function that:
+    1. Takes input `x' : α'`
+    2. Computes `x = p1.left x' : α`
+    3. Applies `f x : β x`
+    4. Maps to `β' x'` using `p2 x x'`
+    
+    Requires contravariant structure on α to go from α' to α. -/
 def Map1_forall
   (p1 : Param02a α α')
   (p2 : ∀ (a : α) (a' : α'), p1.R a a' → Param10 (β a) (β' a'))
@@ -71,6 +111,7 @@ def Map1_forall
   let f' := (p2 x x' (p1.left_implies_R _ _ rfl)).right
   exact f' (f x)
 
+/-- Alternative formulation using arrow relation for the dependent part. -/
 def Map1_forall'
   {α α' : Sort u}
   {β : α → Sort v}

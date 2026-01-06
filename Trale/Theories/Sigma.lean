@@ -9,10 +9,37 @@ import Qq open Qq Lean
 
 namespace Trale
 
+/-!
+# Parametricity for Dependent Pairs (Sigma Types)
+
+This module defines parametric relations for dependent pair types `Σ' a : α, β a`.
+Two dependent pairs are related if:
+- Their first components are related
+- Their second components are related (at the related first components)
+
+## The Sigma Relation
+
+Given:
+- A relation `R₁ : α → α' → Sort _` on the first component
+- A family of relations `R₂ : ∀ a a', R₁ a a' → Param00 (β a) (β' a')` on second components
+
+The sigma relation is:
+```
+R_sigma ⟨a, ba⟩ ⟨a', ba'⟩ := Σ' (aR : R₁ a a'), R₂ a a' aR ba ba'
+```
+
+## Map Instances
+
+We provide Map instances for transferring dependent pairs, carefully handling
+the dependency between components.
+-/
+
 universe u v x w1 w2 w3
 
 variable {α : Sort u} {α' : Sort u} {β : α -> Sort v} {β' : α' -> Sort v}
 
+/-- Base Param instance for dependent pairs.
+    Relates pairs with related first components and related second components. -/
 instance Map0_sigma
   (p1 : Param00 α α')
   (p2 : ∀ a a', p1.R a a' → Param00 (β a) (β' a'))
@@ -26,6 +53,9 @@ instance Map0_sigma
            (p2 a a' aR).R ba ba'
 
 
+/-- Map for dependent pairs.
+    Maps `⟨a, ba⟩` to `⟨p1.right a, p2.right ba⟩`, where p2 is instantiated
+    at the appropriate relation proof. -/
 def Map1_sigma
   (p1 : Param2a0 α α')
   (p2 : ∀ a a', p1.R a a' → Param10 (β a) (β' a'))
@@ -44,6 +74,7 @@ def Map1_sigma
   exact (p2 a a' aR).right ba
 
 
+/-- Map2a for dependent pairs: the map captures the sigma relation. -/
 def Map2a_sigma
   (p1 : Param2a0 α α')
   (p2 : ∀ a a', p1.R a a' → Param2a0 (β a) (β' a'))

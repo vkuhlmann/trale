@@ -9,8 +9,29 @@ import Qq open Qq Lean
 
 namespace Trale
 
+/-!
+# Parametricity for Existential Types
+
+This module defines parametric relations for existential quantification `∃ a : α, β a`.
+Existentials are a special case of dependent pairs (Sigma types) where the second
+component is a proposition.
+
+## The Exists Relation
+
+Two existentials `∃ a, β a` and `∃ a', β' a'` are related if:
+- Their witnesses `a` and `a'` are related by the domain relation
+- Their proofs are related by the codomain relation (at the related witnesses)
+
+## Map Instances
+
+We provide Map0 and Map1 instances, showing how to transfer existentials.
+The construction uses `choose` to extract witnesses and `choose_spec` for proofs.
+-/
+
 variable {α : Sort u} {α' : Sort u} {β : α -> Prop} {β' : α' -> Prop}
 
+/-- Base Param instance for existentials.
+    Two existentials are related if their witnesses and proofs are appropriately related. -/
 def Map0_exists
   (p1 : Param00 α α')
   (p2 : ∀ a a', p1.R a a' → Param00.{0} (β a) (β' a'))
@@ -29,6 +50,12 @@ def Map0_exists
           (p2 x.choose x'.choose p1R).R x.choose_spec x'.choose_spec
 
 
+/-- Map for existentials.
+    Maps `⟨a, ba⟩ : ∃ a, β a` to `⟨a', ba'⟩ : ∃ a', β' a'` where:
+    - `a' = p1.right a` (map the witness)
+    - `ba' = p2.right ba` (map the proof)
+    
+    Requires covariant structure on both domain and codomain. -/
 def Map1_exists
   (p1 : Param2a0 α α')
   (p2 : ∀ a a', p1.R a a' → Param10 (β a) (β' a'))

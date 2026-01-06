@@ -26,10 +26,12 @@ abbrev Zmod5 := Fin 5
 
 -- Functions connecting the types
 def repr5 (a : Zmod5) : Nat := a.val      -- Zmod5 → Nat
-def mod5 (n : Nat) : Zmod5 := ⟨n % 5, ...⟩  -- Nat → Zmod5
+def mod5 (n : Nat) : Zmod5 := ⟨n % 5, by omega⟩  -- Nat → Zmod5
 
 -- Prove they form a retraction (one direction)
-lemma repr5K : ∀ (a : Zmod5), mod5 (repr5 a) = a := by ...
+lemma repr5K : ∀ (a : Zmod5), mod5 (repr5 a) = a := by
+  intro a
+  simp [repr5, mod5]
 ```
 
 ### Step 2: Create a Param Instance
@@ -63,7 +65,8 @@ def R_add_Zmod5
   tr_whnf          -- Unfold tr.R definition
   subst aR bR      -- Use that repr5 a = a' and repr5 b = b'
   -- Now prove: repr5 (a + b) = a' + b'
-  ...
+  simp [repr5, Fin.add]
+  omega
 ```
 
 **Key points:**
@@ -218,10 +221,10 @@ def R_neg
 
 ```lean
 -- Have a theorem on Nat
-theorem nat_theorem (a b c : Nat) : ... := by omega
+theorem nat_theorem (a b c : Nat) : (a + b) + c = (c + b) + a := by omega
 
 -- Transfer it to MyType
-theorem my_theorem (a b c : MyType) : ... := by
+theorem my_theorem (a b c : MyType) : (a + b) + c = (c + b) + a := by
   trale
   -- Goal is now on Nat
   exact nat_theorem _ _ _
@@ -272,8 +275,8 @@ The relation `tr.R a b` connects an element `a` of your custom type with an elem
 
 Example with Zmod5:
 - `tr.R (⟨2⟩ : Zmod5) (2 : Nat)` holds (repr ⟨2⟩ = 2)
-- `tr.R (⟨2⟩ : Zmod5) (7 : Nat)` holds (repr ⟨2⟩ = 2, and 2 = 7 in Zmod5)
-- Actually, for Zmod5: `tr.R ⟨2⟩ n` holds when `n % 5 = 2`
+- `tr.R (⟨2⟩ : Zmod5) (7 : Nat)` also holds (repr ⟨2⟩ = 2, and 7 % 5 = 2)
+- In general for Zmod5: `tr.R ⟨k⟩ n` holds when `n % 5 = k`
 
 ## Advanced Usage
 

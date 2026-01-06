@@ -54,7 +54,9 @@ The core of Trale is the **parametric relation type** `Param`:
 ```lean
 class Param (cov con : Map) (α β : Sort*) where
   R : α → β → Sort w
-  -- plus covariant and contravariant properties
+  -- Additional fields define covariant map functions (when cov ≥ 1)
+  -- and contravariant map functions (when con ≥ 1)
+  -- along with proofs of their properties
 ```
 
 - `R : α → β → Sort w` is the relation connecting types `α` and `β`
@@ -145,14 +147,15 @@ def R_add_Zmod5
 
 ```lean
 -- 1. Define your type
-abbrev MyType := ...
+abbrev MyType := Fin 5  -- example
 
 -- 2. Define transport functions
-def toSimpler (a : MyType) : SimplerType := ...
-def fromSimpler (b : SimplerType) : MyType := ...
+def toSimpler (a : MyType) : SimplerType := a.val
+def fromSimpler (b : SimplerType) : MyType := ⟨b % 5, by omega⟩
 
 -- 3. Prove retraction
-lemma from_to : ∀ (a : MyType), fromSimpler (toSimpler a) = a := by ...
+lemma from_to : ∀ (a : MyType), fromSimpler (toSimpler a) = a := by
+  intro a; simp [toSimpler, fromSimpler]
 
 -- 4. Create Param instance
 instance : Param2a4 MyType SimplerType := by tr_from_map from_to

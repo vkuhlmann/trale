@@ -384,7 +384,6 @@ Check the GitHub repository for open issues and contribution guidelines.
 ### Join the Community
 
 - **Lean Zulip**: [leanprover.zulipchat.com](https://leanprover.zulipchat.com)
-- **Utrecht Formalization Group**: Weekly meetings on formal methods
 
 ## Quick Reference Card
 
@@ -405,7 +404,7 @@ repeat tr_advance  -- Semi-automated solving
 tr_constructor     -- Build Param from scratch
 tr_extend <inst>   -- Extend existing Param with more properties
 tr_from_map <pf>   -- Build from retraction proof
-tr_from_equiv <e>  -- Build from equivalence (requires Mathlib)
+tr_from_equivalence <h1>, <h2>  -- Build from two inversion proofs
 ```
 
 ### Common Param Classes

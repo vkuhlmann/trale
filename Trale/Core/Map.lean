@@ -5,6 +5,29 @@ import Lean.Elab.Command
 
 namespace Trale
 
+/-!
+# Map Types for Parametricity Relations
+
+This module defines the hierarchy of map types that capture different properties
+of relations between types. These map types form the foundation of the Trale
+parametricity framework.
+
+## Overview
+
+A relation `R : α → β → Sort w` may have associated mapping functions between
+`α` and `β`. The Map hierarchy captures increasingly strong properties:
+
+- `Map0`: Just the relation itself, no functions
+- `Map1`: Adds a map function `α → β`
+- `Map2a`: The map captures the relation (covariant)
+- `Map2b`: The relation implies equality via the map (contravariant)
+- `Map3`: Both Map2a and Map2b properties
+- `Map4`: Full equivalence with coherence
+
+The hierarchy forms a partial order: `0 < 1 < 2a < 3 < 4` and `0 < 1 < 2b < 3 < 4`,
+where `2a` and `2b` are incomparable.
+-/
+
 section Map
 universe w u v
 
@@ -12,28 +35,46 @@ section RExplicit
 variable {α: Sort u} {β : Sort v}
 variable (R : α -> β -> Sort w)
 
+/-- Flip a binary relation, swapping the argument order. -/
 @[simp]
 def flipRel : β -> α -> Sort w := fun a b => R b a
 
+/-- `Map0`: A relation with no additional structure.
+    This is the base of the hierarchy, containing only the relation itself. -/
 structure Map0 (R : α -> β -> Sort w) : Type (max u v w)
 
+/-- `Map1`: A relation with a mapping function from `α` to `β`.
+    This adds directionality to the relation. -/
 structure Map1 extends Map0 R where
   map : α -> β
 
+/-- `Map2a`: The map captures the relation (covariant property).
+    If `map a = b`, then `R a b` holds.
+    This means the map function witnesses the relation. -/
 structure Map2a extends Map1 R where
   map_in_R : forall (a : α) (b : β), map a = b -> R a b
 
+/-- `Map2b`: The relation determines the map (contravariant property).
+    If `R a b` holds, then `map a = b`.
+    This means elements in the relation are uniquely determined by the map. -/
 structure Map2b extends Map1 R where
   R_in_map : forall (a : α) (b : β), R a b -> map a = b
 
+/-- `Map3`: Both Map2a and Map2b properties hold.
+    The relation and equality via the map are equivalent: `R a b ↔ map a = b`. -/
 structure Map3 extends Map2a R, Map2b R where
 
+/-- `Map4`: Full equivalence with coherence.
+    Extends Map3 with a proof that the round-trip `map_in_R ∘ R_in_map` is the identity.
+    This ensures the relation behaves like a proper equivalence with no higher structure. -/
 structure Map4 extends Map3 R where
   R_in_mapK : forall (a : α) (b : β) (r : R a b),
               (map_in_R a b (R_in_map a b r)) = r
 
 end RExplicit
 
+/-- Enumeration of the map types in the hierarchy.
+    Used for metaprogramming and type-level computations. -/
 inductive MapType where
   | Map0
   | Map1
@@ -54,6 +95,7 @@ instance : ToString MapType where
     | .Map3 => "Map3"
     | .Map4 => "Map4"
 
+/-- Short indicator strings for map types, used in naming conventions. -/
 def MapType.getMapTypeIndicator
   : MapType → String
   | .Map0 => "0"
@@ -63,6 +105,8 @@ def MapType.getMapTypeIndicator
   | .Map3 => "3"
   | .Map4 => "4"
 
+/-- Interpret a MapType as the corresponding Map structure.
+    This connects the type-level representation to the actual structures. -/
 @[reducible, simp] def MapType.interp
   (mapType : MapType)
   (R : α -> β -> Sort w) :=
@@ -74,6 +118,9 @@ def MapType.getMapTypeIndicator
   | .Map3 => Trale.Map3 R
   | .Map4 => Trale.Map4 R
 
+/-- Partial order on map types.
+    The hierarchy: 0 ≤ 1 ≤ {2a, 2b} ≤ 3 ≤ 4, where 2a and 2b are incomparable.
+    This order represents "has at least as much structure as". -/
 def leMapType (a b : MapType) : Bool :=
   match a, b with
     | .Map0, _
@@ -117,6 +164,7 @@ instance : DecidableLE MapType :=
 theorem map0bottom {X : MapType} : MapType.Map0 ≤ X := by
   cases X <;> decide
 
+/-- Map4 is the top element: it has the most structure. -/
 theorem map4top {X : MapType} : X ≤ MapType.Map4 := by
   cases X <;> decide
 
@@ -138,6 +186,8 @@ instance : Std.IsPartialOrder MapType where
     cases a <;> cases b <;> first|rfl |contradiction
 
 
+/-- Union of map types: takes the least upper bound in the hierarchy.
+    Special case: Map2a ∪ Map2b = Map3 (they combine to give both properties). -/
 instance : Union MapType where
   union
     | .Map2a, .Map2b => .Map3
@@ -169,6 +219,8 @@ theorem maptype_U_maptype_monotone
         | contradiction
 
 
+/-- Intersection of map types: takes the greatest lower bound in the hierarchy.
+    Special case: Map2a ∩ Map2b = Map1 (their common structure is just the map). -/
 instance : Inter MapType where
   inter
     | .Map2a, .Map2b => .Map1
@@ -204,6 +256,8 @@ theorem maptype_inter_monotone
         | contradiction
 
 
+/-- Alternative interpretation of MapType using pattern matching.
+    Functionally equivalent to `MapType.interp` but with different reduction behavior. -/
 @[reducible] def MapType.interp' (mapType : MapType) (R : α -> β -> Sort w) : Type _ :=
   MapType.casesOn (motive := fun _ => Type _) mapType
   (Trale.Map0 R)
@@ -214,6 +268,8 @@ theorem maptype_inter_monotone
   (Trale.Map4 R)
 
 
+/-- Coercion instances following the Map hierarchy.
+    These allow automatic weakening of stronger map types to weaker ones. -/
 instance : Coe (Map1 R) (Map0 R) where
   coe m := m.toMap0
 
@@ -233,6 +289,8 @@ instance : Coe (Map4 R) (Map3 R) where
   coe m := m.toMap3
 
 
+/-- Coerce a map structure to a weaker one, given a proof that the target is
+    weaker in the hierarchy. This is the general coercion function. -/
 @[simp]
 def coeMap {m1 m2 : MapType} {R : α -> β -> Sort w}
   (m : m1.interp R) (h : m2 ≤ m1) : m2.interp R := by
@@ -260,6 +318,8 @@ def coeMap {m1 m2 : MapType} {R : α -> β -> Sort w}
   | .Map0, .Map0 => constructor
 
 
+/-- Alternative implementation of `coeMap` with more detailed proof structure.
+    Uses case analysis to systematically handle all valid coercions. -/
 @[simp]
 def coeMap' {m1 m2 : MapType} {R : α -> β -> Sort w}
   (m : m1.interp R) (h : m2 ≤ m1) : m2.interp R := by

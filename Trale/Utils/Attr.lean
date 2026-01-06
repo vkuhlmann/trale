@@ -18,6 +18,34 @@ import Trale.Utils.Basic
 
 -- https://github.com/leanprover-community/aesop
 
+/-!
+# The `trale` Tactic and Attribute
+
+This module implements the main `trale` tactic for proof transfer, along with
+the `@[trale]` attribute for registering transport theorems.
+
+## Overview
+
+The `trale` tactic:
+1. Analyzes the goal to understand its type structure
+2. Finds appropriate `Param` instances connecting the types
+3. Recursively translates the goal to a simpler type
+4. Uses Aesop with registered `@[trale]` lemmas to solve parametricity obligations
+
+The `@[trale]` attribute marks transport lemmas for automatic use by the tactic.
+
+## Commands
+
+- `#tr_add_translations_from_instances`: Scans for Param instances and registers them
+- `#tr_translate term`: Shows how a term would be translated
+
+## Attribution
+
+Based on:
+- Mathlib4's `to_additive` tactic by the mathlib4 community
+- Lean 4's instance system by Microsoft Corporation, Leonardo de Moura, and community
+-/
+
 -- Based on https://github.com/leanprover-community/mathlib4/blob/18a54b03b696bfa1a81859f884c01077592a7775/Mathlib/Tactic/ToAdditive/Frontend.lean
 -- by the mathlib4 community.
 -- Some code is verbatim, some is modified.
@@ -30,6 +58,8 @@ open Lean Meta Elab Command Std Qq Trale.Utils Term Trale.Utils
 
 namespace Trale.Attr
 
+/-- Command to scan all Param instances and register them as translations.
+    This populates the translation table used by the trale tactic. -/
 elab "#tr_add_translations_from_instances" : command => do
   let x := instanceExtension
   let state := x.getState (←getEnv)
@@ -70,6 +100,8 @@ elab "#tr_add_translations_from_instances" : command => do
         IO.println s!"Expression {i} (error: {err})"
 
 
+/-- Translate a term to its target type using registered translations.
+    Returns `some e'` if a translation is found, `none` otherwise. -/
 def translateTerm (transl : TrTranslations) (e : Expr) : MetaM (Option Expr) := do
   let eType ← inferType e
   if !eType.isSort then

@@ -90,15 +90,7 @@ def R_ofNat_Zmod5 (n : Nat)
 
 This handles numeric literals like `0`, `1`, `2` in the goal.
 
-### Step 7: Register All Translations
-
-```lean
-#tr_add_translations_from_instances
-```
-
-This command automatically generates transport lemmas for instances.
-
-### Using It
+### Step 7: Using the Trale Tactic
 
 ```lean
 theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c : Zmod5),
@@ -108,10 +100,12 @@ theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c : Zmod5),
 ```
 
 The `trale` tactic:
-1. Reverts all variables
-2. Translates goal to Nat
-3. Solves parametricity obligations
-4. Leaves simplified goal for `omega`
+1. **Automatically discovers and registers** `Param` instances (no manual registration needed!)
+2. Reverts all variables
+3. Translates goal to Nat
+4. Solves parametricity obligations
+5. Leaves simplified goal for `omega`
+
 
 ## Comparing Proof Approaches
 

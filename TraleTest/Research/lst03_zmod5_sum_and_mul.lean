@@ -19,7 +19,6 @@ theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c d e : Zmod5),
 # New automation
 -/
 
-#tr_add_translations_from_instances
 theorem sum_eq_reverse_sum_Zmod5' : ∀ (a b c d e : Zmod5),
   a + (b + c * e) * d = d * b + c * d * e + a * 1 := by
 

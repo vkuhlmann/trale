@@ -121,9 +121,11 @@ To use Trale with a custom type, you need to:
      : (tr.R (a + b) (a' + b')) := ...
    ```
 
-5. **Register translations** from instances:
+5. **Use the `trale` tactic** - it automatically discovers and registers your `Param` instances:
    ```lean4
-   #tr_add_translations_from_instances
+   theorem my_theorem : ∀ (a b : Zmod5), a + b = b + a := by
+     trale
+     omega
    ```
 
 ### Complete Example

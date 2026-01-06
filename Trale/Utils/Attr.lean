@@ -27,16 +27,19 @@ the `@[trale]` attribute for registering transport theorems.
 ## Overview
 
 The `trale` tactic:
-1. Analyzes the goal to understand its type structure
-2. Finds appropriate `Param` instances connecting the types
-3. Recursively translates the goal to a simpler type
-4. Uses Aesop with registered `@[trale]` lemmas to solve parametricity obligations
+1. Automatically registers any new Param instances (lazy loading with caching)
+2. Analyzes the goal to understand its type structure
+3. Finds appropriate `Param` instances connecting the types
+4. Recursively translates the goal to a simpler type
+5. Uses Aesop with registered `@[trale]` lemmas to solve parametricity obligations
 
 The `@[trale]` attribute marks transport lemmas for automatic use by the tactic.
 
 ## Commands
 
-- `#tr_add_translations_from_instances`: Scans for Param instances and registers them
+- `#tr_add_translations_from_instances`: (Optional) Manually scans for Param instances and registers them.
+  The `trale` tactic now does this automatically, but when performed at the
+  command level, this work gets cached.
 - `#tr_translate term`: Shows how a term would be translated
 
 ## Attribution
@@ -58,14 +61,12 @@ open Lean Meta Elab Command Std Qq Trale.Utils Term Trale.Utils
 
 namespace Trale.Attr
 
-/-- Command to scan all Param instances and register them as translations.
-    This populates the translation table used by the trale tactic. -/
-elab "#tr_add_translations_from_instances" : command => do
+/-- Register new Param instances that haven't been registered yet.
+    Returns the number of new instances registered. -/
+def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
   let x := instanceExtension
   let state := x.getState (←getEnv)
   let tree := state.discrTree
-
-  discard <| liftCoreM <| MetaM.run do
 
   let levelU ← mkFreshLevelMVar
   let levelV ← mkFreshLevelMVar
@@ -73,15 +74,24 @@ elab "#tr_add_translations_from_instances" : command => do
 
   let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
 
-  let y ← tree.getUnify expr
-  IO.println s!"Found {y.size} instances"
+  let allInstances ← tree.getUnify expr
 
-  for h : i in 0...y.size do
-    let result := y[i]
-    let name := (result.globalName?.map format).getD "(missing)"
-    -- IO.println s!"Expression {i}: {name}"
+  -- Get already registered instances
+  let translationState := trTranslationExtension.getState (←getEnv)
+  let registeredNames := translationState.instanceNames
+
+  let mut newCount := 0
+
+  for h : i in 0...allInstances.size do
+    let result := allInstances[i]
+    let name := result.globalName?
+
+    -- Skip if already registered
+    if let some instanceName := name then
+      if registeredNames.contains instanceName then
+        continue
+
     let type ← inferType result.val
-    -- let val := (←Meta.unfoldDefinition? result.val).getD result.val
     let (args2, argsBi2, expr2) ← forallMetaTelescope type
 
     let parts ← getParamParts? expr2
@@ -90,14 +100,29 @@ elab "#tr_add_translations_from_instances" : command => do
       | .ok parts =>
         let headName := getHeadConst parts.fromType
         if headName.isSome then
-          -- IO.println s!"     {parts.fromType} -> {parts.toType}"
-          -- IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
-
-          addTrTranslation parts.fromType parts.toType result.val result.globalName?
+          addTrTranslation parts.fromType parts.toType (some result.val) result.globalName?
+          newCount := newCount + 1
 
       | .error err =>
-        IO.println s!"Expression {i}: {name}"
-        IO.println s!"Expression {i} (error: {err})"
+        if !silent then
+          let nameStr := (name.map format).getD "(missing)"
+          IO.println s!"Warning: Could not process instance {nameStr}: {err}"
+
+  return newCount
+
+/-- Command to scan all Param instances and register them as translations.
+    This populates the translation table used by the trale tactic.
+
+    Note: This command is now optional. The `trale` tactic automatically
+    registers instances as needed. However, registrations made at the command
+    level persist across the file, whereas registrations made during tactic
+    execution (with asyncMode := .local) do not persist across different
+    theorem proofs. This means each `trale` invocation will re-scan and
+    re-register instances unless you use this command to pre-register them. -/
+elab "#tr_add_translations_from_instances" : command => do
+  discard <| liftCoreM <| MetaM.run do
+    let count ← registerNewParamInstances (silent := false)
+    IO.println s!"Registered {count} new instances"
 
 
 /-- Translate a term to its target type using registered translations.
@@ -176,6 +201,10 @@ def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
 
 
 elab "#tr_translate" a:term : command => do
+  discard <| liftCoreM <| MetaM.run do
+    let count ← registerNewParamInstances (silent := false)
+    IO.println s!"Registered {count} new instances"
+
   let x ← liftTermElabM <| elabTerm a .none
 
   let state := trTranslationExtension.getState (←getEnv)
@@ -217,6 +246,10 @@ elab "#tr_translate" a:term : command => do
 open Tactic in
 elab "trale'" : tactic => do
   liftMetaTactic fun g => do
+    -- Automatically register any new Param instances before translating
+    let newRegisterCount ← registerNewParamInstances (silent := true)
+    trace[tr.utils] s!"[trale] Registered {newRegisterCount} new Param instances"
+
     let orig ← g.getType'
 
     let state := trTranslationExtension.getState (←getEnv)
@@ -441,7 +474,7 @@ def addTrTranslationFromConst (src : Name) : MetaM Unit := do
       IO.println s!"relToHead: {relToHead}"
       pure (relFromHead, relToHead)
 
-    addTrTranslation fromType toType q($src) src
+    addTrTranslation fromType toType (some q($src)) src
 
 
 partial def addTraleAttr (src : Name) (cfg : AttrTraleConfig) (kind := AttributeKind.global) :

@@ -38,14 +38,25 @@ def addTranslationEntry (d : TrTranslations) (e : TranslationEntry) : TrTranslat
   | some n => { d with discrTree := d.discrTree.insertCore e.keys e, instanceNames := d.instanceNames.insert n e }
   | none   => { d with discrTree := d.discrTree.insertCore e.keys e }
 
-
-initialize trTranslationExtension : SimpleScopedEnvExtension TranslationEntry TrTranslations ←
-  registerSimpleScopedEnvExtension {
-    initial  := {}
-    addEntry := addTranslationEntry
-    exportEntry? := fun level e =>
-      guard (level == .private || e.globalName?.any (!isPrivateName ·)) *> e
+initialize trTranslationExtension : PersistentEnvExtension TranslationEntry TranslationEntry TrTranslations ←
+  registerPersistentEnvExtension {
+    mkInitial  := pure {}
+    addImportedFn := fun entries => do
+      let mut state : TrTranslations := {}
+      for arr in entries do
+        for entry in arr do
+          state := addTranslationEntry state entry
+      pure state
+    addEntryFn := addTranslationEntry
+    exportEntriesFn := fun s =>
+      s.discrTree.fold (init := #[]) fun acc _ e =>
+        if e.globalName?.any (!isPrivateName ·) then acc.push e else acc
+    -- We can set the asyncMode to sync, and then remove the asyncMode annotation in
+    -- addTrTranslation. Then, the registrations will remain persistent, but
+    -- probably at some performance cost.
+    -- asyncMode := .sync
   }
+
 
 private def mkTrTranslationKey (e : Expr) : MetaM (Array TranslationKey) := do
   withNewMCtxDepth do
@@ -58,4 +69,7 @@ def addTrTranslation (fromExpr toExpr : Expr) (rel : Option Expr) (src : Option 
     { keys, fromType := fromExpr, toType := toExpr,
       rel := rel,
       priority := 100, globalName? := src }
-  trTranslationExtension.add entry
+  -- Register the entry using local async mode to avoid blocking main thread.
+  -- Note: With asyncMode := .local, registrations made during tactic execution
+  -- do not persist across different theorem proofs within the same file.
+  modifyEnv fun env => trTranslationExtension.addEntry (asyncMode := .local) env entry

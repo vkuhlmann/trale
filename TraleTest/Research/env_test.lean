@@ -126,7 +126,7 @@ elab "test_scoped_1" : tactic => do
     let before := scopedTestExtension.getState (←getEnv)
     IO.println s!"[scoped1] Before: {before.entries.size} entries"
 
-    -- This is what addTrTranslation does
+    -- Directly add an entry to scopedTestExtension (for comparison with addTrTranslation's behavior)
     scopedTestExtension.add { value := 42 }
 
     let after := scopedTestExtension.getState (←getEnv)

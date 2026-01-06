@@ -38,14 +38,6 @@ def addTranslationEntry (d : TrTranslations) (e : TranslationEntry) : TrTranslat
   | some n => { d with discrTree := d.discrTree.insertCore e.keys e, instanceNames := d.instanceNames.insert n e }
   | none   => { d with discrTree := d.discrTree.insertCore e.keys e }
 
-
--- initialize trTranslationExtension : SimpleScopedEnvExtension TranslationEntry TrTranslations ←
---   registerSimpleScopedEnvExtension {
---     initial  := {}
---     addEntry := addTranslationEntry
---     exportEntry? := fun level e =>
---       guard (level == .private || e.globalName?.any (!isPrivateName ·)) *> e
---   }
 initialize trTranslationExtension : PersistentEnvExtension TranslationEntry TranslationEntry TrTranslations ←
   registerPersistentEnvExtension {
     mkInitial  := pure {}
@@ -77,5 +69,7 @@ def addTrTranslation (fromExpr toExpr : Expr) (rel : Option Expr) (src : Option 
     { keys, fromType := fromExpr, toType := toExpr,
       rel := rel,
       priority := 100, globalName? := src }
-  -- trTranslationExtension.add (kind := .local) entry
+  -- Register the entry using local async mode to avoid blocking main thread.
+  -- Note: With asyncMode := .local, registrations made during tactic execution
+  -- do not persist across different theorem proofs within the same file.
   modifyEnv fun env => trTranslationExtension.addEntry (asyncMode := .local) env entry

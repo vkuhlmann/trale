@@ -114,10 +114,11 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
     This populates the translation table used by the trale tactic.
 
     Note: This command is now optional. The `trale` tactic automatically
-    registers instances as needed. However, when performed at the command
-    level, this work gets cached. (Tactics are run in non-main
-    threads, and hence the registration work will need to be redone for each
-    theorem using trale in its proof.) -/
+    registers instances as needed. However, registrations made at the command
+    level persist across the file, whereas registrations made during tactic
+    execution (with asyncMode := .local) do not persist across different
+    theorem proofs. This means each `trale` invocation will re-scan and
+    re-register instances unless you use this command to pre-register them. -/
 elab "#tr_add_translations_from_instances" : command => do
   discard <| liftCoreM <| MetaM.run do
     let count ← registerNewParamInstances (silent := false)

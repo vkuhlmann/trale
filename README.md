@@ -25,7 +25,7 @@ example : ∀ (a b c d e : Zmod5),
 
 ```
 
-This takes prerequisties (`TraleTest.Lemmas.Zmod5`):
+This takes prerequisites (`TraleTest.Lemmas.Zmod5`):
 ```lean4
 import ...
 

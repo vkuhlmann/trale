@@ -40,6 +40,10 @@ macro "tr_from_involution" ppSpace colGt a:term:10 : tactic => `(tactic|
     )
   )
 
+macro "tr_from_equivalence" ppSpace colGt to_from:term:10 "," ppSpace colGt from_to:term:10 : tactic => `(tactic|
+  exact Trale.Utils.paramFromEquiv $to_from $from_to
+)
+
 #check paramFromMap
 #check Trale.Utils.paramFromInjection
 #check Trale.Utils.paramFromSurjection

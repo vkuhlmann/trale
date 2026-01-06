@@ -251,7 +251,7 @@ theorem to_from : ∀ a, from_other (to_other a) = a := ...
 theorem from_to : ∀ b, to_other (from_other b) = b := ...
 
 instance : Param44 MyType OtherType := by
-  tr_from_equivalence (to_other, from_other, to_from, from_to)
+  tr_from_equivalence to_from, from_to
 ```
 
 ### Pattern 2: Embedding (Injection)

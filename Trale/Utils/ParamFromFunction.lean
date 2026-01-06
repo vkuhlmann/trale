@@ -87,3 +87,17 @@ def paramFromInvolution
     subst xR
     apply  h
   simp
+
+def paramFromEquiv
+  {f : α → β}
+  {g : β → α}
+  (h1 : ∀ x, g (f x) = x)
+  (h2 : ∀ x, f (g x) = x)
+  : Param44 α β := by
+  tr_extend paramFromMap f
+
+  -- 4
+  exact g
+  · intro _ _ aF; subst aF; exact h2 _
+  · intro _ _ aR; subst aR; exact h1 _
+  · intro _ _ aR; rfl

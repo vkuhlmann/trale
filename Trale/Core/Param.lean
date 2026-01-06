@@ -98,7 +98,7 @@ The map types determine what properties the relation has:
 - `Map0`: Just the relation
 - `Map1`: Plus a mapping function
 - `Map2a`: Map captures the relation
-- `Map2b`: Relation implies equality via map  
+- `Map2b`: Relation implies equality via map
 - `Map3`: Both Map2a and Map2b
 - `Map4`: Full equivalence with coherence
 -/
@@ -119,9 +119,9 @@ class Param
 --
 -- We enumerate all 36 abbreviations manually (6×6 combinations of map types).
 --
--- It's not the most pure and sophisticated way, but it gets the job done, and 
--- performing all the necessary metaprogramming to automatically enumerate the 
--- cases would likely be more lines of code, and confuse code editor tools like 
+-- It's not the most pure and sophisticated way, but it gets the job done, and
+-- performing all the necessary metaprogramming to automatically enumerate the
+-- cases would likely be more lines of code, and confuse code editor tools like
 -- IntelliSense.
 --
 -- I looked into this in the past, and the cleanest entrance for an api was private,
@@ -185,7 +185,6 @@ end Params
 
 /-- Coerce a Param to one with weaker structure.
     Allows using instance inference to weaken Param types when needed. -/
-set_option pp.all true in
 instance
   CoeParam
 

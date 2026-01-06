@@ -115,10 +115,9 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
 
     Note: This command is now optional. The `trale` tactic automatically
     registers instances as needed. However, when performed at the command
-    level, this work gets cached. (Since the registration hold for the current
-    thread, and hence for multiple theorems in the same file using the `trale`
-    tactic, each occurrence would need to perform the registrations again, as
-    their computations are not performed on the main thread. -/
+    level, this work gets cached. (Tactics are run in non-main
+    threads, and hence the registration work will need to be redone for each
+    theorem using trale in its proof.) -/
 elab "#tr_add_translations_from_instances" : command => do
   discard <| liftCoreM <| MetaM.run do
     let count ← registerNewParamInstances (silent := false)
@@ -244,7 +243,7 @@ elab "#tr_translate" a:term : command => do
   return ()
 
 open Tactic in
-elab "trale'" : tactic => withMainContext do
+elab "trale'" : tactic => do
   liftMetaTactic fun g => do
     -- Automatically register any new Param instances before translating
     let newRegisterCount ← registerNewParamInstances (silent := true)

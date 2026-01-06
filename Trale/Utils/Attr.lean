@@ -99,7 +99,7 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
       | .ok parts =>
         let headName := getHeadConst parts.fromType
         if headName.isSome then
-          addTrTranslation parts.fromType parts.toType result.val result.globalName?
+          addTrTranslation parts.fromType parts.toType (some result.val) result.globalName?
           newCount := newCount + 1
 
       | .error err =>
@@ -464,7 +464,7 @@ def addTrTranslationFromConst (src : Name) : MetaM Unit := do
       IO.println s!"relToHead: {relToHead}"
       pure (relFromHead, relToHead)
 
-    addTrTranslation fromType toType q($src) src
+    addTrTranslation fromType toType (some q($src)) src
 
 
 partial def addTraleAttr (src : Name) (cfg : AttrTraleConfig) (kind := AttributeKind.global) :

@@ -74,14 +74,6 @@ macro "tr_advance_1" : tactic => `(tactic|
     --   )
     | apply_assumption only [*])
 
-macro "tr_advance_2" : tactic => `(tactic|
-  focus first
-    | (refine (Trale.instantiatePropR_bi ?_).forget;
-       tr_step_rel)
-    | (refine (instantiatePropR ?_).forget; tr_step_rel)
-    | (tr_flip; refine (instantiatePropR ?_).forget; tr_step_rel)
-  )
-
 
 macro "tr_advance" : tactic => `(tactic|
   (
@@ -132,7 +124,6 @@ macro "tr_advance" : tactic => `(tactic|
 add_aesop_rules 90% (by assumption) (rule_sets := [trale])
 add_aesop_rules 50% (by apply_assumption) (rule_sets := [trale])
 -- add_aesop_rules 90% apply Trale.R_eq' (rule_sets := [trale])
-add_aesop_rules 90% (by apply Trale.R_eq') (rule_sets := [trale])
 add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])
 -- add_aesop_rules 50% (by (
 --         let : Param.R _ _ _ _ := by assumption;
@@ -143,4 +134,3 @@ add_aesop_rules 80% (by tr_intro _ _ _) (rule_sets := [trale])
 add_aesop_rules 70% (by tr_ident; (first|apply_assumption only [*] |(apply Eq.symm; apply_assumption only [*]))) (rule_sets := [trale])
 add_aesop_rules 80% (by tr_apply_assumption)
 -- add_aesop_rules 40% (by tr_advance_1) (rule_sets := [trale])
-add_aesop_rules 30% (by tr_advance_2) (rule_sets := [trale])

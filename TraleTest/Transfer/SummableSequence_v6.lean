@@ -18,8 +18,7 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_intro a a' aR
   tr_intro b b' bR
 
-  apply instantiatePropR'
-  apply R_eq'
+  apply (R_eq _ _ _ _ _ _).forget
 
 
   -- Part 2: Relate lhs:  *X*  =  X
@@ -57,8 +56,7 @@ theorem sum_nnR_add_minimal : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) :
   tr_intro _ _ aR
   tr_intro _ _ bR
 
-  apply instantiatePropR'
-  apply R_eq'
+  apply (R_eq _ _ _ _ _ _).forget
 
   · apply R_sum_xnnR
     apply seq_nnR_add

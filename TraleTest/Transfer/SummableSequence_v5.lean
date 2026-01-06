@@ -14,13 +14,7 @@ open TraleTest.Lemmas Trale
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 
-  -- TODO: Make this work with infer_instance
-  -- We need to use `propParam` instance for `Param Prop Prop`, not the
-  -- instance defined by equality.
-  let _ : Param00 Prop Prop := propParam.forget
-
-  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    infer_instance
+  let _ : Param00 Prop Prop := sortParam .Map4 .Map0
 
   -- Part 1: split the foralls
   tr_intro a a' aR
@@ -74,16 +68,14 @@ theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   This is a relation for the 'propParam' Param. I.e. `Param Prop Prop`.
   We use `instantiatePropR` to convert it to the Param between those types.
   -/
-  exact (instantiatePropR goalTypeR).forget
+  exact goalTypeR.forget
 
 
 -- Minimal
 theorem sum_nnR_add_minimal : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 
-  let _ : Param00 Prop Prop := propParam.forget
-  let eqParam : Param00 (xnnR → xnnR → Prop) (nnR → nnR → Prop) := by
-    repeat tr_split
+  let _ : Param00 Prop Prop := sortParam .Map4 .Map0
 
   tr_intro _ _ aR
   tr_intro _ _ bR
@@ -101,4 +93,4 @@ theorem sum_nnR_add_minimal : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) :
   tr_split_application e e' eR by
     exact R_eq
 
-  exact (instantiatePropR (eR d d' dR c c' cR)).forget
+  exact (eR d d' dR c c' cR).forget

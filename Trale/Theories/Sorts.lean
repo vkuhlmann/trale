@@ -4,6 +4,7 @@ import Trale.Utils.Basic
 import Trale.Utils.Whnf
 import Trale.Utils.ParamIdent
 import Trale.Utils.ParamFromFunction
+import Trale.Utils.Attr
 import Trale.Theories.Ident
 
 open Trale.Utils
@@ -130,26 +131,12 @@ def instantiatePropR_r
   : Param04 a b := by
   tr_from_map r
 
-theorem R_eq
+@[trale]
+def R_eq
   [Param2b0 α α']
   (a : α) (a' : α') (aR : tr.R a a')
   (b : α) (b' : α') (bR : tr.R b b')
-  : propParam.R (a = b) (a' = b') := by
-
-  tr_whnf
-  show a = b → a' = b'
-
-  tr_subst a a' aR
-  tr_subst b b' bR
-
-  exact congrArg _
-
-
-def R_eq'
-  [Param2b0 α α']
-  (a : α) (a' : α') (aR : tr.R a a')
-  (b : α) (b' : α') (bR : tr.R b b')
-  : Param10 (a = b) (a' = b') := by
+  : Param40 (a = b) (a' = b') := by
 
   tr_from_map
 

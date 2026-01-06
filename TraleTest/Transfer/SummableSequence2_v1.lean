@@ -185,7 +185,7 @@ theorem sum_nnR_add
 
   simp
 
-  tr_advance
+  apply (R_eq _ _ _ _ _ _).forget
   apply summable_rel
   apply seq_nnR_add
   tr_advance

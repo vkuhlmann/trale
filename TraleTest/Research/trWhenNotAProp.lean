@@ -78,7 +78,6 @@ def someNumber2 (a : nnR) : (typeYielder3 4) := by
 
   sorry
   sorry
-  sorry
 
 
 

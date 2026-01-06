@@ -165,7 +165,7 @@ theorem sum_eq_reverse_sum_Zmod5' (a b c : Zmod5)
     | assumption
     | apply R_add_Zmod5
     | tr_intro _ _ _
-    | apply R_eq'
+    | apply (R_eq _ _ _ _ _ _).forget
 
 
 theorem sum_eq_reverse_sum_Zmod5'' (a b c : Zmod5)
@@ -176,6 +176,7 @@ theorem sum_eq_reverse_sum_Zmod5'' (a b c : Zmod5)
 
   repeat first
     | apply R_add_Zmod5
+    | apply (R_eq _ _ _ _ _ _).forget
     | tr_advance
 
 
@@ -201,7 +202,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
   tr_intro b b' bR
   tr_intro c c' cR
 
-  tr_advance
+  apply (R_eq _ _ _ _ _ _).forget
   apply R_add_Zmod5
   apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
@@ -248,7 +249,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)
   tr_advance
   tr_advance
   tr_advance
-  tr_advance
+  apply (R_eq _ _ _ _ _ _).forget
   apply R_add_Zmod5
   apply R_add_Zmod5
   tr_advance
@@ -284,7 +285,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual3 (a b c : Zmod5)
   apply Trale.Map1_forall; intro c c' cR
   case p1 => exact ModParam.flip.forget
 
-  apply R_eq'
+  apply (R_eq _ _ _ _ _ _).forget
 
   · apply R_add_Zmod5
     · apply R_add_Zmod5
@@ -314,7 +315,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual4 (a b c : Zmod5)
   apply Trale.Map1_forall; intro _ _ _
   case p1 => infer_instance
 
-  apply R_eq'
+  apply (R_eq _ _ _ _ _ _).forget
 
   · apply R_add_Zmod5
     · apply R_add_Zmod5
@@ -339,7 +340,7 @@ theorem sum_eq_reverse_sum_Zmod5_manual5 (a b c : Zmod5)
     | apply Trale.Map1_forall
       case' p2 => intro _ _ _
       case p1 => infer_instance
-    | apply R_eq'
+    | apply (R_eq _ _ _ _ _ _).forget
     | apply R_add_Zmod5
     | assumption
 

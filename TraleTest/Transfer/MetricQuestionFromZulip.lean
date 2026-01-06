@@ -308,8 +308,7 @@ instance
     assumption
 
   case p2 =>
-    tr_from_map
-    apply R_eq
+    apply (R_eq _ _ _ _ _ _).forget
     assumption
     assumption
 
@@ -354,7 +353,6 @@ def metricEquiv'
   tr_intro h h' hR
   -- tr_advance
   case p1 =>
-    tr_from_map
     -- have : dist x' y' = 0 → dist x y = 0 := by
     --   unfold dist
     --   dsimp [pseudoMetricSpacePi]
@@ -369,8 +367,10 @@ def metricEquiv'
 
     --   sorry
 
-    apply R_eq
-    case bR => rfl
+    tr_flip
+    apply (R_eq _ _ _ _ _ _).forget
+
+    show tr.R 0 0; exact rfl
 
     apply Utils.flipR'
     tr_whnf
@@ -385,8 +385,7 @@ def metricEquiv'
 
   case p2 =>
     -- tr_subst x x' xR
-    tr_from_map
-    apply R_eq
+    apply (R_eq _ _ _ _ _ _).forget
     assumption
     assumption
 

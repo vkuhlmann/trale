@@ -329,7 +329,8 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       let levelX2 ← mkFreshLevelMVar
       let levelY1 ← mkFreshLevelMVar
       let levelY2 ← mkFreshLevelMVar
-      let levelZ ← mkFreshLevelMVar
+      let levelZ1 ← mkFreshLevelMVar
+      let levelZ2 ← mkFreshLevelMVar
 
 
       let α : Q(Sort $levelX1) ← inferType a
@@ -489,8 +490,8 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
       --   Solved now.  Was using an fresh FVar without `withLocalDec`
 
       -- This will be a goal
-      let p1 : Q(Param00.{levelZ} $α $α') ←
-        mkFreshExprMVar (.some q((Param00.{levelZ} $α $α'))) (userName := .str tag "p1")
+      let p1 : Q(Param00.{levelZ1} $α $α') ←
+        mkFreshExprMVar (.some q((Param00.{levelZ1} $α $α'))) (userName := .str tag "p1")
 
       -- This will be inferred
       -- let a : Q($α) := target1
@@ -565,7 +566,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
         ← mkFreshExprMVarQ
           q(let a : $α := $a; let a' : $α' := $a';
             let aR: ($p1).R a a' := $aR;
-            (Param.{levelZ} $covMapType $conMapType ($β a) ($β' a')))
+            (Param.{levelZ2} $covMapType $conMapType ($β a) ($β' a')))
           (userName := .str tag "p2")
 
       trace[tr.utils] s!"p2 base is {format p2base}"
@@ -574,7 +575,7 @@ elab "tr_split_application'" ppSpace colGt !ident a:Lean.Parser.Tactic.optConfig
 
       p2mvarId.withContext do
 
-      let p2 : Q(Param.{levelZ} $covMapType $conMapType ($β $a) ($β' $a')) :=
+      let p2 : Q(Param.{levelZ2} $covMapType $conMapType ($β $a) ($β' $a')) :=
         .mvar p2mvarId
 
       trace[tr.utils] s!"p2 is {format p2}"

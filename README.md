@@ -1,5 +1,9 @@
 # Trale
 
+[![CI](https://github.com/vkuhlmann/trale/actions/workflows/lean_action_ci.yml/badge.svg)](https://github.com/vkuhlmann/trale/actions/workflows/lean_action_ci.yml)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Lean 4](https://img.shields.io/badge/Lean-4.23.0--rc2-blue)](https://leanprover.github.io/)
+
 **Trale** is a Lean 4 library for transporting theorems and proofs across types using parametricity and relational reasoning. It enables you to prove theorems on simpler types (like `Nat`) and automatically transfer those results to more complex types (like custom `Zmod5`), provided you define appropriate transport theorems between them.
 
 > **Based on the Trocq framework**  

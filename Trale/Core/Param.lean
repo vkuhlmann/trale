@@ -128,7 +128,6 @@ class Param
 -- meaning that for including it in a public library, I would need to replicate its
 -- many private dependencies.
 
-/-- Just the relation, no structure in either direction. -/
 abbrev Param00  :=  Param.{w} .Map0 .Map0
 abbrev Param01  :=  Param.{w} .Map0 .Map1
 abbrev Param02a :=  Param.{w} .Map0 .Map2a
@@ -136,7 +135,6 @@ abbrev Param02b :=  Param.{w} .Map0 .Map2b
 abbrev Param03  :=  Param.{w} .Map0 .Map3
 abbrev Param04  :=  Param.{w} .Map0 .Map4
 
-/-- Covariant map from α to β, no contravariant structure. -/
 abbrev Param10  :=  Param.{w} .Map1 .Map0
 abbrev Param11  :=  Param.{w} .Map1 .Map1
 abbrev Param12a :=  Param.{w} .Map1 .Map2a
@@ -144,7 +142,6 @@ abbrev Param12b :=  Param.{w} .Map1 .Map2b
 abbrev Param13  :=  Param.{w} .Map1 .Map3
 abbrev Param14  :=  Param.{w} .Map1 .Map4
 
-/-- Covariant map that captures the relation (split surjection from β to α). -/
 abbrev Param2a0 :=  Param.{w} .Map2a .Map0
 abbrev Param2a1 :=  Param.{w} .Map2a .Map1
 abbrev Param2a2a := Param.{w} .Map2a .Map2a
@@ -152,7 +149,6 @@ abbrev Param2a2b := Param.{w} .Map2a .Map2b
 abbrev Param2a3 :=  Param.{w} .Map2a .Map3
 abbrev Param2a4 :=  Param.{w} .Map2a .Map4
 
-/-- Relation implies equality via covariant map (split injection from α to β). -/
 abbrev Param2b0 :=  Param.{w} .Map2b .Map0
 abbrev Param2b1 :=  Param.{w} .Map2b .Map1
 abbrev Param2b2a := Param.{w} .Map2b .Map2a
@@ -167,15 +163,11 @@ abbrev Param32b :=  Param.{w} .Map3 .Map2b
 abbrev Param33  :=  Param.{w} .Map3 .Map3
 abbrev Param34  :=  Param.{w} .Map3 .Map4
 
-/-- Full covariant equivalence, no contravariant structure. -/
 abbrev Param40  :=  Param.{w} .Map4 .Map0
 abbrev Param41  :=  Param.{w} .Map4 .Map1
-/-- Split surjection from α to β. -/
 abbrev Param42a :=  Param.{w} .Map4 .Map2a
-/-- Split injection from α to β. -/
 abbrev Param42b :=  Param.{w} .Map4 .Map2b
 abbrev Param43  :=  Param.{w} .Map4 .Map3
-/-- Full equivalence in both directions. -/
 abbrev Param44  :=  Param.{w} .Map4 .Map4
 
 

@@ -44,16 +44,9 @@ macro "tr_from_equivalence" ppSpace colGt to_from:term:10 "," ppSpace colGt from
   exact Trale.Utils.paramFromEquiv $to_from $from_to
 )
 
-#check paramFromMap
-#check Trale.Utils.paramFromInjection
-#check Trale.Utils.paramFromSurjection
-
 
 macro "tr_from_map" : tactic => `(tactic|
   tr_from_map ?_
-  -- first
-  -- | refine (Param_from_map ?_).forget
-  -- | apply Trale.Utils.createInjection
 )
 
 macro "tr_ident" : tactic => `(tactic|

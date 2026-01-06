@@ -39,13 +39,32 @@ def addTranslationEntry (d : TrTranslations) (e : TranslationEntry) : TrTranslat
   | none   => { d with discrTree := d.discrTree.insertCore e.keys e }
 
 
-initialize trTranslationExtension : SimpleScopedEnvExtension TranslationEntry TrTranslations ←
-  registerSimpleScopedEnvExtension {
-    initial  := {}
-    addEntry := addTranslationEntry
-    exportEntry? := fun level e =>
-      guard (level == .private || e.globalName?.any (!isPrivateName ·)) *> e
+-- initialize trTranslationExtension : SimpleScopedEnvExtension TranslationEntry TrTranslations ←
+--   registerSimpleScopedEnvExtension {
+--     initial  := {}
+--     addEntry := addTranslationEntry
+--     exportEntry? := fun level e =>
+--       guard (level == .private || e.globalName?.any (!isPrivateName ·)) *> e
+--   }
+initialize trTranslationExtension : PersistentEnvExtension TranslationEntry TranslationEntry TrTranslations ←
+  registerPersistentEnvExtension {
+    mkInitial  := pure {}
+    addImportedFn := fun entries => do
+      let mut state : TrTranslations := {}
+      for arr in entries do
+        for entry in arr do
+          state := addTranslationEntry state entry
+      pure state
+    addEntryFn := addTranslationEntry
+    exportEntriesFn := fun s =>
+      s.discrTree.fold (init := #[]) fun acc _ e =>
+        if e.globalName?.any (!isPrivateName ·) then acc.push e else acc
+    -- We can set the asyncMode to sync, and then remove the asyncMode annotation in
+    -- addTrTranslation. Then, the registrations will remain persistent, but
+    -- probably at some performance cost.
+    -- asyncMode := .sync
   }
+
 
 private def mkTrTranslationKey (e : Expr) : MetaM (Array TranslationKey) := do
   withNewMCtxDepth do
@@ -58,4 +77,5 @@ def addTrTranslation (fromExpr toExpr : Expr) (rel : Option Expr) (src : Option 
     { keys, fromType := fromExpr, toType := toExpr,
       rel := rel,
       priority := 100, globalName? := src }
-  trTranslationExtension.add entry
+  -- trTranslationExtension.add (kind := .local) entry
+  modifyEnv fun env => trTranslationExtension.addEntry (asyncMode := .local) env entry

@@ -26,11 +26,27 @@ structure TrRels where
 def addTrRelEntry (d : TrRels) (entry : TrRelEntry) : TrRels :=
   { d with tree := d.tree.insertCore entry.keys entry }
 
-initialize trRelsExtension : SimpleScopedEnvExtension TrRelEntry TrRels
-  ← registerSimpleScopedEnvExtension {
-    name := `trRelExt,
-    initial := {},
-    addEntry := addTrRelEntry
+-- initialize trRelsExtension : SimpleScopedEnvExtension TrRelEntry TrRels
+--   ← registerSimpleScopedEnvExtension {
+--     name := `trRelExt,
+--     initial := {},
+--     addEntry := addTrRelEntry,
+--     -- This does not have asyncMode option
+--   }
+
+initialize trRelsExtension : PersistentEnvExtension TrRelEntry TrRelEntry TrRels ←
+  registerPersistentEnvExtension {
+    mkInitial := pure {}
+    addImportedFn := fun entries => do
+      let mut state : TrRels := {}
+      for arr in entries do
+        for entry in arr do
+          state := addTrRelEntry state entry
+      pure state
+    addEntryFn := addTrRelEntry
+    exportEntriesFn := fun s =>
+      s.tree.fold (init := #[]) fun acc _ e => acc.push e
+    asyncMode := .sync
   }
 
 private def mkTrRelsKey (e : Expr) : MetaM (Array TrRelKey) := do
@@ -42,6 +58,6 @@ private def mkTrRelsKey (e : Expr) : MetaM (Array TrRelKey) := do
 def addTrRel (src : Name) : MetaM Unit := do
   let val ← mkConstWithLevelParams src
   let keys ← mkTrRelsKey val
-  trRelsExtension.add { keys, val, globalName? := some src }
+  modifyEnv fun env => trRelsExtension.addEntry env { keys, val, globalName? := some src }
 
 end Trale.Utils

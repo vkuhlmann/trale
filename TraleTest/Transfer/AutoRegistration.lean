@@ -1,5 +1,5 @@
 import Mathlib
-import TraleTest.Lemmas.Zmod5 
+import TraleTest.Lemmas.Zmod5
 open TraleTest.Lemmas
 
 /-!
@@ -8,6 +8,8 @@ open TraleTest.Lemmas
 This file tests that the `trale` tactic automatically registers Param instances
 without needing the `#tr_add_translations_from_instances` command.
 -/
+
+set_option trace.tr.utils true
 
 -- Test theorem using trale without manual registration
 -- This should work now that trale automatically registers instances
@@ -32,4 +34,4 @@ theorem manual_registration_test : ∀ (a b : Zmod5),
   a * b = b * a := by
   trale
   intro a b
-  omega
+  rw [mul_comm]

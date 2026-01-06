@@ -74,22 +74,22 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
   let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
 
   let allInstances ← tree.getUnify expr
-  
+
   -- Get already registered instances
   let translationState := trTranslationExtension.getState (←getEnv)
   let registeredNames := translationState.instanceNames
-  
+
   let mut newCount := 0
-  
+
   for h : i in 0...allInstances.size do
     let result := allInstances[i]
     let name := result.globalName?
-    
+
     -- Skip if already registered
     if let some instanceName := name then
       if registeredNames.contains instanceName then
         continue
-    
+
     let type ← inferType result.val
     let (args2, argsBi2, expr2) ← forallMetaTelescope type
 
@@ -106,12 +106,12 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
         if !silent then
           let nameStr := (name.map format).getD "(missing)"
           IO.println s!"Warning: Could not process instance {nameStr}: {err}"
-  
+
   return newCount
 
 /-- Command to scan all Param instances and register them as translations.
     This populates the translation table used by the trale tactic.
-    
+
     Note: This command is now optional. The `trale` tactic automatically
     registers instances as needed. -/
 elab "#tr_add_translations_from_instances" : command => do
@@ -235,11 +235,12 @@ elab "#tr_translate" a:term : command => do
   return ()
 
 open Tactic in
-elab "trale'" : tactic => do
+elab "trale'" : tactic => withMainContext do
   liftMetaTactic fun g => do
     -- Automatically register any new Param instances before translating
-    discard <| registerNewParamInstances (silent := true)
-    
+    let newRegisterCount ← registerNewParamInstances (silent := true)
+    trace[tr.utils] s!"[trale'] Registered {newRegisterCount} new Param instances"
+
     let orig ← g.getType'
 
     let state := trTranslationExtension.getState (←getEnv)

@@ -10,7 +10,7 @@ import Trale.Utils.Glueing
 
 import Trale.Utils.TrAdvance
 
-import TraleTest.Research.equiv
+import TraleTest.Research.lst13a_equiv
 
 
 -- import Mathlib
@@ -134,6 +134,9 @@ end InReals
 
 variable {V : Type*} {P : Type*}
 
+/-
+# Listing 29
+-/
 noncomputable
 instance
   -- [NormedAddCommGroup V] [InnerProductSpace ℝ V]
@@ -142,7 +145,6 @@ instance
   [hd2 : Fact (Module.rank ℝ V = 2)]
   : Param44 V (Fin 2 → ℝ) :=
   paramFromEquiv (finDimVectorspaceEquiv 2 hd2.out).toEquiv
-
 
 
 instance
@@ -184,69 +186,6 @@ instance
       rfl
 
 
-  -- apply Trale.Utils.glued
-
-  -- case p1 =>
-  --   tr_from_map
-  --   intro x
-  --   exact (x 0, x 1)
-
-  -- case p2 =>
-  --   sorry
-  --   -- tr_from_map
-  --   -- intro (x, y) z
-  --   -- match z with
-  --   -- | 0 => exact x
-  --   -- | 1 => exact y
-
-  -- -- rw [Trale.Utils.R_eq_normalize_R]
-
-  -- -- change (∀ (_ : _) (_ : _), _ = _) = _
-  -- funext x y
-
-  -- rw [@Trale.Utils.R_eq_normalize_R _]
-  -- apply Eq.symm
-  -- rw [@Trale.Utils.R_eq_normalize_R _]
-  -- apply Eq.symm
-
-  -- -- congr
-
-  -- change ?lhs = ?rhs
-  -- set lhs := ?lhs
-  -- set rhs := ?rhs
-
-  -- -- tr_whnf at rhs
-  -- -- match h : lhs with
-  -- -- | (_ -> _ -> (_ = _)) => sorry
-
-
-  -- -- dsimp at lhs
-  -- -- unfold Trale.Utils.paramFromMap at lhs
-
-
-  -- tr_whnf
-
-noncomputable
-def
-  R_dist
-  -- [NormedAddCommGroup V]
-  -- [InnerProductSpace ℝ V]
-  [AddCommMonoid V]
-  [Module ℝ V]
-  [Free ℝ V]
-  [pseudo : PseudoMetricSpace V]
-
-  [Fact (Module.rank ℝ V = 2)]
-  (a : V) (a' : Fin 2 → ℝ) (aR : tr.R a a')
-  (b : V) (b' : Fin 2 → ℝ) (bR : tr.R b b')
-  : (dist a b) = (dist a' b') := by
-
-  unfold dist
-  tr_subst a a' aR
-  tr_subst b b' bR
-
-  sorry
-
 def
   R_dist_zero
   [AddCommMonoid V]
@@ -264,13 +203,6 @@ def
   tr_subst b b' bR
 
   sorry
-
-
-#check dist
-#check pseudoMetricSpacePi.dist
-#check NormedAddCommGroup
-
-set_option trace.tr.utils true
 
 instance
   [NormedAddCommGroup V]
@@ -311,6 +243,35 @@ instance
     assumption
     assumption
 
+/-
+# Other
+-/
+
+#check dist
+#check pseudoMetricSpacePi.dist
+#check NormedAddCommGroup
+
+
+noncomputable
+def
+  R_dist
+  -- [NormedAddCommGroup V]
+  -- [InnerProductSpace ℝ V]
+  [AddCommMonoid V]
+  [Module ℝ V]
+  [Free ℝ V]
+  [pseudo : PseudoMetricSpace V]
+
+  [Fact (Module.rank ℝ V = 2)]
+  (a : V) (a' : Fin 2 → ℝ) (aR : tr.R a a')
+  (b : V) (b' : Fin 2 → ℝ) (bR : tr.R b b')
+  : (dist a b) = (dist a' b') := by
+
+  unfold dist
+  tr_subst a a' aR
+  tr_subst b b' bR
+
+  sorry
 
 
 noncomputable

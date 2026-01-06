@@ -1,5 +1,4 @@
 import Lean
--- import Mathlib
 
 theorem sum_eq_reverse_sum_Nat (a b c : Nat)
     : (a + b) + c = (c + b) + a := by

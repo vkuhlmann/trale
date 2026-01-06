@@ -50,6 +50,9 @@ theorem sum_xnnR_add (u v : ℕ → ℝ≥0) :
 
 -- #check (5 : ℝ≥0∞)
 
+/-
+# Listing 27
+-/
 theorem sum_nnR_add
 : ∀ (u v : summable),
   ∑' i, (u + v) i = (∑' i, u i) + (∑' i, v i) := by

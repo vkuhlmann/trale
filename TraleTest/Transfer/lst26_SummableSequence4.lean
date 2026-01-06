@@ -90,11 +90,18 @@ def zeroSum : summable := by
   refine ⟨fun n => 0, ⟨0, ?_⟩⟩
   simp only [HasSum, Finset.sum_const_zero, tendsto_const_nhds_iff]
 
+/-
+# Listing 26
+-/
 open Classical in
 noncomputable
 def to_summable
   (seq : ℕ → ℝ≥0) : summable :=
   if h : Summable seq then ⟨seq, h⟩ else zeroSum
+
+/-
+# Other
+-/
 
 def truncate_extend_sequence (r) : to_summable (summable.seq r) = r := by
   unfold to_summable

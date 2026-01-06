@@ -4,6 +4,9 @@ import Trale.Utils.TrAdvance
 
 open Trale.Utils Trale
 
+/-
+# Listing 17
+-/
 def prop2a (p : Param10 α β) := ∀ (a : α) (b : β), p.right a = b → p.R a b
 
 def prop2a_R
@@ -27,6 +30,10 @@ def flip2a'
   let := prop2a_R base conv
   exact this.right base.right_implies_R
 
+/-
+# Other
+-/
+
 def prop2a_R_1
   (base : Param2a0.{w} β α)
   {R : α → β → Sort w}
@@ -48,7 +55,3 @@ def prop2a_R_1
   tr_from_map
   intro h
   exact h
-
--- def flip_Map2a
-
-set_option trace.debug true

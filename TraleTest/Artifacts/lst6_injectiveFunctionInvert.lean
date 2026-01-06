@@ -1,6 +1,10 @@
 import Trale.Core.Param
 open Trale
 
+/-
+# Listing 6
+-/
+
 theorem injectiveFunctionInvert'
   (p :  Param42b A B)
   (x : A)
@@ -11,6 +15,10 @@ theorem injectiveFunctionInvert'
 
   show p.left x' = x
   exact p.R_implies_left x x' xR
+
+/-
+# Original (anonymous) listing:
+-/
 
 theorem injectiveFunctionInvert
   (p :  Param .Map4 .Map2b A B)

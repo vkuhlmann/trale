@@ -11,6 +11,77 @@ namespace TraleTest.Research
 
 open Trale.Utils
 
+/-
+# Listing 15d
+-/
+def Param12a_arrow_prop
+  [p1 : Param2b1 α α']
+  [p2 : Param12a.{0} β β']
+  : Param12a (α → β) (α' → β') := by
+
+  apply glued Map1_arrow Map2a_arrow.flip
+
+  funext f f'
+  show _ = _
+  apply propext
+  constructor
+  exact fun x a' a => x a a'
+  exact fun x a a' => x a' a
+
+
+/-
+# Listing 15e
+-/
+def Param12a_arrow_any_sort
+  [Param2b1 α α']
+  [Param12a.{z} β β']
+  : Param12a (α → β) (α' → β') := by
+
+  apply glued Map1_arrow Map2a_arrow.flip
+
+  funext f f'
+  -- apply propext -- This fails
+  sorry
+
+
+/-
+# Listing 16b
+-/
+def Param12a_arrow_any_sort'
+  [Param2b1 α α']
+  [Param12a.{z} β β']
+  : Param12a (α → β) (α' → β') :=
+  -- glued Map1_arrow Param02a_arrow_minimal rfl
+  glued Map1_arrow (flip2a Map2a_arrow arrowR_rel.forget) rfl
+
+
+def Param12a_arrow_any_sort''
+  [Param2b1 α α']
+  [Param12a.{z} β β']
+  : Param12a (α → β) (α' → β') := inferGlued
+
+
+/-
+# Listing 18b
+-/
+def Param2a1_arrow
+  [p1 : Param12b α α']
+  [p2 : Param2a1 β β']
+  : Param2a1 (α → β) (α' → β') := inferGlued
+
+
+
+--------------------------------------------------------
+
+
+
+/-
+# Other
+-/
+
+#reduce (Param12a_arrow_any_sort'' : Param12a (Nat -> Nat) (Nat -> Nat))
+
+
 example
   [p1 : Param2a1 α α']
   [p2 : Param2a1 β β']
@@ -52,12 +123,6 @@ example
 --   tr_extend_multiple [
 --     Map1_prod
 --   ]
-
-
-def Param2a1_arrow
-  [p1 : Param12b α α']
-  [p2 : Param2a1 β β']
-  : Param2a1 (α → β) (α' → β') := inferGlued
 
 def Param2a1_prod'
   [p1 : Param41 α α']
@@ -254,47 +319,8 @@ def Param2a1_arrow_any_sort
   sorry
 
 
-def Param12a_arrow_prop
-  [p1 : Param2b1 α α']
-  [p2 : Param12a.{0} β β']
-  : Param12a (α → β) (α' → β') := by
-
-  apply glued Map1_arrow Map2a_arrow.flip
-
-  funext f f'
-  show _ = _
-  apply propext
-  constructor
-  exact fun x a' a => x a a'
-  exact fun x a a' => x a' a
 
 
-def Param12a_arrow_any_sort
-  [Param2b1 α α']
-  [Param12a.{z} β β']
-  : Param12a (α → β) (α' → β') := by
-
-  apply glued Map1_arrow Map2a_arrow.flip
-
-  funext f f'
-  -- apply propext -- This fails
-  sorry
-
-
-def Param12a_arrow_any_sort'
-  [Param2b1 α α']
-  [Param12a.{z} β β']
-  : Param12a (α → β) (α' → β') :=
-  -- glued Map1_arrow Param02a_arrow_minimal rfl
-  glued Map1_arrow (flip2a Map2a_arrow arrowR_rel.forget) rfl
-
--- noncomputable
-def Param12a_arrow_any_sort''
-  [Param2b1 α α']
-  [Param12a.{z} β β']
-  : Param12a (α → β) (α' → β') := inferGlued
-
-#reduce (Param12a_arrow_any_sort'' : Param12a (Nat -> Nat) (Nat -> Nat))
 
 /-
 theorem Param2a_flip_R_eq

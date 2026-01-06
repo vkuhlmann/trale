@@ -52,6 +52,10 @@ theorem sum_eq_reverse_sum_summable
 
   repeat tr_advance
 
+/-
+# Listing 24
+-/
+
 theorem sum_eq_reverse_sum_summable'
 (a b c : summable)
   : a + b + c = c + b + a := by

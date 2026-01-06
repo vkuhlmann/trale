@@ -2,19 +2,36 @@
 
 **Trale** is a Lean 4 library for transporting theorems and proofs across types using parametricity and relational reasoning. It enables you to prove theorems on simpler types (like `Nat`) and automatically transfer those results to more complex types (like custom `Zmod5`), provided you define appropriate transport theorems between them.
 
+> **Based on the Trocq framework**  
+> Trale implements the [Trocq framework](https://arxiv.org/abs/2310.14022) in Lean 4. The framework was developed by Cyril Cohen, Enzo Crance, and Assia Mahboubi for Coq/Rocq.
+
 ## Overview
 
 Trale implements a proof technique based on **parametricity** and **proof transfer**. Instead of duplicating proofs for similar structures, you can:
 
-1. Define a relation (parametricity) between your custom type and a simpler type
-2. Prove the theorem on the simpler type
-3. Use the `trale` tactic to automatically transfer the proof
+1. **Define a parametric relation** between your custom type and a simpler type
+2. **Prove the theorem** on the simpler type where you have better automation
+3. **Use the `trale` tactic** to automatically transfer the proof
 
-This approach is particularly useful when working with:
-- Custom numeric types (e.g., modular arithmetic)
-- Abstract algebraic structures
-- Types that are isomorphic to simpler types
-- Cases where direct proofs would be tedious but the result is "morally obvious"
+This approach is particularly useful when:
+- Working with custom numeric types (e.g., modular arithmetic, finite fields)
+- Dealing with abstract algebraic structures
+- Types are isomorphic, equivalent, or in quotient relationships
+- Direct proofs would be tedious but the result is "morally obvious"
+- Type-specific automation (like `omega` for `Nat`) cannot be easily abstracted
+
+### Why Use Proof Transfer?
+
+**Compared to generic proofs:**
+- Leverage type-specific tactics and automation (like `omega` for naturals)
+- More natural incremental development (prove for concrete types first, generalize later)
+- Better readability without requiring deep knowledge of abstract typeclasses
+- Complexity scales with type complexity rather than proof complexity
+
+**When proof transfer excels:**
+- The type structure is simpler than the proof logic
+- You need type-specific automation that doesn't generalize
+- The proof naturally belongs to a concrete type but you need it elsewhere
 
 ## Quick Example
 
@@ -133,29 +150,95 @@ TraleTest/             # Examples and test cases
 
 ## Key Concepts
 
-### Parametricity (`Param`)
+### Parametricity and the `Param` Type
 
-The `Param` class defines a relation `R` between two types along with proof obligations for covariance and contravariance. Different `ParamXY` abbreviations correspond to different mapping structures (e.g., `Param2a4` for standard bijections).
+At the core of Trale is the **parametric relation type** `Param`, which relates two types through a graph-like relation `R : α → β → Sort w`. This is accompanied by:
+
+- **Covariant properties**: How to map from `α` to `β` while preserving `R`
+- **Contravariant properties**: How to map from `β` to `α` while preserving `R`
+
+The `Param` class is indexed by two **map classes** that specify which properties hold in each direction:
+- `Param00`: Just the relation (no functions)
+- `Param10`: Covariant map function
+- `Param2a0`: Covariant map with proof it captures the relation
+- `Param2b0`: Covariant map with proof relations imply equality
+- `Param40`: Full equivalence in covariant direction (split surjection when combined with `Param42b`)
+- `Param44`: Full equivalence (types are equivalent)
+
+These classes form a hierarchy: `0 < 1 < 2a < 3 < 4` and `0 < 1 < 2b < 3 < 4`, where `2a` and `2b` are incomparable.
+
+**Examples of map classes:**
+- `Param44 α β`: Types `α` and `β` are equivalent
+- `Param42b α β`: `α` injects into `β` with explicit right inverse (split injection)
+- `Param42a α β`: `α` surjects onto `β` with explicit left inverse (split surjection)
+- `Param40 α β`: Simple mapping from `α` to `β`
 
 ### The `trale` Tactic
 
 The main entry point is the `trale` tactic, which:
-1. Analyzes the goal
-2. Finds appropriate `Param` instances and transport lemmas
-3. Translates the goal to a simpler type
-4. Attempts to solve the parametricity obligations using the Aesop tactic
+1. **Analyzes the goal** to understand its type structure
+2. **Finds appropriate `Param` instances** connecting the types
+3. **Recursively translates** the goal to a simpler type
+4. **Solves parametricity obligations** using the Aesop automation framework with registered `@[trale]` lemmas
+
+The translation preserves logical structure: universal quantifiers, implications, function types, and equalities are all handled systematically.
 
 ### The `@[trale]` Attribute
 
-Mark lemmas with `@[trale]` to register them as transport theorems. These lemmas describe how operations on your custom type relate to operations on the simpler type.
+Mark transport lemmas with `@[trale]` to register them for automatic use by the `trale` tactic. These lemmas describe how operations on your custom type relate to operations on the simpler type.
+
+**Structure of a transport lemma:**
+```lean
+@[trale]
+def R_operation
+  (a : α) (a' : β) (aR : tr.R a a')  -- Related inputs
+  (b : α) (b' : β) (bR : tr.R b b')
+  : tr.R (operation a b) (operation a' b')  -- Related outputs
+```
+
+### Transport Functions and Relations
+
+A typical setup involves:
+- A **representation function** `repr : α → β` (e.g., `repr5 : Zmod5 → Nat`)
+- A **construction function** `mk : β → α` (e.g., `mod5 : Nat → Zmod5`)
+- A **retraction proof** showing `mk ∘ repr ∼ id` or vice versa
+
+The relation `R a b` typically means `repr a = b`, capturing when elements correspond across the type boundary.
 
 ## Examples
 
-The `TraleTest/` directory contains numerous examples:
+The `TraleTest/` directory contains some examples:
 
-- **`TraleTest/Lemmas/Zmod5.lean`**: Modular arithmetic transport
-- **`TraleTest/Transfer/lst01_reverse_sum_generic.lean`**: Comparing different proof approaches
+### Basic Examples
+- **`TraleTest/Lemmas/Zmod5.lean`**: Complete setup for modular arithmetic on ℤ/5ℤ
+- **`TraleTest/Lemmas/StringNat.lean`**: Relating natural numbers with strings by length
+- **`TraleTest/Transfer/lst01_reverse_sum_generic.lean`**: Comparing three approaches:
+  1. Parallel proofs on each type
+  2. Generic proofs using typeclasses
+  3. Proof transfer (introduced later)
+
+### Proof Transfer Examples
 - **`TraleTest/Transfer/lst20_22_reverse_sum_trale.lean`**: Manual vs. automated proof transfer
+- **`TraleTest/Transfer/DoubleCommuntes.lean`**: Transferring commutativity properties
+- **`TraleTest/Transfer/ModuloFin.lean`**: Working with modular arithmetic
+
+### Advanced Examples
+- **`TraleTest/Transfer/InductionPrinciple_*.lean`**: Series showing transfer of induction principles
+- **`TraleTest/Transfer/SummableSequence_*.lean`**: Working with infinite sequences
+- **`TraleTest/Transfer/lst29_MetricQuestionFromZulip.lean`**: Real-world example from community
+- **`TraleTest/Transfer/lst30_GenRewrite.lean`**: Generalized rewriting with Trale
+
+### Research Examples
+The `TraleTest/Research/` directory contains experimental features and investigations into the framework's capabilities.
+
+## Documentation
+
+For more detailed information, see the [`docs/`](docs/) directory:
+
+- **[Getting Started Guide](docs/getting-started.md)**: Step-by-step tutorial for beginners
+- **[Theory Overview](docs/theory.md)**: Mathematical foundations of the Trocq framework
+- **[Implementation Details](docs/implementation.md)**: Technical details of the Lean implementation
+- **[Examples Guide](docs/examples.md)**: Walkthrough of key examples with explanations
 
 ## Development
 
@@ -186,15 +269,40 @@ MIT License
 
 ## References
 
-- Based on techniques from parametricity and proof transfer
-- Inspired by similar mechanisms in other proof assistants (e.g., Coq's `transfer` tactic)
+- **Trocq Paper**: Cohen, C., Crance, E., & Mahboubi, A. (2024). [Trocq: Proof Transfer for Free, With or Without Univalence](https://arxiv.org/abs/2310.14022). arXiv:2310.14022
+- **Lean 4 Documentation**: [https://lean-lang.org/lean4/doc/](https://lean-lang.org/lean4/doc/)
+- **Homotopy Type Theory**: The Univalent Foundations Program. (2013). [Homotopy Type Theory: Univalent Foundations of Mathematics](https://homotopytypetheory.org/book)
 
 ## Authors
 
-Vincent Kuhlmann (@vkuhlmann)
+**Vincent Kuhlmann** ([@vkuhlmann](https://github.com/vkuhlmann))
+
+Master's Thesis, Utrecht University (December 2025)  
+Supervisors: Dr. Johan Commelin and Dr. Wouter Swierstra
 
 ## Acknowledgments
 
-Some code is based on or inspired by:
-- Mathlib4 community (particularly the `to_additive` tactic)
-- Code from the Lean prover community, and from Microsoft Corporation
+- **Trocq Framework Authors**: Cyril Cohen, Enzo Crance, and Assia Mahboubi for developing the theoretical framework
+- **Mathlib4 Community**: For code demonstrating implementation of tactics, like `to_additive`, which inspired parts of the implementation
+- **Aesop Authors**: Jannis Limperg and Asta Halkjær From for the automation framework used in `trale`
+
+<!-- ## Citation
+
+If you use Trale in your research, please cite both this implementation and the original Trocq paper:
+
+```bibtex
+@mastersthesis{kuhlmann2025trale,
+  author = {Vincent Kuhlmann},
+  title = {Proof transfer in Lean: implementing the Trocq framework},
+  school = {Utrecht University},
+  year = {2025},
+  month = {December}
+}
+
+@article{cohen2024trocq,
+  title={Trocq: Proof Transfer for Free, With or Without Univalence},
+  author={Cohen, Cyril and Crance, Enzo and Mahboubi, Assia},
+  journal={arXiv preprint arXiv:2310.14022},
+  year={2024}
+}
+``` -->

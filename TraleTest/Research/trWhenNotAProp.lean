@@ -4,7 +4,6 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
-import Trale.Utils.Converter
 
 import TraleTest.Lemmas.SummableSequence
 

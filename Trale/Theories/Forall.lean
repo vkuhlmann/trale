@@ -88,39 +88,16 @@ def Map2a_forall
 
   tr_extend Map1_forall p1 (p2 . . .)
 
-  intro f f' mapFF'
+  intro f f' fF
   intro a a' aR
-
   apply (p2 a a' aR).right_implies_R
-
-  dsimp at mapFF'
-  subst mapFF'
-  dsimp
+  subst fF
 
   have := p1.R_implies_left a a' aR
   subst this
   congr
-  -- show_term
 
   repeat exact (p1.R_implies_leftK _ _ _).symm
-
-  -- congr
-
-  -- have h := congrFun mapFF' a'
-
-  -- have m : p1.contravariant.map a' = a := by
-  --     exact p1.R_implies_left a a' aR
-
-  -- have h2 := p1.contravariant.R_in_mapK
-  -- specialize h2 a' a aR
-  -- subst m
-  -- have h3 : (p1.contravariant.map_in_R a' (p1.contravariant.map a')
-  --           (Eq.refl (p1.contravariant.map a'))) = aR := by
-
-  --   exact h2
-
-  -- subst h3
-  -- exact h
 
 def Map2a_forall_flipped
   {α : Sort u} {α' : Sort u'}

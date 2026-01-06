@@ -3,7 +3,6 @@ import Lean.Meta
 import Lean.Expr
 import Lean.Elab.Command
 import Trale.Core.Param
-import Trale.Core.Related
 import Trale.Utils.Extend
 import Qq open Qq Lean
 
@@ -107,45 +106,3 @@ def Map4_option
 
       dsimp only [id_eq]
       congr
-
-
--- instance [inst : Related α β] : Related (Option α) (Option β) where
---   mapCov := inst.mapCov
---   mapCon := .Map0
-
---   param := by
---     let cov := inst.mapCov
---     let contra := inst.mapCon
---     have p : Param cov contra α β := inst.param
-
---     show Param cov .Map0 (Option α) (Option β)
---     match cov with
---     | .Map0 =>
---       apply Map0_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide
-
---     | .Map1 =>
---       apply Map1_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide
-
---     | .Map2a =>
---       apply Map2a_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide
-
---     | .Map2b =>
---       apply Map2b_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide
-
---     | .Map3 =>
---       apply Map3_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide
-
---     | .Map4 =>
---       apply Map4_option
---       apply p.forget (h2 := _)
---       cases contra <;> decide

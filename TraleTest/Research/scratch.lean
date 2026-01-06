@@ -110,3 +110,7 @@ open Lean Meta Elab Command
 #check Std.PRange
 
 #check instanceExtension
+
+#check show_term sorry
+
+#check Aesop.runRuleTac

@@ -157,23 +157,6 @@ theorem maptype_U_maptype_geq_maptype
 
   cases a <;> cases b <;> decide
 
-/-
- theorem maptype_U_maptype_tight
-   (a b c : MapType)
-   (h : a ∪ b ≥ c)
-   : (a ≥ c ∨ b ≥ c) := by
-
-   cases a <;> cases b <;> cases c
-   any_goals first
-     | left; decide
-     | right; decide
-
-   all_goals
-     exfalso; simp [Union.union, LE.le, leMapType] at h
-
-   fail "False statement"
--/
-
 theorem maptype_U_maptype_monotone
   (a b c : MapType)
   (h : a ≥ c)
@@ -221,17 +204,6 @@ theorem maptype_inter_monotone
         | contradiction
 
 
-
-  -- decidableLe a b : Decidable (a ≤ b) := by
-  --   unfold LE.le
-  --   unfold instLEMapType
-  --   simp
-  --   cases a <;> cases b <;> (
-  --     first
-  --     | exact isTrue true
-  --     | exact isFalse false
-  --   )
-
 @[reducible] def MapType.interp' (mapType : MapType) (R : α -> β -> Sort w) : Type _ :=
   MapType.casesOn (motive := fun _ => Type _) mapType
   (Trale.Map0 R)
@@ -240,24 +212,6 @@ theorem maptype_inter_monotone
   (Trale.Map2b R)
   (Trale.Map3 R)
   (Trale.Map4 R)
-
-
-  -- MapType.casesOn (motive := fun _ => Type _) mapType
-  --   (fun _ => Map0 R)
-  --   (fun _ => Map1 R)
-  --   (fun _ => Map2a R)
-  --   (fun _ => Map2b R)
-  --   (fun _ => Map3 R)
-  --   (fun _ => Map4 R)
-
-
-
--- instance : Coe (@Map4.{1,1,0} α β) (Map0.{1,1,0}) where
---   coe _ := { }
-
-
--- instance : Coe (Map4_former.{1,1,0}) (Map0.{1,1,0}) where
---   coe _ := { }
 
 
 instance : Coe (Map1 R) (Map0 R) where

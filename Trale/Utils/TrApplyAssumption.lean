@@ -9,8 +9,6 @@ syntax (name := tr_apply_assumption) "tr_apply_assumption" : tactic
 
 open Lean Elab Tactic Meta Term
 
-#check Param.forget
-
 macro "tr_apply_assumption" : tactic => `(tactic|
   focus (
       apply Param.forget

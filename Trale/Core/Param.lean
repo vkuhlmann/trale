@@ -247,10 +247,6 @@ abbrev R_implies_leftK (p : Param04 α β)
 
 end Param
 
--- @[simp]
--- abbrev right [p : Param10 α β] : α -> β :=
---   p.covariant.map
-
 namespace tr
 
 @[simp]
@@ -260,16 +256,6 @@ abbrev R [p : Param00 α β] := p.R
 @[simp]
 abbrev map [p : Param10 α β] : α -> β :=
   p.covariant.map
-
--- @[simp]
--- abbrev R_implies_left [p : Param02b α β]
---   : forall (a : α) (b : β), p.R a b -> p.left b = a := by
---     let h := p.contravariant.R_in_map
---     simp
---     simp [flipRel] at h
---     intros a b h'
---     let h2 := h b a
---     exact h2 h'
 
 @[simp]
 abbrev R_implies_map [p : Param2b0 α β]
@@ -285,26 +271,9 @@ abbrev R_implies_mapK [p : Param40 α β]
 
 end tr
 
-
-
--- instance [p : Param α β cov con] [c :Coe (Param α β cov con) (Param α β cov2 con2)]
---   : Param α β cov2 con2 := c.coe p
-
--- instance : Param42a.{0} String Nat := sorry
-
--- instance [p : Param40 α β] : Param10 α β := p
--- instance [p : Param α β cov con] [h : cov ≥ .Map1]
---   : Param10 α β := p.forget
--- instance [p : Param α β cov con] (h : cov ≥ .Map1 := by decide)
---   : Param10 α β := p.forget
-
--- instance [p : Param α β .Map4 con] : Param α β .Map1 con := p
--- instance [p : Param α β cov .Map2a] : Param α β cov .Map0 := p
--- instance : Param10.{0} String Nat := sorry
--- def abc : Nat := right "hoi"
-
 instance (priority := 80) [p : Param α β cov con] : Param β α con cov := p.flip
 
+-- Instances for weakening (coercing/forgetting) Param structures.
 @[simp] instance (priority := low) [p : Param .Map4 con α β] : Param .Map3 con α β := p
 @[simp] instance (priority := low) [p : Param .Map3 con α β] : Param .Map2a con α β := p
 @[simp] instance (priority := low) [p : Param .Map3 con α β] : Param .Map2b con α β := p

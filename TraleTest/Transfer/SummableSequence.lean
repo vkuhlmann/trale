@@ -4,7 +4,6 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
-import Trale.Utils.Converter
 import Trale.Utils.Attr
 
 import Trale.Utils.TrAdvance
@@ -125,7 +124,6 @@ instance [Param00 α β] [Param00 γ δ] : Param00 (α -> γ) (β -> δ) := by
 --   | fail "No step available"
 --   )
 
-#check Aesop.runRuleTac
 
 example (a : nnR) (a' : xnnR)
      (b : nnR) (b' : xnnR)
@@ -146,11 +144,6 @@ example (a : nnR) (a' : xnnR)
 
 
 --      sorry
-
--- #check instParam
-#printTraleInstances
-#printTraleImpliedTranslations
-#check Trale.arrowR_rel
 
 #tr_add_translations_from_instances
 

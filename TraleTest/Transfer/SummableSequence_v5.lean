@@ -4,13 +4,13 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
-import Trale.Utils.Converter
 
 import TraleTest.Lemmas.SummableSequence
 open TraleTest.Lemmas Trale
 
 -- Code based on 'summable.v' example by Trocq Rocq plugin developers.
 
+set_option pp.universes true in
 theorem sum_nnR_add : ∀ (u v : summable), (Σ (u + v) = Σ u + Σ v) := by
   tr_by sum_xnnR_add
 

@@ -4,12 +4,12 @@ import Trale.Utils.Split
 import Trale.Utils.Simp
 import Trale.Utils.ParamIdent
 import Trale.Utils.Application
-import Trale.Utils.Converter
 import Trale.Utils.Attr
 import Trale.Theories.Sorts
 import TraleTest.Lemmas.Modulo
 import TraleTest.Lemmas.Zmod5
 import Trale.Utils.TrAdvance
+import TraleTest.Research.translation_inspect
 
 open TraleTest.Lemmas Trale
 -- set_option trace.tr.utils true
@@ -141,8 +141,6 @@ theorem sum_eq_reverse_sum_Nat (a b c : Nat)
 --   simp
 
 
-#check Nat.add
-
 theorem sum_eq_reverse_sum_Zmod5 (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by
 
@@ -150,8 +148,6 @@ theorem sum_eq_reverse_sum_Zmod5 (a b c : Zmod5)
   tr_by sum_eq_reverse_sum_Nat
 
   change Param10.{0} _ _
-
-  -- aesop (rule_sets := [trale])
   tr_solve
 
 
@@ -188,8 +184,6 @@ theorem sum_eq_reverse_sum_Zmod5''' (a b c : Zmod5)
   tr_exact sum_eq_reverse_sum_Nat
 
 
-#check Eq
-
 theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
     : (a + b) + c = (c + b) + a := by
 
@@ -207,35 +201,9 @@ theorem sum_eq_reverse_sum_Zmod5_manual (a b c : Zmod5)
   apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
 
-  -- tr_advance
   apply R_add_Zmod5
   apply R_add_Zmod5
   tr_advance; tr_advance; tr_advance
-
-
-
-  -- tr_advance
-
-  -- intro lhs lhs' lhsR
-  -- intro rhs rhs' rhsR
-
-  -- subst lhsR
-  -- subst rhsR
-
-  -- tr_whnf
-  -- intro this
-  -- subst this
-  -- rfl
-  -- -- exact congrArg _
-
-
-  -- refine (instantiatePropR ?_).forget
-  -- -- apply denormalizeR
-  -- tr_whnf
-  -- tr_whnf at aR
-  -- apply_assumption
-  -- assumption
-  -- assumption
 
 
 theorem sum_eq_reverse_sum_Zmod5_manual2 (a b c : Zmod5)

@@ -30,136 +30,45 @@ open Lean Meta Elab Command Std Qq Trale.Utils Term Trale.Utils
 
 namespace Trale.Attr
 
-elab "#printTraleInstances" : command => do
-  let x := instanceExtension
-  let state := x.getState (←getEnv)
-  let tree := state.discrTree
-
-  let e ← liftCoreM do
-    let metaState ← MetaM.run do
-      let levelU ← mkFreshLevelMVar
-      let levelV ← mkFreshLevelMVar
-      let levelW ← mkFreshLevelMVar
-
-      let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
-
-      -- let cov ← mkFreshLevelMVar
-
-      -- let (y, _) ← tree.getMatchLiberal expr--q(Param _ _ _ _)
-      let y ← tree.getUnify expr
-      IO.println s!"Found {y.size} instances"
-
-      -- let n := min y.size 5
-      -- let range := (1...=n)
-      -- for i in range do
-      let mut i := 0
-      while h : i < y.size ∧ i < 35 do
-        let result := y[i]
-        IO.println s!"Expression {i}: {result.globalName?}"
-        -- let z := 4
-        -- pure ()
-        i := i + 1
-
-    return ()
-  return ()
-
-elab "#printTraleImpliedTranslations" : command => do
-  let x := instanceExtension
-  let state := x.getState (←getEnv)
-  let tree := state.discrTree
-
-  let e ← liftCoreM do
-    let metaState ← MetaM.run do
-      let levelU ← mkFreshLevelMVar
-      let levelV ← mkFreshLevelMVar
-      let levelW ← mkFreshLevelMVar
-
-      let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
-
-      let y ← tree.getUnify expr
-      IO.println s!"Found {y.size} instances"
-
-      let mut i := 0
-      while h : i < y.size ∧ i < 35 do
-        let result := y[i]
-        let name := (result.globalName?.map format).getD "(missing)"
-        IO.println s!"Expression {i}: {name}"
-        let type ← inferType result.val
-        -- IO.println s!"   Type: {type}"
-        -- let val := (←Meta.unfoldDefinition? result.val).getD result.val
-        let (args2, argsBi2, expr2) ← forallMetaTelescope type
-        -- IO.println s!"   Expr2: {expr2}"
-
-        let parts ← getParamParts? expr2
-
-        match parts with
-          | .ok parts =>
-            let headName := getHeadConst parts.fromType
-            if headName.isSome then
-              IO.println s!"     {parts.fromType} -> {parts.toType}"
-              IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
-
-          | .error err => IO.println s!"Expression {i} (error: {err})"
-
-        i := i + 1
-
-    return ()
-  return ()
-
-
 elab "#tr_add_translations_from_instances" : command => do
   let x := instanceExtension
   let state := x.getState (←getEnv)
   let tree := state.discrTree
 
-  -- let trTree =
+  discard <| liftCoreM <| MetaM.run do
 
-  let trExt := trTranslationExtension
+  let levelU ← mkFreshLevelMVar
+  let levelV ← mkFreshLevelMVar
+  let levelW ← mkFreshLevelMVar
 
-  let e ← liftCoreM do
-    let metaState ← MetaM.run do
-      let levelU ← mkFreshLevelMVar
-      let levelV ← mkFreshLevelMVar
-      let levelW ← mkFreshLevelMVar
+  let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
 
-      let (args, argsBi, expr) ← forallMetaTelescope q(∀ cov con α β, Param.{levelW, levelU, levelV} cov con α β)
+  let y ← tree.getUnify expr
+  IO.println s!"Found {y.size} instances"
 
-      let y ← tree.getUnify expr
-      IO.println s!"Found {y.size} instances"
+  for h : i in 0...y.size do
+    let result := y[i]
+    let name := (result.globalName?.map format).getD "(missing)"
+    -- IO.println s!"Expression {i}: {name}"
+    let type ← inferType result.val
+    -- let val := (←Meta.unfoldDefinition? result.val).getD result.val
+    let (args2, argsBi2, expr2) ← forallMetaTelescope type
 
-      for h : i in 0...y.size do
-        let result := y[i]
-        let name := (result.globalName?.map format).getD "(missing)"
+    let parts ← getParamParts? expr2
+
+    match parts with
+      | .ok parts =>
+        let headName := getHeadConst parts.fromType
+        if headName.isSome then
+          -- IO.println s!"     {parts.fromType} -> {parts.toType}"
+          -- IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
+
+          addTrTranslation parts.fromType parts.toType result.val result.globalName?
+
+      | .error err =>
         IO.println s!"Expression {i}: {name}"
-        let type ← inferType result.val
-        -- IO.println s!"   Type: {type}"
-        -- let val := (←Meta.unfoldDefinition? result.val).getD result.val
-        let (args2, argsBi2, expr2) ← forallMetaTelescope type
-        -- IO.println s!"   Expr2: {expr2}"
+        IO.println s!"Expression {i} (error: {err})"
 
-        let parts ← getParamParts? expr2
-
-        match parts with
-          | .ok parts =>
-            let headName := getHeadConst parts.fromType
-            if headName.isSome then
-              IO.println s!"     {parts.fromType} -> {parts.toType}"
-              IO.println s!"     ({parts.conMapType}, {parts.conMapType})"
-
-              addTrTranslation parts.fromType parts.toType result.val result.globalName?
-
-          | .error err => IO.println s!"Expression {i} (error: {err})"
-
-    return ()
-
-  let translations := trTranslationExtension.getState (←getEnv)
-  let treeSize := translations.discrTree.size
-  IO.println s!"Translations is ({treeSize}): "
-  let vals := translations.discrTree.elements.map (fun x => (format x.fromType).pretty)
-  -- let valsString := vals.toList.foldl (· ++ ·) ""
-  IO.println s!"  : {vals}"
-
-  return ()
 
 def translateTerm (transl : TrTranslations) (e : Expr) : MetaM (Option Expr) := do
   let eType ← inferType e
@@ -239,7 +148,7 @@ elab "#tr_translate" a:term : command => do
 
   let state := trTranslationExtension.getState (←getEnv)
 
-  let (result, metaState) ← liftCoreM <| MetaM.run do
+  let (result, _) ← liftCoreM <| MetaM.run do
     let x ← instantiateMVars x
 
     -- let entries ← state.discrTree.getUnify x
@@ -309,8 +218,6 @@ macro "trale" : tactic => `(tactic|
     tr_solve
   )
 
-#printTraleInstances
-
 declare_aesop_rule_sets [trale]
 
 -- open Lean Meta Elab Command Std in
@@ -331,11 +238,6 @@ abbrev TraleTheoremKey := DiscrTree.Key
 structure TraleTheorem where
   proof       : Expr
   deriving Inhabited
-
--- inductive TraleEntry where
---   | thm      : TraleTheorem → TraleEntry
-
--- abbrev TraleTheoremTree := DiscrTree TraleTheorem
 
 structure TraleTheorems where
   -- thms : TraleTheoremTree
@@ -371,42 +273,9 @@ builtin_initialize tr_test2 : TraleExtension ← do
 
 
 /-- `Config` is the type of the arguments that can be provided to `to_additive`. -/
-structure Config : Type where
-  /-- View the trace of the to_additive procedure.
-  Equivalent to `set_option trace.to_additive true`. -/
+structure AttrTraleConfig : Type where
   trace : Bool := false
-  /-- The name of the target (the additive declaration). -/
-  tgt : Name := Name.anonymous
-  /-- An optional doc string. -/
-  doc : Option String := none
-  /-- If `allowAutoName` is `false` (default) then
-  `@[to_additive]` will check whether the given name can be auto-generated. -/
-  allowAutoName : Bool := false
-  /-- The arguments that should be reordered by `to_additive`, using cycle notation. -/
-  reorder : List (List Nat) := []
-  /-- The argument used to determine whether this constant should be translated. -/
-  relevantArg? : Option Nat := none
-  /-- The attributes which we want to give to both the multiplicative and additive versions.
-  For `simps` this will also add generated lemmas to the translation dictionary. -/
-  attrs : Array Syntax := #[]
-  /-- A list of type variables that should not be translated by `to_additive`. -/
-  dontTranslate : List Ident := []
-  /-- The `Syntax` element corresponding to the original multiplicative declaration
-  (or the `to_additive` attribute if it is added later),
-  which we need for adding definition ranges. -/
   ref : Syntax
-  /-- An optional flag stating that the additive declaration already exists.
-  If this flag is wrong about whether the additive declaration exists, `to_additive` will
-  raise a linter error.
-  Note: the linter will never raise an error for inductive types and structures. -/
-  existing : Bool := false
-  /-- An optional flag stating that the target of the translation is the target itself.
-  This can be used to reorder arguments, such as in
-  `attribute [to_dual self (reorder := 3 4)] LE.le`.
-  It can also be used to give a hint to `additiveTest`, such as in
-  `attribute [to_additive self] Unit`.
-  If `self := true`, we should also have `existing := true`. -/
-  self : Bool := false
   deriving Repr
 
 
@@ -416,7 +285,7 @@ structure Config : Type where
 open Tactic.TryThis in
 -- open private addSuggestionCore in addSuggestion in
 /-- Elaboration of the configuration options for `to_additive`. -/
-def elabAttrTrale : Syntax → CoreM Config
+def elabAttrTrale : Syntax → CoreM AttrTraleConfig
   | `(attr| trale%$tk $[?%$trace]?)
   -- | `(attr| trale%$tk $[?%$trace]? $existing?)
       -- $[$opts:toAdditiveOption]* $[$tgt]? $[$doc]?)
@@ -484,11 +353,6 @@ def elabAttrTrale : Syntax → CoreM Config
     --   | _ => throwUnsupportedSyntax
     return {
       trace := trace.isSome
-      -- tgt := match tgt with | some tgt => tgt.getId | none => Name.anonymous
-      -- doc
-      allowAutoName := false
-      -- attrs, reorder, relevantArg?, dontTranslate, existing, self
-      -- ref := (tgt.map (·.raw)).getD tk }
       ref := tk
     }
   | _ => throwUnsupportedSyntax
@@ -548,7 +412,7 @@ def addTrTranslationFromConst (src : Name) : MetaM Unit := do
     addTrTranslation fromType toType q($src) src
 
 
-partial def addTraleAttr (src : Name) (cfg : Config) (kind := AttributeKind.global) :
+partial def addTraleAttr (src : Name) (cfg : AttrTraleConfig) (kind := AttributeKind.global) :
     AttrM Unit := do
   if (kind != AttributeKind.global) then
     throwError "`trale` can only be used as a global attribute"

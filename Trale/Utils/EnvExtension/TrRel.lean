@@ -26,14 +26,6 @@ structure TrRels where
 def addTrRelEntry (d : TrRels) (entry : TrRelEntry) : TrRels :=
   { d with tree := d.tree.insertCore entry.keys entry }
 
--- initialize trRelsExtension : SimpleScopedEnvExtension TrRelEntry TrRels
---   ← registerSimpleScopedEnvExtension {
---     name := `trRelExt,
---     initial := {},
---     addEntry := addTrRelEntry,
---     -- This does not have asyncMode option
---   }
-
 initialize trRelsExtension : PersistentEnvExtension TrRelEntry TrRelEntry TrRels ←
   registerPersistentEnvExtension {
     mkInitial := pure {}

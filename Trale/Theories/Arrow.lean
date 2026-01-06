@@ -52,7 +52,9 @@ def arrowR
     forall a a', p1.R a a' → p2.R (f a) (f' a')
 
 /-- Flipping the arrow relation.
-    If f and f' are related in one direction, they're related in the flipped direction. -/
+    If f and f' are related in one direction, they're related in the flipped direction.
+    This reverses both domain and codomain relations: `R₁ a a'` becomes `R₁ a' a` 
+    and `R₂ b b'` becomes `R₂ b' b`. -/
 def flipArrowR
   : arrowR p1 p2 f f' → arrowR p1.flip p2.flip f' f
   := fun r a' a aR' => r a a' (flipR aR')

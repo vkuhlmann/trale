@@ -47,13 +47,15 @@ def paramFromMap
   exact f
   repeat simp
 
--- Split surjection.
 /-- Construct a Param42a from a split surjection.
-    Given `retract : α' → α` and `sect : α → α'` with `retract ∘ sect = id`,
-    we get a split surjection from α' to α (or equivalently, a split injection
-    from α to α' in the contravariant direction).
+    Given `sect : α → α'` and `retract : α' → α` with `retract ∘ sect = id`,
+    we get:
+    - In the covariant direction: Map4 structure using `retract`
+    - In the contravariant direction: Map2a structure using `sect`
     
-    This means every element of α has a preimage in α' via retract. -/
+    This corresponds to a split surjection from α' onto α (retract is surjective
+    with section sect), or equivalently, a split injection from α into α' in the
+    contravariant direction. -/
 def paramFromSurjection
   {sect : α → α'} {retract : α' → α}
   (sectK : ∀ a, retract (sect a) = a)
@@ -65,14 +67,15 @@ def paramFromSurjection
   · intro _ _  aF; subst aF
     exact sectK _
 
--- Split injection.
 /-- Construct a Param42b from a split injection.
     Given `sect : α → α'` and `retract : α' → α` with `retract ∘ sect = id`,
-    we get a split injection from α to α' (or equivalently, a split surjection
-    from α' to α in the contravariant direction).
+    we get:
+    - In the covariant direction: Map4 structure using `sect`
+    - In the contravariant direction: Map2b structure using `retract`
     
-    This means sect is injective and every element in its image has a
-    canonical preimage. -/
+    This corresponds to a split injection from α into α' (sect is injective
+    with retraction retract), or equivalently, a split surjection from α' onto α
+    in the contravariant direction. -/
 def paramFromInjection
   {sect : α → α'} {retract : α' → α}
   (sectK : ∀ a, retract (sect a) = a)

@@ -80,6 +80,11 @@ class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
 
 --   R : α → β -> Sort w
 
+-- TODO: Being a 'class' sometimes hurts readability, especially when
+-- constructing new params based on previous ones. However, if manipulation of
+-- Params can be done by this library, such that the user (almost) never needs
+-- to do it, this issue is more limited.
+
 /--
 The core parametricity class.
 
@@ -96,11 +101,6 @@ The map types determine what properties the relation has:
 - `Map2b`: Relation implies equality via map  
 - `Map3`: Both Map2a and Map2b
 - `Map4`: Full equivalence with coherence
-
-FIXME: Being a 'class' sometimes hurts readability, especially when
-constructing new params based on previous ones. However, if manipulation of
-Params can be done by this library, such that the user (almost) never needs
-to do it, this issue is more limited.
 -/
 class Param
     (mapCov : MapType)

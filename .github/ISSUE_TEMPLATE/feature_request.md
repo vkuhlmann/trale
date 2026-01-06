@@ -1,28 +1,18 @@
 ---
 name: Feature Request
-about: Suggest an idea or new feature for Trale
-title: "[FEATURE] "
+about: Suggest an idea
+title: ""
 labels: enhancement
 assignees: ''
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**What would you like to see?**
+Describe the feature or improvement.
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+**Why would this be useful?**
+Explain the use case.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
-
-**Use case**
-Describe how this feature would be used and who would benefit from it.
-
-**Example**
-If applicable, provide a code example of how you'd like to use this feature:
+**Example (if applicable)**
 ```lean
--- Your example here
+-- Show how you'd like to use it
 ```
-
-**Additional context**
-Add any other context, screenshots, or references about the feature request here.

@@ -1,36 +1,25 @@
 ---
 name: Bug Report
-about: Report a bug or unexpected behavior
-title: "[BUG] "
+about: Something's not working
+title: ""
 labels: bug
 assignees: ''
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**What's the bug?**
+Describe what went wrong.
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Code example or steps
-2. Commands run
-3. Expected vs. actual output
+**How to reproduce**
+Steps to reproduce the issue.
 
-**Minimal Example**
-If possible, provide a minimal Lean code example:
+**Code example (if applicable)**
 ```lean
 -- Your example here
 ```
 
 **Environment**
-- Lean version: (from `lean-toolchain` or `lean --version`)
-- Trale version/commit: 
-- Operating System: 
-
-**Expected behavior**
-A clear and concise description of what you expected to happen.
-
-**Actual behavior**
-What actually happened. Include error messages if applicable.
+- Lean version: 
+- OS: 
 
 **Additional context**
-Add any other context about the problem here.
+Anything else that might help!

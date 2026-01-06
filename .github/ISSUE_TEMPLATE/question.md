@@ -1,24 +1,13 @@
 ---
 name: Question
-about: Ask a question about using Trale
-title: "[QUESTION] "
+about: Ask about using Trale
+title: ""
 labels: question
 assignees: ''
 ---
 
-**Your Question**
-What would you like to know about Trale?
+**Your question**
+What would you like to know?
 
-**Context**
-What are you trying to accomplish? Any relevant background information.
-
-**What you've tried**
-Have you checked the documentation? What have you already attempted?
-
-**Code Example (if applicable)**
-```lean
--- Your code here
-```
-
-**Additional Information**
-Any other details that might help us answer your question.
+**Context (if applicable)**
+What are you trying to do?

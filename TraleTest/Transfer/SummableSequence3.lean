@@ -24,9 +24,6 @@ theorem sum_eq_reverse_sum_seq
   rw [AddCommMagma.add_comm (a _) (b _)]
   simp [AddSemigroup.add_assoc]
 
--- Note: #tr_add_translations_from_instances is now optional!
--- The trale tactic automatically registers instances as needed.
-#tr_add_translations_from_instances
 #tr_translate ∀ (a b c : summable), (a + b + c = c + b + a)
 
 -- set_option pp.all true in

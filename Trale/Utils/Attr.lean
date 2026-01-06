@@ -38,7 +38,8 @@ The `@[trale]` attribute marks transport lemmas for automatic use by the tactic.
 ## Commands
 
 - `#tr_add_translations_from_instances`: (Optional) Manually scans for Param instances and registers them.
-  The `trale` tactic now does this automatically, so this command is mainly useful for debugging.
+  The `trale` tactic now does this automatically, but when performed at the
+  command level, this work gets cached.
 - `#tr_translate term`: Shows how a term would be translated
 
 ## Attribution
@@ -113,7 +114,11 @@ def registerNewParamInstances (silent : Bool := true) : MetaM Nat := do
     This populates the translation table used by the trale tactic.
 
     Note: This command is now optional. The `trale` tactic automatically
-    registers instances as needed. -/
+    registers instances as needed. However, when performed at the command
+    level, this work gets cached. (Since the registration hold for the current
+    thread, and hence for multiple theorems in the same file using the `trale`
+    tactic, each occurrence would need to perform the registrations again, as
+    their computations are not performed on the main thread. -/
 elab "#tr_add_translations_from_instances" : command => do
   discard <| liftCoreM <| MetaM.run do
     let count ← registerNewParamInstances (silent := false)
@@ -196,6 +201,10 @@ def TrTranslateRecursive (transl : TrTranslations) (e : Expr) : MetaM Expr :=
 
 
 elab "#tr_translate" a:term : command => do
+  discard <| liftCoreM <| MetaM.run do
+    let count ← registerNewParamInstances (silent := false)
+    IO.println s!"Registered {count} new instances"
+
   let x ← liftTermElabM <| elabTerm a .none
 
   let state := trTranslationExtension.getState (←getEnv)
@@ -239,7 +248,7 @@ elab "trale'" : tactic => withMainContext do
   liftMetaTactic fun g => do
     -- Automatically register any new Param instances before translating
     let newRegisterCount ← registerNewParamInstances (silent := true)
-    trace[tr.utils] s!"[trale'] Registered {newRegisterCount} new Param instances"
+    trace[tr.utils] s!"[trale] Registered {newRegisterCount} new Param instances"
 
     let orig ← g.getType'
 

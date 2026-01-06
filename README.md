@@ -128,8 +128,6 @@ To use Trale with a custom type, you need to:
      omega
    ```
 
-**Note:** The `#tr_add_translations_from_instances` command is now optional. The `trale` tactic automatically registers `Param` instances as needed using lazy loading with caching for performance.
-
 ### Complete Example
 
 See [`TraleTest/Lemmas/Zmod5.lean`](TraleTest/Lemmas/Zmod5.lean) for a complete working example showing how to set up Trale for modular arithmetic on `Zmod5`.

@@ -11,11 +11,6 @@ theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c : Zmod5),
 
 
 
-
--- Note: #tr_add_translations_from_instances is now optional!
--- The trale tactic automatically registers instances as needed.
-#tr_add_translations_from_instances
-
 set_option pp.all true in
 theorem sum_eq_reverse_sum_Zmod5' : ∀ (a b c : Zmod5),
   (a + b) + c = (c + b) + a := by

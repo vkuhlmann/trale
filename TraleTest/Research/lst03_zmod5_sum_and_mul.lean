@@ -19,11 +19,6 @@ theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c d e : Zmod5),
 # New automation
 -/
 
--- Note: #tr_add_translations_from_instances is now optional!
--- The trale tactic automatically registers instances as needed.
--- Keeping this line for backward compatibility demonstration.
-#tr_add_translations_from_instances
-
 theorem sum_eq_reverse_sum_Zmod5' : ∀ (a b c d e : Zmod5),
   a + (b + c * e) * d = d * b + c * d * e + a * 1 := by
 

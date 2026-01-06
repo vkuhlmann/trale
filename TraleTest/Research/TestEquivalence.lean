@@ -34,10 +34,6 @@ section Test1
   instance : Param44 Bool (Fin 2) := by
     tr_from_equivalence boolToFin2_inv, fin2ToBool_inv
 
-  -- Note: #tr_add_translations_from_instances is now optional!
-  -- The trale tactic automatically registers instances as needed.
-  #tr_add_translations_from_instances
-
   -- Verify it works by checking the relation
   example : tr.R true (1 : Fin 2) := rfl
   example : tr.R false (0 : Fin 2) := rfl

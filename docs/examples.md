@@ -106,7 +106,6 @@ The `trale` tactic:
 4. Solves parametricity obligations
 5. Leaves simplified goal for `omega`
 
-**Note**: The `#tr_add_translations_from_instances` command is now optional. The `trale` tactic automatically registers instances using lazy loading with caching for performance. You may still use the manual command if you wish to pre-register instances or for debugging purposes.
 
 ## Comparing Proof Approaches
 

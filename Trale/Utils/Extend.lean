@@ -11,6 +11,25 @@ open Lean Qq Elab Command Tactic Term Expr Meta PrettyPrinter
 
 namespace Trale.Utils
 
+/-!
+# Utilities for Extending Param Instances
+
+This module provides the `tr_extend` tactic and related utilities for building
+stronger Param instances from weaker ones.
+
+The main pattern is:
+```lean
+instance Map2a_foo : Param2a0 α β := by
+  tr_extend Map0_foo
+  -- provide the additional structure needed for Map2a
+```
+
+This automates the boilerplate of extracting the base relation and coercing
+to the right type while letting you focus on the new properties.
+-/
+
+/-- Attempt to recover a concrete MapType value from an expression.
+    Returns `none` if the expression doesn't match any MapType constructor. -/
 def recoverMapTypeFromExpr? (expr : Q(MapType)) : MetaM (Option MapType) := do
   if (← isExprDefEq expr q(MapType.Map4)) then
     return MapType.Map4
@@ -32,6 +51,7 @@ def recoverMapTypeFromExpr? (expr : Q(MapType)) : MetaM (Option MapType) := do
 
   return none
 
+/-- Recover a concrete MapType from an expression, throwing an error if it fails. -/
 def recoverMapTypeFromExpr! (expr : Q(MapType)) := do
   match (←recoverMapTypeFromExpr? expr) with
   | .none =>
@@ -40,6 +60,8 @@ def recoverMapTypeFromExpr! (expr : Q(MapType)) := do
 
 
 
+/-- Extract field names and types from a base Param instance.
+    Used by `tr_extend` to know what fields need to be filled in. -/
 def get_base_tr_fill_from_template (base : Expr) (baseType : Expr) : MetaM (Name -> Option Expr) := do
   let levelU <- mkFreshLevelMVar
   let levelV <- mkFreshLevelMVar

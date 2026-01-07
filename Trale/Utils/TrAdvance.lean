@@ -115,6 +115,11 @@ macro "tr_advance" : tactic => `(tactic|
     )
   )
 
+
+instance
+  : Param10 (OfNat α x) (OfNat Nat x)
+  := by tr_from_map (fun _ => ⟨x⟩)
+
 #check Trale.instantiatePropR_bi
 #check instantiatePropR
 #check flipR'

@@ -65,10 +65,6 @@ def R_mul_Zmod5
   unfold Fin.mul
   simp only [Nat.mul_mod_mod, Nat.mod_mul_mod]
 
-instance
-  : Param10 (OfNat Zmod5 x) (OfNat Nat x)
-  := by tr_from_map (fun _ => ⟨x⟩)
-
 instance zmod5OfNat : OfNat Zmod5 x := Fin.instOfNat
 
 

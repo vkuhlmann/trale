@@ -4,22 +4,127 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Lean 4](https://img.shields.io/badge/Lean-4.23.0--rc2-blue)](https://leanprover.github.io/)
 
-**Trale** is a Lean 4 library for transporting theorems and proofs across types using parametricity and relational reasoning. It enables you to prove theorems on simpler types (like `Nat`) and automatically transfer those results to more complex types (like custom `Zmod5`), provided you define appropriate transport theorems between them.
+**Trale** is a Lean 4 library for transporting theorems and proofs across types using parametricity and relational reasoning. It enables you to prove theorems on common types (like `Nat`) and automatically transfer those results to similar types (like a custom `Zmod5`), provided you define appropriate transport theorems between them.
 
 > **Based on the Trocq framework**  
-> Trale implements the [Trocq framework](https://arxiv.org/abs/2310.14022) in Lean 4. The framework was developed by Cyril Cohen, Enzo Crance, and Assia Mahboubi for Coq/Rocq.
+> Trale implements the [Trocq framework](https://arxiv.org/abs/2310.14022) in Lean 4. The framework was developed by Cyril Cohen, Enzo Crance, and Assia Mahboubi for Rocq.
+
+## Quick Example
+
+```lean4
+import Mathlib
+import TraleTest.Lemmas.Zmod5
+open TraleTest.Lemmas
+
+example : ∀ (a b c : Zmod5),
+  (a + b) + c = (c + b) + a := by
+  trale
+  omega
+
+example : ∀ (a b c d e : Zmod5),
+  a + (b + c * e) * d = d * b + c * d * e + a * 1 := by
+  trale
+  intro a b c d e
+  rw [add_mul, mul_comm b d, mul_assoc c e d,
+      mul_assoc c d e, mul_comm e d]
+  omega
+```
+
+The `trale` tactic automatically translates the goal from `Zmod5` to `Nat`, where we can use standard tactics like `omega`. In contrast, the usual approach is
+to abstract the theorem with typeclasses for properties, and define these
+properties on Zmod5:
+
+```lean4
+theorem sum_eq_reverse_sum {G : Type*} [AddCommSemigroup G] (a b c : G)
+    : (a + b) + c = (c + b) + a := by
+
+  rw [AddCommMagma.add_comm _ c]
+  rw [AddCommMagma.add_comm a b]
+  simp [AddSemigroup.add_assoc]
+
+example : ∀ (a b c : Nat),
+    (a + b) + c = (c + b) + a := sum_eq_reverse_sum
+
+instance : AddCommMagma Zmod5 where
+  add_comm a b := ...
+
+instance : AddSemigroup Zmod5 where
+  add_assoc a b c := ...
+
+instance : AddCommSemigroup Zmod5 := {}
+
+example : ∀ (a b c : Zmod5),
+  (a + b) + c = (c + b) + a := sum_eq_reverse_sum
+```
+
+### Prerequisites
+
+The generic proof approach is easy in computation, but prevents use of non-generic
+tools like `omega`, and the complexity scales with the amount of properties used.
+The example with multiplication needs 6 properties:
+1. add_comm
+2. add_assoc
+3. mul_comm
+4. mul_assoc
+5. mul_add
+6. mul_one
+
+In the Trocq framework, the complexity scales with the amount of operators occurring
+in the proposition:
+1. addition
+2. multiplication
+3. (equality)
+4. (forall)
+5. (OfNat, used for the literal `1`)
+
+These definitions are shown in `TraleTest.Lemmas.Zmod5`:
+```lean4
+-- We specify how Zmod5 and Nat are related.
+lemma repr5K : ∀ (a' : Zmod5), mod5 (repr5 a') = a' := ...
+instance : Param2a4 Zmod5 Nat := by tr_from_map repr5K
+
+-- Relations between terms propagate through addition
+@[trale]
+def R_add_Zmod5
+  (a b : Zmod5) (a' b' : Nat)
+  (aR : tr.R a a')
+  (bR : tr.R b b')
+  : (tr.R (a + b) (a' + b')) := ...
+
+-- Relations between terms propagate through multiplication
+@[trale]
+def R_mul_Zmod5
+  (a b : Zmod5) (a' b' : Nat)
+  (aR : tr.R a a')
+  (bR : tr.R b b')
+  : (tr.R (a * b) (a' * b')) := ...
+
+-- Currently, the library needs this to handle the literal value `1` occurring in the proposition
+instance zmod5OfNat : OfNat Zmod5 x := Fin.instOfNat
+@[trale]
+def R_ofNat_Fin
+  (n : Nat)
+  : tr.R (zmod5OfNat (x := n)) (instOfNatNat (n := n)) := by rfl
+```
+
+Note the absence of specifying the propagation for equality and forall; the
+Trocq framework provides them, based on the parametric instance `Param` that we
+provide.
+
+
 
 ## Overview
 
-Trale implements a proof technique based on **parametricity** and **proof transfer**. Instead of duplicating proofs for similar structures, you can:
+Trale performs proof transfer based on the Trocq parametricity framework.
+Instead of duplicating proofs for similar structures, or converting them
+into a generic proof, you can:
 
-1. **Define a parametric relation** between your custom type and a simpler type
-2. **Prove the theorem** on the simpler type where you have better automation
-3. **Use the `trale` tactic** to automatically transfer the proof
+1. **Define a parametric relation** between the types of interest
+2. **Prove propagation of relation** in the operators occurring in the proposition
+3. **Use the `trale` tactic** to convert the goal to the other type
+3. **Prove the theorem** on the other type where you have better automation or more lemma's
 
 This approach is particularly useful when:
-- Working with custom numeric types (e.g., modular arithmetic, finite fields)
-- Dealing with abstract algebraic structures
 - Types are isomorphic, equivalent, or in quotient relationships
 - Direct proofs would be tedious but the result is "morally obvious"
 - Type-specific automation (like `omega` for `Nat`) cannot be easily abstracted
@@ -36,29 +141,6 @@ This approach is particularly useful when:
 - The type structure is simpler than the proof logic
 - You need type-specific automation that doesn't generalize
 - The proof naturally belongs to a concrete type but you need it elsewhere
-
-## Quick Example
-
-```lean4
-import Mathlib
-import TraleTest.Lemmas.Zmod5
-open TraleTest.Lemmas
-
-theorem sum_eq_reverse_sum_Zmod5 : ∀ (a b c : Zmod5),
-  (a + b) + c = (c + b) + a := by
-  trale
-  omega
-
-example : ∀ (a b c d e : Zmod5),
-  a + (b + c * e) * d = d * b + c * d * e + a * 1 := by
-  trale
-  intro a b c d e
-  rw [add_mul, mul_comm b d, mul_assoc c e d,
-      mul_assoc c d e, mul_comm e d]
-  omega
-```
-
-The `trale` tactic automatically translates the goal from `Zmod5` to `Nat`, where we can use standard tactics like `omega`.
 
 ## Installation
 

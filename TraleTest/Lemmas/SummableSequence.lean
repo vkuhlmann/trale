@@ -213,8 +213,6 @@ theorem summationHomeo (a : summable) : Σ seq_extend a.seq = .fin (Σ a) := by
 
 instance paramNNR : Param42b nnR xnnR
   := by tr_from_map truncate_extend
-instance : TrTranslateRight nnR xnnR := by constructor
-instance : TrTranslateLeft nnR xnnR := by constructor
 
 instance param_NNR_seq : Param40 seq_nnR seq_xnnR
   := by tr_from_map seq_extend
@@ -258,8 +256,6 @@ theorem param_summable_seq_injective
   rfl
 
 
-instance : TrTranslateRight summable seq_xnnR := by constructor
-instance : TrTranslateLeft summable seq_xnnR := by constructor
 -- For propParam, see Trale/Theories/Sorts.lean
 
 

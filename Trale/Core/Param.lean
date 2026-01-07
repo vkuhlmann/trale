@@ -42,49 +42,6 @@ universe w u v
 
 variable (α: Sort u) (β : Sort v)
 
-/-- Represents the normative direction(s) for a parametricity relation.
-    Used to track which direction is considered "primary" for proof transfer.
-    Currently not actively used in the implementation. -/
-structure NormativeDirection where
-  this_dir : Bool
-  other_dir : Bool
-
-namespace NormativeDirection
-def both : NormativeDirection := ⟨true, true⟩
-def this : NormativeDirection := ⟨true, false⟩
-def other : NormativeDirection := ⟨false, true⟩
-def none : NormativeDirection := ⟨false, false⟩
-
-def opposite : NormativeDirection → NormativeDirection
-  := (match . with | ⟨a, b⟩ => ⟨b, a⟩)
-end NormativeDirection
-
-/-- Typeclass marking that we can translate from α to β in proof transfer. -/
-class TrTranslateRight (α : Sort u) (β : outParam (Sort v)) where
-  -- hypotheses : Array (((p : Prop), (proof : p)) : (p : Prop) ×' (_ : p))
-  -- hypotheses : Σ' (p : Prop), (_ : p)
-  -- or type like Simprocs? Do it by attributes?
-
-
-
-/-- Typeclass marking that we can translate from β to α in proof transfer. -/
-class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
--- class TrTranslateRight (α : Sort u) : Sort (max 1 u)
--- class TrTranslateLeft (α : outParam (Sort u)) (β : Sort v)
-
--- structure ParamRoot (α : Sort u) (β : Sort v)
---     (mapCov : MapType)
---     (mapContra : MapType)
---   -- : Sort ((max u v w) + 1)
---    where
-
---   R : α → β -> Sort w
-
--- TODO: Being a 'class' sometimes hurts readability, especially when
--- constructing new params based on previous ones. However, if manipulation of
--- Params can be done by this library, such that the user (almost) never needs
--- to do it, this issue is more limited.
-
 /--
 The core parametricity class.
 
@@ -106,27 +63,18 @@ class Param
     (mapCov : MapType)
     (mapContra : MapType)
     (α : Sort u) (β : Sort v)
-  -- extends ParamRoot.{w, u, v} α β mapCov mapContra
   where
 
   R : α → β → Sort w
   covariant : mapCov.interp R
   contravariant : mapContra.interp (flipRel R)
-  -- normativeDirection : NormativeDirection := .this
 
 
 -- ## Param abbreviations
 --
 -- We enumerate all 36 abbreviations manually (6×6 combinations of map types).
---
--- It's not the most pure and sophisticated way, but it gets the job done, and
--- performing all the necessary metaprogramming to automatically enumerate the
--- cases would likely be more lines of code, and confuse code editor tools like
--- IntelliSense.
---
--- I looked into this in the past, and the cleanest entrance for an api was private,
--- meaning that for including it in a public library, I would need to replicate its
--- many private dependencies.
+-- This could be slightly shorter with metaprogramming, but this is clearer and
+-- more explicit.
 
 abbrev Param00  :=  Param.{w} .Map0 .Map0
 abbrev Param01  :=  Param.{w} .Map0 .Map1
@@ -171,10 +119,6 @@ abbrev Param43  :=  Param.{w} .Map4 .Map3
 abbrev Param44  :=  Param.{w} .Map4 .Map4
 
 
-#check (_ : Param11 ?a ?b).covariant
-
-#check (_ : Param11 ?a ?b).R
-
 -- FIXME The last expression has type `MapType.Map1.interp p.R`. Can we apply a simplification automatically
 --     such that it becomes `Map1 p.R` instead?
 #check
@@ -201,9 +145,7 @@ instance
     R := p.R,
     covariant := p.covariant,
     contravariant := p.contravariant,
-    -- normativeDirection := Rp.normativeDirection
    }
-  --  (@Param.mk α β X' Y' Rp.R Rp.covariant Rp.contravariant Rp.normativeDirection : Param.{w} α β X' Y')
 
 
 namespace Param
@@ -240,7 +182,6 @@ def forget
 @[simp]
 abbrev flip (p : Param α β m1 m2) : Param β α m2 m1 :=
   { R := flipRel p.R, covariant := p.contravariant, contravariant := p.covariant,
-  -- normativeDirection := p.normativeDirection.opposite
   }
 
 /-- Extract the covariant map function from a Param10. -/
@@ -268,22 +209,12 @@ abbrev left (p : Param cov con α β) (b : β) (h : .Map1 ≤ con := by decide) 
 @[simp]
 abbrev right_implies_R (p : Param2a0 α β)
   := p.covariant.map_in_R
-  -- : (a : α) -> (b : β) -> p.right a = b -> p.R a b := p.covariant.map_in_R
 
 /-- From a Param02a, get that the contravariant map captures the relation. -/
 @[simp]
 abbrev left_implies_R {β : Sort v} (p : Param02a α β)
   : ∀ (a : α) (b : β), p.left b = a → p.R a b :=
     fun a b h => p.contravariant.map_in_R b a h
-
-    -- let h := p.contravariant.map_in_R
-    -- simp
-    -- simp [flipRel] at h
-    -- intros a b h'
-    -- let h2 := h b
-    -- rw [h'] at h2
-    -- apply h2
-    -- trivial
 
 -- We need to give an explicit level name to β, else it will get inferred as a
 -- Type for some reason.

@@ -60,7 +60,6 @@ elab "tr_constructor'" : tactic =>
 
     let translationMap := [
       (`R.R, `R),
-      (`toParamRoot.R, `R),
       (`covariant.map, `right),
       (`covariant.map_in_R, `right_implies_R),
       (`covariant.R_in_map, `R_implies_right),
@@ -74,11 +73,7 @@ elab "tr_constructor'" : tactic =>
     let mut newGoals : AssocList Name MVarId := .empty
 
     for subgoal in subgoals do
-      -- let name := subgoal.name
-      let name <- subgoal.getTag
-      if name == `normativeDirection then
-        subgoal.assign q(NormativeDirection.this)
-        continue
+      let name ← subgoal.getTag
 
       trace[debug] s!"[tr_constructor] processing subgoal: {name}"
       -- let name <- MetavarContext.findUserName? subgoal

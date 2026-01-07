@@ -42,7 +42,7 @@ def R_add_Zmod5
   (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (tr.R (a + b) (a' + b')) := by
+  : tr.R (a + b) (a' + b') := by
 
   tr_whnf
   subst aR bR
@@ -56,7 +56,7 @@ def R_mul_Zmod5
   (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (tr.R (a * b) (a' * b')) := by
+  : tr.R (a * b) (a' * b') := by
 
   tr_whnf
   subst aR bR

@@ -89,7 +89,7 @@ def R_add_Zmod5
   (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (tr.R (a + b) (a' + b')) := ...
+  : tr.R (a + b) (a' + b') := ...
 
 -- Relations between terms propagate through multiplication
 @[trale]
@@ -97,7 +97,7 @@ def R_mul_Zmod5
   (a b : Zmod5) (a' b' : Nat)
   (aR : tr.R a a')
   (bR : tr.R b b')
-  : (tr.R (a * b) (a' * b')) := ...
+  : tr.R (a * b) (a' * b') := ...
 
 -- Currently, the library needs this to handle the literal value `1` occurring in the proposition
 instance zmod5OfNat : OfNat Zmod5 x := Fin.instOfNat
@@ -200,7 +200,7 @@ To use Trale with a custom type, you need to:
      (a b : Zmod5) (a' b' : Nat)
      (aR : tr.R a a')
      (bR : tr.R b b')
-     : (tr.R (a + b) (a' + b')) := ...
+     : tr.R (a + b) (a' + b') := ...
    ```
 
 5. **Use the `trale` tactic** - it automatically discovers and registers your `Param` instances:
